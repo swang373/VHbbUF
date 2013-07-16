@@ -1,0 +1,641 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="Docutils 0.10: http://docutils.sourceforge.net/" />
+<title>Z(υυ) H(bb) Step by Step</title>
+<style type="text/css">
+
+/*
+ * HTML5 Boilerplate
+ *
+ * What follows is the result of much research on cross-browser styling.
+ * Credit left inline and big thanks to Nicolas Gallagher, Jonathan Neal,
+ * Kroc Camen, and the H5BP dev community and team.
+ *
+ * Detailed information about this CSS: h5bp.com/css
+ *
+ * ==|== normalize ==========================================================
+ */
+
+/*
+Stylesheet for use with Docutils.
+*/
+
+/*@import url(html4css1.css);*/
+
+/* =============================================================================
+   HTML5 display definitions
+   ========================================================================== */
+
+article, aside, details, figcaption, figure, footer, header, hgroup, nav, section { display: block; }
+audio, canvas, video { display: inline-block; *display: inline; *zoom: 1; }
+audio:not([controls]) { display: none; }
+[hidden] { display: none; }
+
+
+/* =============================================================================
+   Base
+   ========================================================================== */
+
+/*
+ * 1. Correct text resizing oddly in IE6/7 when body font-size is set using em units
+ * 2. Prevent iOS text size adjust on device orientation change, without disabling user zoom: h5bp.com/g
+ */
+
+html { font-size: 100%; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+
+html, button, input, select, textarea { font-family: sans-serif; color: #222; }
+
+body { margin: 5em; font-size: 1em; line-height: 1.4; }
+
+/*
+ * Remove text-shadow in selection highlight: h5bp.com/i
+ * These selection declarations have to be separate
+ * Also: hot pink! (or customize the background color to match your design)
+ */
+
+::-moz-selection { background: #ff7c21; color: #fff; text-shadow: none; }
+::selection { background: #ff7c21; color: #fff; text-shadow: none; }
+
+
+/* =============================================================================
+   Links
+   ========================================================================== */
+
+a { color: #2b60de; }
+a:visited { color: #842dce; }
+a:hover { color: #5cb3ff; }
+a:focus { outline: thin dotted; }
+
+/* Improve readability when focused and hovered in all browsers: h5bp.com/h */
+a:hover, a:active { outline: 0; }
+
+
+/* =============================================================================
+   Typography
+   ========================================================================== */
+
+abbr[title] { border-bottom: 1px dotted; }
+
+b { font-weight: bold; }
+
+strong { font-weight: bolder; }
+
+blockquote { margin: 1em 40px; }
+
+dfn { font-style: italic; }
+
+hr { display: block; height: 1px; border: 0; border-top: 1px solid #ccc; margin: 1em 0; padding: 0; }
+
+ins { background: #ff9; color: #000; text-decoration: none; }
+
+mark { background: #ff0; color: #000; font-style: italic; font-weight: bold; }
+
+/* Redeclare monospace font family: h5bp.com/j */
+pre, code, kbd, samp { font-family: monospace, serif; _font-family: 'courier new', monospace; font-size: 1em; }
+
+/* Improve readability of pre-formatted text in all browsers */
+pre { white-space: pre; white-space: pre-wrap; word-wrap: break-word; }
+
+
+q { quotes: none; }
+q:before, q:after { content: ""; content: none; }
+
+small { font-size: 85%; }
+
+/* Position subscript and superscript content without affecting line-height: h5bp.com/k */
+sub, sup { font-size: 75%; line-height: 0; position: relative; vertical-align: baseline; }
+sup { top: -0.5em; }
+sub { bottom: -0.25em; }
+
+
+/* =============================================================================
+   Lists
+   ========================================================================== */
+
+ul, ol { margin: 0 0; padding: 0 0 0 24px; }
+dd { margin: 0 0 0 40px; }
+nav ul, nav ol { list-style: none; list-style-image: none; margin: 0; padding: 0; }
+
+
+/* =============================================================================
+   Embedded content
+   ========================================================================== */
+
+/*
+ * 1. Improve image quality when scaled in IE7: h5bp.com/d
+ * 2. Remove the gap between images and borders on image containers: h5bp.com/i/440
+ */
+
+img { border: 0; -ms-interpolation-mode: bicubic; vertical-align: middle; }
+
+/*
+ * Correct overflow not hidden in IE9
+ */
+
+svg:not(:root) { overflow: hidden; }
+
+
+/* =============================================================================
+   Figures
+   ========================================================================== */
+
+figure { margin: 0; }
+
+
+/* =============================================================================
+   Forms
+   ========================================================================== */
+
+form { margin: 0; }
+fieldset { border: 0; margin: 0; padding: 0; }
+
+/* Indicate that 'label' will shift focus to the associated form element */
+label { cursor: pointer; }
+
+/*
+ * 1. Correct color not inheriting in IE6/7/8/9
+ * 2. Correct alignment displayed oddly in IE6/7
+ */
+
+legend { border: 0; *margin-left: -7px; padding: 0; white-space: normal; }
+
+/*
+ * 1. Correct font-size not inheriting in all browsers
+ * 2. Remove margins in FF3/4 S5 Chrome
+ * 3. Define consistent vertical alignment display in all browsers
+ */
+
+button, input, select, textarea { font-size: 100%; margin: 0; vertical-align: baseline; *vertical-align: middle; }
+
+/*
+ * 1. Define line-height as normal to match FF3/4 (set using !important in the UA stylesheet)
+ */
+
+button, input { line-height: normal; }
+
+/*
+ * 1. Display hand cursor for clickable form elements
+ * 2. Allow styling of clickable form elements in iOS
+ * 3. Correct inner spacing displayed oddly in IE7 (doesn't effect IE6)
+ */
+
+button, input[type="button"], input[type="reset"], input[type="submit"] { cursor: pointer; -webkit-appearance: button; *overflow: visible; }
+
+/*
+ * Re-set default cursor for disabled elements
+ */
+
+button[disabled], input[disabled] { cursor: default; }
+
+/*
+ * Consistent box sizing and appearance
+ */
+
+input[type="checkbox"], input[type="radio"] { box-sizing: border-box; padding: 0; *width: 13px; *height: 13px; }
+input[type="search"] { -webkit-appearance: textfield; -moz-box-sizing: content-box; -webkit-box-sizing: content-box; box-sizing: content-box; }
+input[type="search"]::-webkit-search-decoration, input[type="search"]::-webkit-search-cancel-button { -webkit-appearance: none; }
+
+/*
+ * Remove inner padding and border in FF3/4: h5bp.com/l
+ */
+
+button::-moz-focus-inner, input::-moz-focus-inner { border: 0; padding: 0; }
+
+/*
+ * 1. Remove default vertical scrollbar in IE6/7/8/9
+ * 2. Allow only vertical resizing
+ */
+
+textarea { overflow: auto; vertical-align: top; resize: vertical; }
+
+/* Colors for form validity */
+input:valid, textarea:valid {  }
+input:invalid, textarea:invalid { background-color: #f0dddd; }
+
+
+/* =============================================================================
+   Tables
+   ========================================================================== */
+
+table { border-collapse: collapse; border-spacing: 0; }
+td { vertical-align: top; }
+
+
+/* =============================================================================
+   Chrome Frame Prompt
+   ========================================================================== */
+
+.chromeframe { margin: 0.2em 0; background: #ccc; color: black; padding: 0.2em 0; }
+
+
+
+
+/* =============================================================================
+   Pygments syntax highlight
+   ========================================================================== */
+
+.hll { background-color: #ffffcc }
+ { background: #eeffcc; }
+.c { color: #408090; font-style: italic } /* Comment */
+.err { border: 1px solid #FF0000 } /* Error */
+.k { color: #007020; font-weight: bold } /* Keyword */
+.o { color: #666666 } /* Operator */
+.cm { color: #408090; font-style: italic } /* Comment.Multiline */
+.cp { color: #007020 } /* Comment.Preproc */
+.c1 { color: #408090; font-style: italic } /* Comment.Single */
+.cs { color: #408090; background-color: #fff0f0 } /* Comment.Special */
+.gd { color: #A00000 } /* Generic.Deleted */
+.ge { font-style: italic } /* Generic.Emph */
+.gr { color: #FF0000 } /* Generic.Error */
+.gh { color: #000080; font-weight: bold } /* Generic.Heading */
+.gi { color: #00A000 } /* Generic.Inserted */
+.go { color: #303030 } /* Generic.Output */
+.gp { color: #c65d09; font-weight: bold } /* Generic.Prompt */
+.gs { font-weight: bold } /* Generic.Strong */
+.gu { color: #800080; font-weight: bold } /* Generic.Subheading */
+.gt { color: #0040D0 } /* Generic.Traceback */
+.kc { color: #007020; font-weight: bold } /* Keyword.Constant */
+.kd { color: #007020; font-weight: bold } /* Keyword.Declaration */
+.kn { color: #007020; font-weight: bold } /* Keyword.Namespace */
+.kp { color: #007020 } /* Keyword.Pseudo */
+.kr { color: #007020; font-weight: bold } /* Keyword.Reserved */
+.kt { color: #902000 } /* Keyword.Type */
+.m { color: #208050 } /* Literal.Number */
+.s { color: #4070a0 } /* Literal.String */
+.na { color: #4070a0 } /* Name.Attribute */
+.nb { color: #007020 } /* Name.Builtin */
+.nc { color: #0e84b5; font-weight: bold } /* Name.Class */
+.no { color: #60add5 } /* Name.Constant */
+.nd { color: #555555; font-weight: bold } /* Name.Decorator */
+.ni { color: #d55537; font-weight: bold } /* Name.Entity */
+.ne { color: #007020 } /* Name.Exception */
+.nf { color: #06287e } /* Name.Function */
+.nl { color: #002070; font-weight: bold } /* Name.Label */
+.nn { color: #0e84b5; font-weight: bold } /* Name.Namespace */
+.nt { color: #062873; font-weight: bold } /* Name.Tag */
+.nv { color: #bb60d5 } /* Name.Variable */
+.ow { color: #007020; font-weight: bold } /* Operator.Word */
+.w { color: #bbbbbb } /* Text.Whitespace */
+.mf { color: #208050 } /* Literal.Number.Float */
+.mh { color: #208050 } /* Literal.Number.Hex */
+.mi { color: #208050 } /* Literal.Number.Integer */
+.mo { color: #208050 } /* Literal.Number.Oct */
+.sb { color: #4070a0 } /* Literal.String.Backtick */
+.sc { color: #4070a0 } /* Literal.String.Char */
+.sd { color: #4070a0; font-style: italic } /* Literal.String.Doc */
+.s2 { color: #4070a0 } /* Literal.String.Double */
+.se { color: #4070a0; font-weight: bold } /* Literal.String.Escape */
+.sh { color: #4070a0 } /* Literal.String.Heredoc */
+.si { color: #70a0d0; font-style: italic } /* Literal.String.Interpol */
+.sx { color: #c65d09 } /* Literal.String.Other */
+.sr { color: #235388 } /* Literal.String.Regex */
+.s1 { color: #4070a0 } /* Literal.String.Single */
+.ss { color: #517918 } /* Literal.String.Symbol */
+.bp { color: #007020 } /* Name.Builtin.Pseudo */
+.vc { color: #bb60d5 } /* Name.Variable.Class */
+.vg { color: #bb60d5 } /* Name.Variable.Global */
+.vi { color: #bb60d5 } /* Name.Variable.Instance */
+.il { color: #208050 } /* Literal.Number.Integer.Long */
+
+.MathJax .mo, .MathJax .mi { color: inherit; font-weight: inherit }
+
+/* =============================================================================
+   From Docutils
+   ========================================================================== */
+
+pre.address {
+  margin-bottom: 0 ;
+  margin-top: 0 ;
+  font: inherit }
+
+pre.literal-block, pre.doctest-block, pre.math, pre.code {
+  margin-left: 2em ;
+  margin-right: 2em }
+
+pre.code .ln { color: grey; } /* line numbers */
+pre.code, code { background-color: #eeeeee }
+pre.code .comment, code .comment { color: #5C6576 }
+pre.code .keyword, code .keyword { color: #3B0D06; font-weight: bold }
+pre.code .literal.string, code .literal.string { color: #0C5404 }
+pre.code .name.builtin, code .name.builtin { color: #352B84 }
+pre.code .deleted, code .deleted { background-color: #DEB0A1}
+pre.code .inserted, code .inserted { background-color: #A3D289}
+
+table.citation {
+  border-left: solid 1px gray;
+  margin-left: 1px }
+
+table.docinfo {
+  margin: 2em 4em }
+
+table.docutils {
+  margin-top: 0.5em ;
+  margin-bottom: 0.5em }
+
+table.footnote {
+  border-left: solid 1px black;
+  margin-left: 1px }
+
+table.docutils td, table.docutils th,
+table.docinfo td, table.docinfo th {
+  padding-left: 0.5em ;
+  padding-right: 0.5em ;
+  vertical-align: top }
+
+table.docutils th.field-name, table.docinfo th.docinfo-name {
+  font-weight: bold ;
+  text-align: left ;
+  white-space: nowrap ;
+  padding-left: 0 }
+
+
+
+/* ==|== primary styles =====================================================
+   Author:
+   ========================================================================== */
+
+h1, h2, h3, h4, h5, h6, p.topic-title { color: #939393; }
+
+blockquote { margin: .8em .8em; border: 1px solid #ccc; padding: .2em .8em;}
+
+pre, code, kbd, samp { font-family: 'Consolas', 'Deja Vu Sans Mono', 'Bitstream Vera Sans Mono', monospace; font-size: 0.9em; letter-spacing: 0.01em;  margin-left: 2.5em; margin-right: 2.5em; white-space: pre; }
+/* pre, code, kbd, samp { font-family: monospace, serif; _font-family: 'courier new', monospace; font-size: 0.95em; margin-left: 2.5em; margin-right: 2.5em; background-color: #eeeeee; } */
+
+/*.literal-block { background: #CAE096; }*/
+
+.smallcaps { font-family:monospace, serif; _font-family: 'courier new', monospace; font-size: 1em;  font-variant: small-caps;}
+
+.note { display: block; color: #FFF; background-color: #039; margin: .8em .8em; padding: .2em .8em; text-decoration: none; }
+
+.first { margin: .8em 0em; }
+
+.last { margin: .8em 0em; }
+
+.first.admonition-title { font-weight: bold; }
+
+.citation-reference { font-size: 0.7em; vertical-align:super;}
+
+
+
+
+
+
+
+
+
+
+
+/* ==|== media queries ======================================================
+   EXAMPLE Media Query for Responsive Design.
+   This example overrides the primary ('mobile first') styles
+   Modify as content requires.
+   ========================================================================== */
+
+@media only screen and (min-width: 35em) {
+  /* Style adjustments for viewports that meet the condition */
+}
+
+
+
+/* ==|== non-semantic helper classes ========================================
+   Please define your styles before this section.
+   ========================================================================== */
+
+/* For image replacement */
+.ir { display: block; border: 0; text-indent: -999em; overflow: hidden; background-color: transparent; background-repeat: no-repeat; text-align: left; direction: ltr; *line-height: 0; }
+.ir br { display: none; }
+
+/* Hide from both screenreaders and browsers: h5bp.com/u */
+.hidden { display: none !important; visibility: hidden; }
+
+/* Hide only visually, but have it available for screenreaders: h5bp.com/v */
+.visuallyhidden { border: 0; clip: rect(0 0 0 0); height: 1px; margin: -1px; overflow: hidden; padding: 0; position: absolute; width: 1px; }
+
+/* Extends the .visuallyhidden class to allow the element to be focusable when navigated to via the keyboard: h5bp.com/p */
+.visuallyhidden.focusable:active, .visuallyhidden.focusable:focus { clip: auto; height: auto; margin: 0; overflow: visible; position: static; width: auto; }
+
+/* Hide visually and from screenreaders, but maintain layout */
+.invisible { visibility: hidden; }
+
+/* Contain floats: h5bp.com/q */
+.clearfix:before, .clearfix:after { content: ""; display: table; }
+.clearfix:after { clear: both; }
+.clearfix { *zoom: 1; }
+
+
+
+/* ==|== print styles =======================================================
+   Print styles.
+   Inlined to avoid required HTTP connection: h5bp.com/r
+   ========================================================================== */
+
+@media print {
+  * { background: transparent !important; color: black !important; box-shadow:none !important; text-shadow: none !important; filter:none !important; -ms-filter: none !important; } /* Black prints faster: h5bp.com/s */
+  a, a:visited { text-decoration: underline; }
+  a[href]:after { content: " (" attr(href) ")"; }
+  abbr[title]:after { content: " (" attr(title) ")"; }
+  .ir a:after, a[href^="javascript:"]:after, a[href^="#"]:after { content: ""; }  /* Don't show links for images, or javascript/internal links */
+  pre, blockquote { border: 1px solid #999; page-break-inside: avoid; }
+  thead { display: table-header-group; } /* h5bp.com/t */
+  tr, img { page-break-inside: avoid; }
+  img { max-width: 100% !important; }
+  @page { margin: 0.5cm; }
+  p, h2, h3 { orphans: 3; widows: 3; }
+  h2, h3 { page-break-after: avoid; }
+}
+
+</style>
+</head>
+<body>
+<div class="document" id="z-h-bb-step-by-step">
+<h1 class="title">Z(υυ) H(bb) Step by Step</h1>
+
+<div class="section" id="analysis">
+<h1>Analysis</h1>
+<div class="note">
+<p class="first admonition-title">Note</p>
+<p class="last">All the scripts must be run from the base directory.</p>
+</div>
+<ol class="arabic simple">
+<li>Use <cite>copyfromINFNtoFNAL.sh</cite> to transfer Step 2 ntuples from Pisa to FNAL.</li>
+</ol>
+<pre class="code bash literal-block">
+<span class="comment"># edit the directories in the script before run.
+</span>sh copyfromINFNtoFNAL.sh
+</pre>
+<ol class="arabic simple" start="2">
+<li>Use <cite>Skim.C</cite> to skim the Step 2 ntuples with baseline selection. Make sure <cite>HelperNtuples.h</cite> is updated.</li>
+</ol>
+<pre class="code bash literal-block">
+<span class="comment"># in `inputstep2.ini` Section [Skim], edit tagMC, tagData, baseline, mettrigger, metfilter.
+# in `inputstep2.ini` Section [Stitch], edit xxxLHECUT's
+# enable reader.write_HelperNtuples(), disable the rest
+</span>python pyhelper.py
+<span class="comment"># copy printout to HelperNtuples.h
+</span>
+<span class="comment"># now run the skim
+</span><span class="name builtin">source </span>run_Skim.sh
+</pre>
+<ol class="arabic simple" start="3">
+<li>Use <cite>SkimRegression.C</cite> to skim the Step2 ntuples for BDTG regression training. Make sure <cite>HelperNtuples.h</cite> is updated.</li>
+</ol>
+<pre class="code bash literal-block">
+<span class="comment"># in `inputstep2.ini` Section [Skim], edit regression, fjregression
+# enable reader.write_HelperNtuples(), disable the rest
+</span>python pyhelper.py
+<span class="comment"># copy printout to HelperNtuples.h
+</span>
+<span class="comment"># now run the skim for ak5 regression
+</span><span class="name builtin">source </span>run_SkimRegression.sh
+<span class="comment"># now run the skim for filter jet regression
+</span><span class="name builtin">source </span>run_SkimRegressionFJ.sh
+</pre>
+<ol class="arabic simple" start="4">
+<li>Use <cite>TrainRegression.C</cite> and <cite>TrainRegressionFJ.C</cite> to produce the BDT regression .xml files. Make sure <cite>HelperTMVA.h</cite> is updated.</li>
+</ol>
+<pre class="code bash literal-block">
+<span class="comment"># in `inputstep2.ini` Section [BDT Regression Variable], edit the variables to use
+# in `inputstep2.ini` Section [BDT Regression FJ Variable], edit the variables to use
+# enable reader.write_HelperTMVA(), disable the rest
+</span>python pyhelper.py
+<span class="comment"># copy printout to HelperTMVA.h
+</span>
+<span class="comment"># now run the BDT regression
+</span>python run_TrainRegression.py
+cp weights/TMVARegression_BDTG.weights.xml weights/TMVARegression_BDTG.testweights.xml
+cp TMVAReg.root testTMVAReg.root
+
+<span class="comment"># now run the BDT regression for FJ
+</span>python run_TrainRegressionFJ.py
+cp weights/TMVARegressionFJ_BDTG.weights.xml weights/TMVARegressionFJ_BDTG.testweights.xml
+cp TMVARegFJ.root testTMVARegFJ.root
+</pre>
+<ol class="arabic simple" start="5">
+<li>Update <cite>HelperNtuples.h</cite> to have all the correct numbers.</li>
+</ol>
+<pre class="code bash literal-block">
+<span class="comment"># enable skimmer.process(), disable the rest
+</span>python skimmer.py inputstep2.ini
+<span class="comment"># copy printout to inputstep2.ini Section [Process]
+</span>
+<span class="comment"># enable skimmer.stitch(), disable the rest
+</span>python skimmer.py inputstep2.ini
+<span class="comment"># copy printout to inputstep2.ini Section [Stitch]
+</span>
+<span class="comment"># enable reader.write_HelperNtuples(), disable the rest
+</span>python pyhelper.py
+<span class="comment"># copy printout to HelperNtuples.h</span>
+</pre>
+<ol class="arabic simple" start="6">
+<li>Use <cite>GrowTree.C</cite> to create Step 3's.</li>
+</ol>
+<pre class="code bash literal-block">
+python run_GrowTree.py
+</pre>
+<ol class="arabic simple" start="7">
+<li>Use <cite>TrainBDT.C</cite> to produce the BDT regression .xml files.</li>
+</ol>
+<pre class="code bash literal-block">
+<span class="name builtin">source </span>run_TrainBDT.sh
+</pre>
+<ol class="arabic simple" start="8">
+<li>Use <cite>TrimTree.C</cite> to create Step 4's.</li>
+</ol>
+<pre class="code bash literal-block">
+<span class="comment"># in `inputstep2.ini` Section [Weight], edit the MC event weights
+# in `inputstep2.ini` Section [Trigger], edit the Data trigger
+# in `inputstep2.ini` Section [Selection], edit the signal and control regions
+# enable reader.write_HelperTMVA(), disable the rest
+</span>python pyhelper.py
+<span class="comment"># copy printout to HelperTMVA.h
+</span>
+<span class="comment"># in `TrimTree.C`, edit the BDT .xml files to load, then run
+</span>python run_TrimTree.py
+
+<span class="comment"># stitch the Step 4's (remember to edit $DIR in the script)
+</span><span class="name builtin">source </span>run_stitch.sh
+</pre>
+<ol class="arabic simple" start="9">
+<li>Use <cite>ScaleFactorJ11.C</cite> and <cite>ScaleFactorWorkspaceJ11.C</cite> to fit scale factors.</li>
+</ol>
+<pre class="code bash literal-block">
+<span class="comment"># set the variable indir in the scripts, reset the fitresults arrays, reset the iteration number in calc_scalefactors(...)
+</span>root -l -b -q ScaleFactorJ11.C++O
+root -l -b -q ScaleFactorWorkspaceJ11.C++O
+
+<span class="comment"># use MaxLikelihoodFit to get the nuisances
+</span>combineCards.py <span class="name variable">ZnunuHighPt_WjLF</span><span class="operator">=</span>vhbb_Znn_SF_J11_ZnunuHighPt_WjLF_8TeV.txt <span class="name variable">ZnunuHighPt_WjHF</span><span class="operator">=</span>vhbb_Znn_SF_J11_ZnunuHighPt_WjHF_8TeV.txt <span class="name variable">ZnunuHighPt_ZjLF</span><span class="operator">=</span>vhbb_Znn_SF_J11_ZnunuHighPt_ZjLF_8TeV.txt <span class="name variable">ZnunuHighPt_ZjHF</span><span class="operator">=</span>vhbb_Znn_SF_J11_ZnunuHighPt_ZjHF_8TeV.txt <span class="name variable">ZnunuHighPt_TT</span><span class="operator">=</span>vhbb_Znn_SF_J11_ZnunuHighPt_TT_8TeV.txt &gt; vhbb_Znn_SF_J11_ZnunuHighPt_8TeV.txt
+combine -M MaxLikelihoodFit -m 125 --robustFit<span class="operator">=</span>1 --stepSize<span class="operator">=</span>0.05 --rMin<span class="operator">=</span>-5 --rMax<span class="operator">=</span>5 --saveNorm vhbb_Znn_SF_J11_ZnunuHighPt_8TeV.txt
+python printNuisances.py mlfit.root
+</pre>
+<ol class="arabic simple" start="10">
+<li>Use <cite>BDTShapeJ12.C</cite> and <cite>BDTShapeWorkspaceJ12.C</cite> to get final limit and significance.</li>
+</ol>
+<pre class="code bash literal-block">
+<span class="comment"># set the variable indir in the scripts, adjust binning, then run
+</span>root -l -b -q BDTShapeJ12.C++O
+root -l -b -q BDTShapeWorkspaceJ12.C++O
+
+<span class="comment"># calculate final limit and significance (blinded)
+</span>combine -M Asymptotic -t -1 vhbb_Znn_J11_ZnunuHighPt_8TeV.txt
+combine -M ProfileLikelihood -m 125 --signif --pvalue -t -1 --toysFreq --expectSignal<span class="operator">=</span>1 vhbb_Znn_J11_ZnunuHighPt_8TeV.txt
+</pre>
+</div>
+<div class="section" id="tuning">
+<h1>Tuning</h1>
+<ol class="arabic simple">
+<li>In directory <cite>tuneBDT</cite>, use <cite>prepare_tuneBDT.sh</cite> to create symbolic links. This step is only needed at the first time.</li>
+</ol>
+<pre class="code bash literal-block">
+<span class="comment"># edit the links if necessary
+</span><span class="name builtin">source </span>prepare_tuneBDT.sh
+</pre>
+<ol class="arabic simple" start="2">
+<li>Use <cite>BDTShapeJ12_reload.C.diff</cite> to patch <cite>BDTShapeJ12_reload.C</cite>.</li>
+</ol>
+<pre class="code bash literal-block">
+<span class="comment"># the patch was created with `diff -u BDTShapeJ12.C BDTShapeJ12_reload.C`
+# it might only work with a specific version of BDTShapeJ12.C
+</span>patch -p0 &lt; BDTShapeJ12_reload.C.diff
+</pre>
+<ol class="arabic simple" start="3">
+<li>Use <cite>run_tune.py</cite> to get commands to train and reload.</li>
+</ol>
+<pre class="code bash literal-block">
+<span class="comment"># edit r, n, w if necessary
+</span>python run_tune.py
+<span class="comment"># first train, then reload</span>
+</pre>
+<ol class="arabic simple" start="4">
+<li>Use <cite>run_combine_tune.py</cite> to calculate final limit and significance.</li>
+</ol>
+<pre class="code bash literal-block">
+<span class="comment"># edit r, n, w, logs if necessary
+</span>python run_combine_tune.py
+</pre>
+<ol class="arabic simple" start="5">
+<li>Use <cite>retrieve_combine_tune.py</cite> to store the previous results into TTrees.</li>
+</ol>
+<pre class="code bash literal-block">
+<span class="comment"># edit r, w, logs if necessary
+# it only does one channel at a time
+</span>python run_combine_tune.py
+<span class="comment"># use `hadd` to combine the TTrees</span>
+</pre>
+<ol class="arabic simple" start="6">
+<li>Open the combined TTree (e.g. TMVA_ZnunuHighPt_new.root), scan for the best significance.</li>
+</ol>
+<pre class="code bash literal-block">
+root <span class="operator">[</span>0<span class="operator">]</span> fomtree-&gt;Scan<span class="operator">(</span><span class="literal string double">&quot;NTrees:nEventsMin:MaxDepth:COMB_limit:COMB_signif:TMVA_kolS:TMVA_kolB:USER_psig&quot;</span>,<span class="literal string double">&quot;COMB_limit&lt;3.6 &amp;&amp; COMB_signif&gt;0.68&quot;</span><span class="operator">)</span>
+</pre>
+<ol class="arabic simple" start="99">
+<li>BDT binning optimization instructions pending...</li>
+</ol>
+<!-- HTML generation command: rst2html.py - -no-toc-backlinks - -stylesheet=style.css < steps.txt > steps.html -->
+</div>
+</div>
+</body>
+</html>

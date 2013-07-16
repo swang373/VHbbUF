@@ -1,0 +1,1887 @@
+////////////////////////////////////////////////////////////////////////////////
+/// This macro runs on Step 4 with jmax = 9 in the following order
+///   ZH         WH         Wj0b       Wj1b       Wj2b       Zj0b       Zj1b       Zj2b       TT         s_Top      VV         QCD
+///   -1         0          1          2          3          4          5          6          7          8          9          10
+///
+/// It produces a datacard (set by dcname) and a root file with TH1F (set by rootname).
+///
+/// The following 1 + 2 x 9 systematic variations are considered:
+///   NONE
+///   CMS_vhbb_res_jUp
+///   CMS_vhbb_res_jDown
+///   CMS_vhbb_scale_jUp
+///   CMS_vhbb_scale_jDown
+///   CMS_vhbb_eff_bUp
+///   CMS_vhbb_eff_bDown
+///   CMS_vhbb_fake_b_8TeVUp
+///   CMS_vhbb_fake_b_8TeVDown
+///   UEPSUp
+///   UEPSDown
+///   CMS_vhbb_trigger_MET_Znunu_8TeVUp
+///   CMS_vhbb_trigger_MET_Znunu_8TeVDown
+///   CMS_vhbb_stat$PROCESS_$CHANNELUp
+///   CMS_vhbb_stat$PROCESS_$CHANNELDown
+///   CMS_vhbb_WJModel_Znunu_8TeVUp
+///   CMS_vhbb_WJModel_Znunu_8TeVDown
+///   CMS_vhbb_ZJModel_Znunu_8TeVUp
+///   CMS_vhbb_ZJModel_Znunu_8TeVDown
+///   CMS_vhbb_TTModel_Znunu_8TeVUp
+///   CMS_vhbb_TTModel_Znunu_8TeVDown
+////////////////////////////////////////////////////////////////////////////////
+
+#include <cstdlib>
+#include <iostream>
+#include <iomanip>
+#include <fstream>
+#include <vector>
+//#include <map>
+
+#include "TCanvas.h"
+#include "TCut.h"
+#include "TChain.h"
+#include "TFile.h"
+#include "TH1.h"
+#include "THStack.h"
+#include "TLatex.h"
+#include "TLegend.h"
+#include "TMath.h"
+#include "TPaveText.h"
+#include "TROOT.h"
+#include "TStyle.h"
+#include "TString.h"
+#include "TSystem.h"
+#include "TTree.h"
+
+#include "HelperBDTShape.h"
+#include "HelperFunctions.h"  // FIXME
+
+//#define VV_AS_SIGNAL
+
+// TODO:
+// - Veto pixel movement runs. new lumi 19.04, isBadHcalEvent [DONE]
+// - Add trigger up/down shape [DONE]
+// - Use VVHF = VVHF = WZ+HF, ZZ+HF and VVLF = WZ+LF, ZZ+LF, WW
+// - Change normalization in nuisance histograms
+// - Add signal NNLO correction
+// - Include Mjj cuts
+
+////////////////////////////////////////////////////////////////////////////////
+/// Configuration                                                            ///
+////////////////////////////////////////////////////////////////////////////////
+
+//const TString indir     = "/uscms_data/d3/lpchbb/jiafu/ZnnH_postHCP/Step4_20130302/reload_20130306/";
+//const TString indir     = "/uscms_data/d3/lpchbb/jiafu/ZnnH_postHCP/Step4_20130302/reload_20130302/";
+//const TString indir     = "/uscms_data/d3/lpchbb/jiafu/ZnnH_postHCP/Step4_20130221/reload_20130228/";
+//const TString indir     = "/uscms_data/d3/lpchbb/jiafu/ZnnH_postHCP/Step4_20130214/reload_20130216/";
+const TString indir     = "/uscms_data/d3/lpchbb/jiafu/ZnnH_postHCP/Step4_20130314/stitch/";
+//const TString indir     = "/uscms_data/d3/lpchbb/jiafu/ZnnH_postHCP/Step4_20130302/stitch/";
+//const TString indir     = "/uscms_data/d3/lpchbb/jiafu/ZnnH_postHCP/Step4_20130221/stitch/";
+//const TString indir     = "/uscms_data/d3/lpchbb/jiafu/ZnnH_postHCP/Step4_20130214/stitch/";
+//const TString indir     = "root://eoscms//eos/cms/store/caf/user/degrutto/2013/Step4_20130207/";
+const TString prefix    = "Step4_";
+const TString suffix    = ".root";
+
+const TCut    g_cutallmc    = "";          // used in CopyTree()
+const TCut    g_cutalldata  = "(!(207883<=EVENT.run && EVENT.run<=208307))";  // used in CopyTree()
+const double  g_xlow        = -1.;
+const double  g_xup         = 1.;
+const bool    g_manyplots   = true;
+
+#ifndef VV_AS_SIGNAL
+const int jmax              = 11;  // as in datacard
+const int nsyst             = 13;
+const int massH             = 125;
+const TString g_var         = Form("BDTregular_%i[ISYST]", massH);  // ISYST is replaced in the main function.
+//const TString g_var         = Form("BDTregular_fj_%i[ISYST]", massH);  // ISYST is replaced in the main function.
+const TString g_varslice    = Form("slice(BDTregular_%i[ISYST], (BDTtt_%i[ISYST]>-0.6), (BDTvjlf_%i[ISYST]>-0.5), (BDTzz_%i[ISYST]>-0.3))", massH, massH, massH, massH);
+//const TString g_varslice    = Form("slice(BDTregular_fj_%i[ISYST], (BDTtt_%i[ISYST]>-0.6), (BDTvjlf_%i[ISYST]>-0.5), (BDTzz_%i[ISYST]>-0.3))", massH, massH, massH, massH);
+//const TString g_varslice    = Form("hybridslice(BDTregularhybrid_%i[ISYST], BDTregularhybrid_fj_%i[ISYST], (nfathFilterJets>0 && FatH.FatHiggsFlag==1))", massH, massH);
+//const TString g_varslice    = Form("slice(BDTttbar_%i[ISYST], BDTvjl_%i[ISYST], BDTzz_%i[ISYST], BDTregular_%i[ISYST], -0.5, -0.4, -0.4)", massH, massH, massH, massH);
+const TString g_dcname      = "vhbb_Znn_J11_$CHANNEL_8TeV.txt";
+const TString g_wsname      = "vhbb_Znn_J11_$CHANNEL_8TeV.root";
+const TString g_rootname    = "vhbb_Znn_J11_$CHANNEL_TH1.root";
+const TString g_plotdir     = "plotsJ11/";
+#else
+const int jmax              = 12;  // as in datacard
+const int nsyst             = 13;
+const int massH             = 125;
+const TString g_var         = Form("BDTzzhfassignal_%i[ISYST]", massH);  // ISYST is replaced in the main function.
+const TString g_varslice    = "";
+const TString g_dcname      = "vhbb_Znn_J12_$CHANNEL_8TeV.txt";
+const TString g_wsname      = "vhbb_Znn_J12_$CHANNEL_8TeV.root";
+const TString g_rootname    = "vhbb_Znn_J12_$CHANNEL_TH1.root";
+const TString g_plotdir     = "plotsJ12/";
+#endif
+
+/// The channel
+TString channel = "ZnunuHighPt";
+
+/// Systematics
+const TString g_systematics[nsyst] = {
+    "NONE", 
+    "CMS_vhbb_res_jUp", 
+    "CMS_vhbb_res_jDown", 
+    "CMS_vhbb_scale_jUp", 
+    "CMS_vhbb_scale_jDown", 
+    "CMS_vhbb_eff_bUp", 
+    "CMS_vhbb_eff_bDown", 
+    "CMS_vhbb_fake_b_8TeVUp", 
+    "CMS_vhbb_fake_b_8TeVDown", 
+    "UEPSUp", 
+    "UEPSDown", 
+    "CMS_vhbb_trigger_MET_Znunu_8TeVUp", 
+    "CMS_vhbb_trigger_MET_Znunu_8TeVDown"
+};
+
+/// Regions
+const TString g_regions[1+5] = {
+    "VH", 
+    "ZjLF", 
+    "ZjHF", 
+    "WjLF",
+    "WjHF", 
+    "TT"
+};
+
+/// Scale factors of Wj0b, Wj1b, Wj2b, Zj0b, Zj1b, Zj2b, TT (as in datacard)
+const double g_scalefactors_ZnunuHighPt[7] = {
+  //1.154, 2.374, 0.736, 1.131, 2.198, 1.136, 0.954
+    0.825, 1.994, 0.717, 1.165, 2.158, 1.101, 0.933
+};
+const double g_scalefactors_lnN_ZnunuHighPt[7] = {
+  //1.03, 1.30, 1.40, 1.03, 1.07, 1.10, 1.03
+    1.03, 1.30, 1.40, 1.04, 1.09, 1.12, 1.04
+};
+
+const double g_scalefactors_ZnunuMedPt[7] = {
+  //1.002, 2.175, 1.132, 1.239, 2.502, 1.114, 0.959
+    0.868, 1.923, 1.022, 1.306, 2.523, 1.102, 0.944
+};
+const double g_scalefactors_lnN_ZnunuMedPt[7] = {
+  //1.03, 1.28, 1.29, 1.03, 1.07, 1.10, 1.03
+    1.03, 1.34, 1.35, 1.04, 1.09, 1.15, 1.04
+};
+
+const double g_scalefactors_ZnunuLowPt[7] = {
+  //0.865, 2.588, 0.783, 1.259, 2.190, 1.422, 0.939
+    0.726, 2.797, 0.946, 1.270, 2.159, 1.426, 0.925
+};
+const double g_scalefactors_lnN_ZnunuLowPt[7] = {
+  //1.05, 1.34, 1.39, 1.03, 1.07, 1.09, 1.04
+    1.03, 1.31, 1.42, 1.04, 1.09, 1.12, 1.04
+};
+
+const double g_scalefactors_ZnunuLowCSV[7] = {
+    1.000, 2.000, 1.000, 1.000, 2.000, 1.000, 1.000
+};
+const double g_scalefactors_lnN_ZnunuLowCSV[7] = {
+    1.15, 1.60, 1.50, 1.12, 1.30, 1.25, 1.10
+};
+
+const double g_scalefactors_lnN_prefit[7] = {
+    1.15, 1.60, 1.50, 1.12, 1.30, 1.25, 1.10
+};
+
+//const double g_scalefactors_QCD[3] = {0.02, 0.2, 0.5};
+const double g_scalefactors_QCD[3] = {0.005, 0.05, 0.03};
+////////////////////////////////////////////////////////////////////////////////
+/// END Configuration                                                        ///
+////////////////////////////////////////////////////////////////////////////////
+
+///_____________________________________________________________________________
+/// Classes
+
+class EventsJ11 {  // jmax = 11 in datacard, with 7 scale factors.
+public:
+    EventsJ11()
+      : ZH(0),
+        WH(0),
+        Wj0b(0),
+        Wj1b(0),
+        Wj2b(0),
+        Zj0b(0),
+        Zj1b(0),
+        Zj2b(0),
+        TT(0),
+        s_Top(0),
+        VVLF(0),
+        VVHF(0),
+        QCD(0),
+        Wj0b_syst(0),
+        Wj1b_syst(0),
+        Wj2b_syst(0),
+        Zj0b_syst(0),
+        Zj1b_syst(0),
+        Zj2b_syst(0),
+        TT_syst(0),
+        ZH_SM(0),
+        WH_SM(0),
+        data_obs(0),
+        sf_Wj0b(1.), sf_Wj1b(1.), sf_Wj2b(1.), sf_Zj0b(1.), sf_Zj1b(1.), sf_Zj2b(1.), sf_TT(1.) {}
+
+    ~EventsJ11()
+    {
+        delete ZH;
+        delete WH;
+        delete Wj0b;
+        delete Wj1b;
+        delete Wj2b;
+        delete Zj0b;
+        delete Zj1b;
+        delete Zj2b;
+        delete TT;
+        delete s_Top;
+        delete VVLF;
+        delete VVHF;
+        delete QCD;
+        delete Wj0b_syst;
+        delete Wj1b_syst;
+        delete Wj2b_syst;
+        delete Zj0b_syst;
+        delete Zj1b_syst;
+        delete Zj2b_syst;
+        delete TT_syst;
+        delete ZH_SM;
+        delete WH_SM;
+        delete data_obs;
+    }
+
+    void check() const {
+        assert(ZH        != 0 && ZH       ->GetEntriesFast() > 0);
+        assert(WH        != 0 && WH       ->GetEntriesFast() > 0);
+        assert(Wj0b      != 0 && Wj0b     ->GetEntriesFast() > 0);
+        assert(Wj1b      != 0 && Wj1b     ->GetEntriesFast() > 0);
+        assert(Wj2b      != 0 && Wj2b     ->GetEntriesFast() > 0);
+        assert(Zj0b      != 0 && Zj0b     ->GetEntriesFast() > 0);
+        assert(Zj1b      != 0 && Zj1b     ->GetEntriesFast() > 0);
+        assert(Zj2b      != 0 && Zj2b     ->GetEntriesFast() > 0);
+        assert(TT        != 0 && TT       ->GetEntriesFast() > 0);
+        assert(s_Top     != 0 && s_Top    ->GetEntriesFast() > 0);
+        assert(VVLF      != 0 && VVLF     ->GetEntriesFast() > 0);
+        assert(VVHF      != 0 && VVHF     ->GetEntriesFast() > 0);
+        assert(QCD       != 0 && QCD      ->GetEntriesFast() > 0);
+        assert(Wj0b_syst != 0 && Wj0b_syst->GetEntriesFast() > 0);
+        assert(Wj1b_syst != 0 && Wj1b_syst->GetEntriesFast() > 0);
+        assert(Wj2b_syst != 0 && Wj2b_syst->GetEntriesFast() > 0);
+        assert(Zj0b_syst != 0 && Zj0b_syst->GetEntriesFast() > 0);
+        assert(Zj1b_syst != 0 && Zj1b_syst->GetEntriesFast() > 0);
+        assert(Zj2b_syst != 0 && Zj2b_syst->GetEntriesFast() > 0);
+        assert(TT_syst   != 0 && TT_syst  ->GetEntriesFast() > 0);
+        assert(ZH_SM     != 0 && ZH_SM    ->GetEntriesFast() > 0);
+        assert(WH_SM     != 0 && WH_SM    ->GetEntriesFast() > 0);
+        assert(data_obs  != 0 && data_obs ->GetEntriesFast() > 0);
+        return;
+    }
+    
+    void set_scalefactors(const double sf[7]) {
+        sf_Wj0b = sf[0];
+        sf_Wj1b = sf[1];
+        sf_Wj2b = sf[2];
+        sf_Zj0b = sf[3];
+        sf_Zj1b = sf[4];
+        sf_Zj2b = sf[5];
+        sf_TT   = sf[6];
+        return;
+    }
+
+public:
+    TTree * ZH;
+    TTree * WH;
+    TTree * Wj0b;
+    TTree * Wj1b;
+    TTree * Wj2b;
+    TTree * Zj0b;
+    TTree * Zj1b;
+    TTree * Zj2b;
+    TTree * TT;
+    TTree * s_Top;
+    TTree * VVLF;
+    TTree * VVHF;
+    TTree * QCD;
+    TTree * Wj0b_syst;  // for WJModel
+    TTree * Wj1b_syst;  // for WJModel
+    TTree * Wj2b_syst;  // for WJModel
+    TTree * Zj0b_syst;  // for ZJModel
+    TTree * Zj1b_syst;  // for ZJModel
+    TTree * Zj2b_syst;  // for ZJModel
+    TTree * TT_syst;    // for TTModel
+    TTree * ZH_SM;      // for signal injection
+    TTree * WH_SM;      // for signal injection
+    TTree * data_obs;
+    double sf_Wj0b;
+    double sf_Wj1b;
+    double sf_Wj2b;
+    double sf_Zj0b;
+    double sf_Zj1b;
+    double sf_Zj2b;
+    double sf_TT;
+};  // EventsJ11
+
+///_____________________________________________________________________________
+/// Functions
+
+float slice(const float var1, int cut1)
+{
+    const float xlow=-1., xup=1.;
+    // Assume original range is [xlow,xup], check if this is always true!
+    if(!(xlow <= var1 && var1 <= xup))  std::cerr << "ERROR: var1 = " << var1 << std::endl;
+    const float scale = (xup - xlow) / 2.0 / 2.0;
+    if (!cut1) {
+        return ((var1+1.0)*scale + xlow);
+    } else { // pass all 1 cuts
+        return ((var1+3.0)*scale + xlow);
+    }
+}
+
+float slice(const float var1, int cut1, int cut2)
+{
+    const float xlow=-1., xup=1.;
+    // Assume original range is [xlow,xup], check if this is always true!
+    if(!(xlow <= var1 && var1 <= xup))  std::cerr << "ERROR: var1 = " << var1 << std::endl;
+    const float scale = (xup - xlow) / 2.0 / 3.0;
+    if (!cut1) {
+        return ((var1+1.0)*scale + xlow);
+    } else if (!cut2) {
+        return ((var1+3.0)*scale + xlow);
+    } else { // pass all 2 cuts
+        return ((var1+5.0)*scale + xlow);
+    }
+}
+
+float slice(const float var1, int cut1, int cut2, int cut3)
+{
+    const float xlow=-1., xup=1.;
+    // Assume original range is [xlow,xup], check if this is always true!
+    if(!(xlow <= var1 && var1 <= xup))  std::cerr << "ERROR: var1 = " << var1 << std::endl;
+    const float scale = (xup - xlow) / 2.0 / 4.0;
+    if (!cut1) {
+        return ((var1+1.0)*scale + xlow);
+    } else if (!cut2) {
+        return ((var1+3.0)*scale + xlow);
+    } else if (!cut3) {
+        return ((var1+5.0)*scale + xlow);
+    } else { // pass all 3 cuts
+        return ((var1+7.0)*scale + xlow);
+    }
+}
+
+float hybridslice(const float var1, const float var2, int cut1)
+{
+    const float xlow=-1., xup=1.;
+    // Assume original range is [xlow,xup], check if this is always true!
+    if(!(xlow <= var1 && var1 <= xup))  std::cerr << "ERROR: var1 = " << var1 << std::endl;
+    const float scale = (xup - xlow) / 2.0 / 2.0;
+    if (!cut1) {
+        return ((var1+1.0)*scale + xlow);
+    } else { // pass all 1 cuts
+        return ((var2+3.0)*scale + xlow);
+    }
+}
+
+///_____________________________________________________________________________
+/// The core function that makes plots, prints stats, and writes the datacard.
+
+using namespace std;
+
+/// Declare rebinner
+Rebinner* rebinner = 0;
+
+void MakePlots(const EventsJ11 * ev, const TString var, 
+               const TCut cutmc, const TCut cutdata, const TString syst, const TString region, 
+               const char* xtitle, int nbins, double xlow, double xup, 
+               long long newnbins, double rebinerrorf, 
+               const double scalefactors_lnN[7], 
+               TString options="printStat:printCard:plotData:plotLog:plotSig")
+{
+    std::clog << "MakePlots(): Using cutmc = " << cutmc << ", cutdata = " << cutdata << std::endl;
+
+    // Parse options
+    options.ReplaceAll(" ", "");
+    bool printStat = options.Contains("printStat") && (!options.Contains("!printStat"));
+    bool printCard = options.Contains("printCard") && (!options.Contains("!printCard"));
+    bool writeRoot = options.Contains("writeRoot") && (!options.Contains("!writeRoot"));
+    bool plotData  = options.Contains("plotData")  && (!options.Contains("!plotData"));
+    bool plotSig   = options.Contains("plotSig")   && (!options.Contains("!plotSig"));
+    bool plotLog   = options.Contains("plotLog")   && (!options.Contains("!plotLog"));
+
+    // Book histograms before rebinning
+    TH1F * hZH_0        = new TH1F("ZH_0"       , "", nbins, xlow, xup);
+    TH1F * hWH_0        = new TH1F("WH_0"       , "", nbins, xlow, xup);
+    TH1F * hWj0b_0      = new TH1F("Wj0b_0"     , "", nbins, xlow, xup);
+    TH1F * hWj1b_0      = new TH1F("Wj1b_0"     , "", nbins, xlow, xup);
+    TH1F * hWj2b_0      = new TH1F("Wj2b_0"     , "", nbins, xlow, xup);
+    TH1F * hZj0b_0      = new TH1F("Zj0b_0"     , "", nbins, xlow, xup);
+    TH1F * hZj1b_0      = new TH1F("Zj1b_0"     , "", nbins, xlow, xup);
+    TH1F * hZj2b_0      = new TH1F("Zj2b_0"     , "", nbins, xlow, xup);
+    TH1F * hTT_0        = new TH1F("TT_0"       , "", nbins, xlow, xup);
+    TH1F * hs_Top_0     = new TH1F("s_Top_0"    , "", nbins, xlow, xup);
+    TH1F * hVVLF_0      = new TH1F("VVLF_0"     , "", nbins, xlow, xup);
+    TH1F * hVVHF_0      = new TH1F("VVHF_0"     , "", nbins, xlow, xup);
+    TH1F * hQCD_0       = new TH1F("QCD_0"      , "", nbins, xlow, xup);
+    TH1F * hWj0b_syst_0 = new TH1F("Wj0b_syst_0", "", nbins, xlow, xup);
+    TH1F * hWj1b_syst_0 = new TH1F("Wj1b_syst_0", "", nbins, xlow, xup);
+    TH1F * hWj2b_syst_0 = new TH1F("Wj2b_syst_0", "", nbins, xlow, xup);
+    TH1F * hZj0b_syst_0 = new TH1F("Zj0b_syst_0", "", nbins, xlow, xup);
+    TH1F * hZj1b_syst_0 = new TH1F("Zj1b_syst_0", "", nbins, xlow, xup);
+    TH1F * hZj2b_syst_0 = new TH1F("Zj2b_syst_0", "", nbins, xlow, xup);
+    TH1F * hTT_syst_0   = new TH1F("TT_syst_0"  , "", nbins, xlow, xup);
+    TH1F * hZH_SM_0     = new TH1F("ZH_SM_0"    , "", nbins, xlow, xup);
+    TH1F * hWH_SM_0     = new TH1F("WH_SM_0"    , "", nbins, xlow, xup);
+    TH1F * hVH_0        = new TH1F("VH_0"       , "", nbins, xlow, xup);
+    TH1F * hVV_0        = new TH1F("VV_0"       , "", nbins, xlow, xup);
+    TH1F * hmc_exp_0    = new TH1F("mc_exp_0"   , "", nbins, xlow, xup);
+    TH1F * hdata_obs_0  = new TH1F("data_obs_0" , "", nbins, xlow, xup);
+    
+    std::vector<TH1 *> histos_0;
+    histos_0.push_back(hZH_0);
+    histos_0.push_back(hWH_0);
+    histos_0.push_back(hWj0b_0);
+    histos_0.push_back(hWj1b_0);
+    histos_0.push_back(hWj2b_0);
+    histos_0.push_back(hZj0b_0);
+    histos_0.push_back(hZj1b_0);
+    histos_0.push_back(hZj2b_0);
+    histos_0.push_back(hTT_0);
+    histos_0.push_back(hs_Top_0);
+    histos_0.push_back(hVVLF_0);
+    histos_0.push_back(hVVHF_0);
+    histos_0.push_back(hQCD_0);
+    histos_0.push_back(hWj0b_syst_0);
+    histos_0.push_back(hWj1b_syst_0);
+    histos_0.push_back(hWj2b_syst_0);
+    histos_0.push_back(hZj0b_syst_0);
+    histos_0.push_back(hZj1b_syst_0);
+    histos_0.push_back(hZj2b_syst_0);
+    histos_0.push_back(hTT_syst_0);
+    histos_0.push_back(hZH_SM_0);
+    histos_0.push_back(hWH_SM_0);
+    histos_0.push_back(hVH_0);
+    histos_0.push_back(hVV_0);
+    histos_0.push_back(hmc_exp_0);
+    histos_0.push_back(hdata_obs_0);
+    
+    for (UInt_t ih = 0; ih < histos_0.size(); ih++)
+        histos_0.at(ih)->Sumw2();
+    
+    // Project
+    ev->ZH->Project("ZH_0", var, cutmc);
+    std::clog << "... DONE: project ZH_0." << std::endl;
+    ev->WH->Project("WH_0", var, cutmc);
+    std::clog << "... DONE: project WH_0." << std::endl;
+    
+    // Apply slope
+    double WJSlopeErr = 0.0015;
+    double ZJSlopeErr = 0.0025;
+    double WJSlope = -0.00;  // -1.64
+    double ZJSlope = -1.00;  // -4.04
+    TCut cutwjslope = Form("VaryVptSlope(genW.pt, %f, 150)", WJSlope * WJSlopeErr);
+    TCut cutzjslope = Form("VaryVptSlope(genZ.pt, %f, 130)", ZJSlope * ZJSlopeErr);
+    
+    // Apply scale factors
+    TCut cutsf = "1.0";
+    cutsf = Form("%f", ev->sf_Wj0b);
+    ev->Wj0b->Project("Wj0b_0", var, cutmc * cutsf * cutwjslope);
+    std::clog << "... DONE: project Wj0b_0, scaled by " << cutsf * cutwjslope << "." << std::endl;
+    cutsf = Form("%f", ev->sf_Wj1b);
+    ev->Wj1b->Project("Wj1b_0", var, cutmc * cutsf * cutwjslope);
+    std::clog << "... DONE: project Wj1b_0, scaled by " << cutsf * cutwjslope << "." << std::endl;
+    cutsf = Form("%f", ev->sf_Wj2b);
+    ev->Wj2b->Project("Wj2b_0", var, cutmc * cutsf * cutwjslope);
+    std::clog << "... DONE: project Wj2b_0, scaled by " << cutsf * cutwjslope << "." << std::endl;
+    cutsf = Form("%f", ev->sf_Zj0b);
+    ev->Zj0b->Project("Zj0b_0", var, cutmc * cutsf * cutzjslope);
+    std::clog << "... DONE: project Zj0b_0, scaled by " << cutsf * cutzjslope << "." << std::endl;
+    cutsf = Form("%f", ev->sf_Zj1b);
+    ev->Zj1b->Project("Zj1b_0", var, cutmc * cutsf * cutzjslope);
+    std::clog << "... DONE: project Zj1b_0, scaled by " << cutsf * cutzjslope << "." << std::endl;
+    cutsf = Form("%f", ev->sf_Zj2b);
+    ev->Zj2b->Project("Zj2b_0", var, cutmc * cutsf * cutzjslope);
+    std::clog << "... DONE: project Zj2b_0, scaled by " << cutsf * cutzjslope << "." << std::endl;
+    cutsf = Form("%f", ev->sf_TT);
+    ev->TT->Project("TT_0", var, cutmc * cutsf);
+    std::clog << "... DONE: project TT_0, scaled by " << cutsf << "." << std::endl;
+    
+    ev->s_Top->Project("s_Top_0", var, cutmc);
+    std::clog << "... DONE: project s_Top_0." << std::endl;
+    ev->VVLF->Project("VVLF_0", var, cutmc);
+    std::clog << "... DONE: project VVLF_0." << std::endl;
+    ev->VVHF->Project("VVHF_0", var, cutmc);
+    std::clog << "... DONE: project VVHF_0." << std::endl;
+
+    // Apply QCD scale factor 
+    if (channel == "ZnunuHighPt")
+        cutsf = Form("%f", g_scalefactors_QCD[0]);
+    else if (channel == "ZnunuMedPt")
+        cutsf = Form("%f", g_scalefactors_QCD[1]);
+    else if (channel == "ZnunuLowPt")
+        cutsf = Form("%f", g_scalefactors_QCD[2]);
+    ev->QCD->Project("QCD_0", var, cutmc * cutsf);
+    std::clog << "... DONE: project QCD_0, scaled by " << cutsf << "." << std::endl;
+    //ev->QCD->Project("QCD_0", var, cutmc);
+    //std::clog << "... DONE: project QCD_0." << std::endl;
+
+    ev->Wj0b_syst->Project("Wj0b_syst_0", var, cutmc);
+    std::clog << "... DONE: project Wj0b_syst_0." << std::endl;
+    ev->Wj1b_syst->Project("Wj1b_syst_0", var, cutmc);
+    std::clog << "... DONE: project Wj1b_syst_0." << std::endl;
+    ev->Wj2b_syst->Project("Wj2b_syst_0", var, cutmc);
+    std::clog << "... DONE: project Wj2b_syst_0." << std::endl;
+    ev->Zj0b_syst->Project("Zj0b_syst_0", var, cutmc);
+    std::clog << "... DONE: project Zj0b_syst_0." << std::endl;
+    ev->Zj1b_syst->Project("Zj1b_syst_0", var, cutmc);
+    std::clog << "... DONE: project Zj1b_syst_0." << std::endl;
+    ev->Zj2b_syst->Project("Zj2b_syst_0", var, cutmc);
+    std::clog << "... DONE: project Zj2b_syst_0." << std::endl;
+    ev->TT_syst->Project("TT_syst_0", var, cutmc);
+    std::clog << "... DONE: project TT_syst_0." << std::endl;
+    
+    ev->ZH_SM->Project("ZH_SM_0", var, cutmc);
+    std::clog << "... DONE: project ZH_SM_0." << std::endl;
+    ev->WH_SM->Project("WH_SM_0", var, cutmc);
+    std::clog << "... DONE: project WH_SM_0." << std::endl;
+    
+    ev->data_obs->Project("data_obs_0", var, cutdata);
+    std::clog << "... DONE: project data_obs_0." << std::endl;
+
+    // Make sum of histograms
+    hVH_0->Add(hZH_0);
+    hVH_0->Add(hWH_0);
+    std::clog << "... DONE: add ZH_0, WH_0 to VH_0." << std::endl;
+
+    hVV_0->Add(hVVLF_0);
+    hVV_0->Add(hVVHF_0);
+    std::clog << "... DONE: add VVLF_0, VVHF_0 to VV_0." << std::endl;
+
+    hmc_exp_0->Add(hWj0b_0);
+    hmc_exp_0->Add(hWj1b_0);
+    hmc_exp_0->Add(hWj2b_0);
+    hmc_exp_0->Add(hZj0b_0);
+    hmc_exp_0->Add(hZj1b_0);
+    hmc_exp_0->Add(hZj2b_0);
+    hmc_exp_0->Add(hTT_0);
+    hmc_exp_0->Add(hs_Top_0);
+#ifndef VV_AS_SIGNAL
+    hmc_exp_0->Add(hVV_0);
+#else
+    hmc_exp_0->Add(hVVLF_0);
+    //hmc_exp_0->Add(hVH_0);
+#endif
+    hmc_exp_0->Add(hQCD_0);
+    std::clog << "... DONE: add MC backgrounds to mc_exp_0." << std::endl;
+
+    if (rebinner == 0) {
+        rebinner = new Rebinner(newnbins, rebinerrorf, xlow, xup);
+        rebinner->set_signal_backgr(hVH_0, hmc_exp_0);
+    }
+
+    TH1F * hZH        = rebinner->rebin(hZH_0         , newnbins, "ZH"        );
+    TH1F * hWH        = rebinner->rebin(hWH_0         , newnbins, "WH"        );
+    TH1F * hWj0b      = rebinner->rebin(hWj0b_0       , newnbins, "Wj0b"      );
+    TH1F * hWj1b      = rebinner->rebin(hWj1b_0       , newnbins, "Wj1b"      );
+    TH1F * hWj2b      = rebinner->rebin(hWj2b_0       , newnbins, "Wj2b"      );
+    TH1F * hZj0b      = rebinner->rebin(hZj0b_0       , newnbins, "Zj0b"      );
+    TH1F * hZj1b      = rebinner->rebin(hZj1b_0       , newnbins, "Zj1b"      );
+    TH1F * hZj2b      = rebinner->rebin(hZj2b_0       , newnbins, "Zj2b"      );
+    TH1F * hTT        = rebinner->rebin(hTT_0         , newnbins, "TT"        );
+    TH1F * hs_Top     = rebinner->rebin(hs_Top_0      , newnbins, "s_Top"     );
+    TH1F * hVVLF      = rebinner->rebin(hVVLF_0       , newnbins, "VVLF"      );
+    TH1F * hVVHF      = rebinner->rebin(hVVHF_0       , newnbins, "VVHF"      );
+    TH1F * hQCD       = rebinner->rebin(hQCD_0        , newnbins, "QCD"       );
+    TH1F * hWj0b_syst = rebinner->rebin(hWj0b_syst_0  , newnbins, "Wj0b_syst" );
+    TH1F * hWj1b_syst = rebinner->rebin(hWj1b_syst_0  , newnbins, "Wj1b_syst" );
+    TH1F * hWj2b_syst = rebinner->rebin(hWj2b_syst_0  , newnbins, "Wj2b_syst" );
+    TH1F * hZj0b_syst = rebinner->rebin(hZj0b_syst_0  , newnbins, "Zj0b_syst" );
+    TH1F * hZj1b_syst = rebinner->rebin(hZj1b_syst_0  , newnbins, "Zj1b_syst" );
+    TH1F * hZj2b_syst = rebinner->rebin(hZj2b_syst_0  , newnbins, "Zj2b_syst" );
+    TH1F * hTT_syst   = rebinner->rebin(hTT_syst_0    , newnbins, "TT_syst"   );
+    TH1F * hZH_SM     = rebinner->rebin(hZH_SM_0      , newnbins, "ZH_SM"     );
+    TH1F * hWH_SM     = rebinner->rebin(hWH_SM_0      , newnbins, "WH_SM"     );
+    TH1F * hVH        = rebinner->rebin(hVH_0         , newnbins, "VH"        );
+    TH1F * hVV        = rebinner->rebin(hVV_0         , newnbins, "VV"        );
+    TH1F * hmc_exp    = rebinner->rebin(hmc_exp_0     , newnbins, "mc_exp"    );
+    TH1F * hdata_obs  = rebinner->rebin(hdata_obs_0   , newnbins, "data_obs"  );
+
+    std::vector<TH1 *> histos;
+    histos.push_back(hZH);
+    histos.push_back(hWH);
+    histos.push_back(hWj0b);
+    histos.push_back(hWj1b);
+    histos.push_back(hWj2b);
+    histos.push_back(hZj0b);
+    histos.push_back(hZj1b);
+    histos.push_back(hZj2b);
+    histos.push_back(hTT);
+    histos.push_back(hs_Top);
+    histos.push_back(hVVLF);
+    histos.push_back(hVVHF);
+    histos.push_back(hQCD);
+    histos.push_back(hWj0b_syst);
+    histos.push_back(hWj1b_syst);
+    histos.push_back(hWj2b_syst);
+    histos.push_back(hZj0b_syst);
+    histos.push_back(hZj1b_syst);
+    histos.push_back(hZj2b_syst);
+    histos.push_back(hTT_syst);
+    histos.push_back(hZH_SM);
+    histos.push_back(hWH_SM);
+    histos.push_back(hVH);
+    histos.push_back(hVV);
+    histos.push_back(hmc_exp);
+    histos.push_back(hdata_obs);
+    
+    assert(histos.size() == histos_0.size());
+    for (UInt_t ih = 0; ih < histos.size(); ih++)
+        histos.at(ih)->Sumw2();
+    
+    if (printStat && syst == "NONE") {
+        std::clog << "MakePlots(): Printing statistics..." << std::endl;
+        
+        const int p_bin1=0, p_bin2=9999;
+        double p_integral=0., p_error=0.;
+        double D=0., S=0., B=0.;
+        std::cout.setf(ios::fixed,ios::floatfield);
+        std::cout.precision(3);
+        
+        p_integral = hZH->IntegralAndError(p_bin1, p_bin2, p_error);
+        S += p_integral;
+        std::cout << setw(10) << left << "ZH " << "(" << p_bin1 << ", " << p_bin2 << ") = " << setw(8) << right << p_integral << " +/- " << setw(6) << right << p_error << std::endl;
+        p_integral = hWH->IntegralAndError(p_bin1, p_bin2, p_error);
+        S += p_integral;
+        std::cout << setw(10) << left << "WH " << "(" << p_bin1 << ", " << p_bin2 << ") = " << setw(8) << right << p_integral << " +/- " << setw(6) << right << p_error << std::endl;
+        
+        p_integral = hWj0b->IntegralAndError(p_bin1, p_bin2, p_error);
+        B += p_integral;
+        std::cout << setw(10) << left << "Wj0b " << "(" << p_bin1 << ", " << p_bin2 << ") = " << setw(8) << right << p_integral << " +/- " << setw(6) << right << p_error << std::endl;
+        p_integral = hWj1b->IntegralAndError(p_bin1, p_bin2, p_error);
+        B += p_integral;
+        std::cout << setw(10) << left << "Wj1b " << "(" << p_bin1 << ", " << p_bin2 << ") = " << setw(8) << right << p_integral << " +/- " << setw(6) << right << p_error << std::endl;
+        p_integral = hWj2b->IntegralAndError(p_bin1, p_bin2, p_error);
+        B += p_integral;
+        std::cout << setw(10) << left << "Wj2b " << "(" << p_bin1 << ", " << p_bin2 << ") = " << setw(8) << right << p_integral << " +/- " << setw(6) << right << p_error << std::endl;
+        p_integral = hZj0b->IntegralAndError(p_bin1, p_bin2, p_error);
+        B += p_integral;
+        std::cout << setw(10) << left << "Zj0b " << "(" << p_bin1 << ", " << p_bin2 << ") = " << setw(8) << right << p_integral << " +/- " << setw(6) << right << p_error << std::endl;
+        p_integral = hZj1b->IntegralAndError(p_bin1, p_bin2, p_error);
+        B += p_integral;
+        std::cout << setw(10) << left << "Zj1b " << "(" << p_bin1 << ", " << p_bin2 << ") = " << setw(8) << right << p_integral << " +/- " << setw(6) << right << p_error << std::endl;
+        p_integral = hZj2b->IntegralAndError(p_bin1, p_bin2, p_error);
+        B += p_integral;
+        std::cout << setw(10) << left << "Zj2b " << "(" << p_bin1 << ", " << p_bin2 << ") = " << setw(8) << right << p_integral << " +/- " << setw(6) << right << p_error << std::endl;
+        p_integral = hTT->IntegralAndError(p_bin1, p_bin2, p_error);
+        B += p_integral;
+        std::cout << setw(10) << left << "TT " << "(" << p_bin1 << ", " << p_bin2 << ") = " << setw(8) << right << p_integral << " +/- " << setw(6) << right << p_error << std::endl;
+        p_integral = hs_Top->IntegralAndError(p_bin1, p_bin2, p_error);
+        B += p_integral;
+        std::cout << setw(10) << left << "s_Top " << "(" << p_bin1 << ", " << p_bin2 << ") = " << setw(8) << right << p_integral << " +/- " << setw(6) << right << p_error << std::endl;
+        p_integral = hVVLF->IntegralAndError(p_bin1, p_bin2, p_error);
+        B += p_integral;
+        std::cout << setw(10) << left << "VVLF " << "(" << p_bin1 << ", " << p_bin2 << ") = " << setw(8) << right << p_integral << " +/- " << setw(6) << right << p_error << std::endl;
+        p_integral = hVVHF->IntegralAndError(p_bin1, p_bin2, p_error);
+        B += p_integral;
+        std::cout << setw(10) << left << "VVHF " << "(" << p_bin1 << ", " << p_bin2 << ") = " << setw(8) << right << p_integral << " +/- " << setw(6) << right << p_error << std::endl;
+        p_integral = hQCD->IntegralAndError(p_bin1, p_bin2, p_error);
+        B += p_integral;
+        std::cout << setw(10) << left << "QCD " << "(" << p_bin1 << ", " << p_bin2 << ") = " << setw(8) << right << p_integral << " +/- " << setw(6) << right << p_error << std::endl;
+        
+        p_integral = hVH->IntegralAndError(p_bin1, p_bin2, p_error);
+        std::cout << setw(10) << left << "VH " << "(" << p_bin1 << ", " << p_bin2 << ") = " << setw(8) << right << p_integral << " +/- " << setw(6) << right << p_error << std::endl;
+        p_integral = hVV->IntegralAndError(p_bin1, p_bin2, p_error);
+        std::cout << setw(10) << left << "VV " << "(" << p_bin1 << ", " << p_bin2 << ") = " << setw(8) << right << p_integral << " +/- " << setw(6) << right << p_error << std::endl;
+        p_integral = hmc_exp->IntegralAndError(p_bin1, p_bin2, p_error);
+        std::cout << setw(10) << left << "mc_exp " << "(" << p_bin1 << ", " << p_bin2 << ") = " << setw(8) << right << p_integral << " +/- " << setw(6) << right << p_error << std::endl;
+        p_integral = hdata_obs->IntegralAndError(p_bin1, p_bin2, p_error);
+        D += p_integral;
+        std::cout << setw(10) << left << "data_obs " << "(" << p_bin1 << ", " << p_bin2 << ") = " << setw(8) << right << p_integral << " +/- " << setw(6) << right << p_error << std::endl;
+
+        double Sover1p5B = S / (1.5 + sqrt(B) + (0.2 * B));
+        double SoverSB = S / (sqrt(S + B));
+
+        std::cout.precision(5);
+        std::cout << "==> data, S, B, S/(1.5 + sqrt(B) + (0.2 * B)), S/sqrt(S+B): " << D << ", " << S << ", " << B << ", " << Sover1p5B << ", " << SoverSB << std::endl;
+    }
+
+    if (printCard && syst == "NONE") {
+        std::clog << "MakePlots(): Printing the datacard..." << std::endl;
+
+        TString dcname = g_dcname;
+        TString wsname = g_wsname;
+        dcname.ReplaceAll("$CHANNEL", channel);
+        wsname.ReplaceAll("$CHANNEL", channel);
+        const TString channel_8TeV = channel + "_8TeV";
+        TString channel_8TeV_1 = channel_8TeV;  // scale factors
+        if (channel == "ZnunuLowCSV")
+            channel_8TeV_1.ReplaceAll("ZnunuLowCSV", "ZnunuHighPt");
+        
+        std::ofstream dc;
+        dc.setf(ios::fixed,ios::floatfield);
+        dc.precision(3);
+        dc.open(dcname);
+        
+        // FIXME: QCD histograms are empty and thus excluded.
+
+        dc << "imax 1 number of channels" << std::endl;
+        dc << "jmax " << jmax << " number of processes minus 1 ('*' = automatic)" << std::endl;
+        dc << "kmax * number of nuisance parameters (sources of systematical uncertainties)" << std::endl;
+        dc << "-----------------------------------" << std::endl;
+        dc << "shapes * * " << wsname << " $CHANNEL:$PROCESS $CHANNEL:$PROCESS_$SYSTEMATIC" << std::endl;
+        dc << "-----------------------------------" << std::endl;
+        dc << "bin         " << channel_8TeV << std::endl;
+        dc << "observation " << hdata_obs->Integral() << std::endl;
+        dc << "#prediction " << hmc_exp->Integral() << std::endl;
+        dc << "-----------------------------------" << std::endl;
+#ifndef VV_AS_SIGNAL
+        dc << "bin         "; for (int j=0; j!=jmax+1; j++)  dc << channel_8TeV << " "; dc << std::endl;
+        dc << "process     ZH         WH         Wj0b       Wj1b       Wj2b       Zj0b       Zj1b       Zj2b       TT         s_Top      VV         QCD        " << std::endl;
+        dc << "process     -1         0          1          2          3          4          5          6          7          8          9          10         " << std::endl;
+        dc << "rate        " << setw(10) << right << hZH->Integral() << " " << setw(10) << right << hWH->Integral() << " " << setw(10) << right << hWj0b->Integral() << " " << setw(10) << right << hWj1b->Integral() << " " << setw(10) << right << hWj2b->Integral() << " " << setw(10) << right << hZj0b->Integral() << " " << setw(10) << right << hZj1b->Integral() << " " << setw(10) << right << hZj2b->Integral() << " " << setw(10) << right << hTT->Integral() << " " << setw(10) << right << hs_Top->Integral() << " " << setw(10) << right << hVV->Integral() << " " << setw(10) << right << hQCD->Integral() << std::endl;
+        dc.precision(2);
+        dc << "-----------------------------------" << std::endl;
+        dc << "" << std::endl;
+        dc << "### Flat ########################## #####  ZH    WH    Wj0b  Wj1b  Wj2b  Zj0b  Zj1b  Zj2b  TT    s_Top VV    QCD  " << std::endl;
+        dc << "lumi_8TeV                           lnN    1.05  1.05  -     -     -     -     -     -     -     1.05  1.05  1.05 " << std::endl;
+        dc << "pdf_qqbar                           lnN    1.01  1.01  -     -     -     -     -     -     -     -     1.01  -    " << std::endl;
+        dc << "pdf_gg                              lnN    -     -     -     -     -     -     -     -     -     1.01  -     1.01 " << std::endl;
+        dc << "QCDscale_VH                         lnN    1.04  1.04  -     -     -     -     -     -     -     -     -     -    " << std::endl;
+        dc << "QCDscale_ttbar                      lnN    -     -     -     -     -     -     -     -     -     1.06  -     -    " << std::endl;
+        dc << "QCDscale_VV                         lnN    -     -     -     -     -     -     -     -     -     -     1.04  -    " << std::endl;
+        dc << "QCDscale_QCD                        lnN    -     -     -     -     -     -     -     -     -     -     -     1.30 " << std::endl;
+        dc << "CMS_vhbb_boost_EWK                  lnN    1.05  1.10  -     -     -     -     -     -     -     -     -     -    " << std::endl;
+        dc << "CMS_vhbb_boost_QCD                  lnN    1.10  1.10  -     -     -     -     -     -     -     -     -     -    " << std::endl;
+        dc << "CMS_vhbb_ST                         lnN    -     -     -     -     -     -     -     -     -     1.25  -     -    " << std::endl;
+        dc << "CMS_vhbb_VV                         lnN    -     -     -     -     -     -     -     -     -     -     1.30  -    " << std::endl;
+        dc << "#CMS_vhbb_MET_nojets                lnN    1.03  1.03  -     -     -     -     -     -     -     1.03  1.03  -    " << std::endl;
+        dc << "#CMS_vhbb_trigger_MET               lnN    1.03  1.03  -     -     -     -     -     -     -     1.03  1.03  -    " << std::endl;
+        dc << "CMS_vhbb_Wj0b_SF_" << channel_8TeV_1 << "   lnN    -     -     " << scalefactors_lnN[0] << "  -     -     -     -     -     -     -     -     -    " << std::endl;
+        dc << "CMS_vhbb_Wj1b_SF_" << channel_8TeV_1 << "   lnN    -     -     -     " << scalefactors_lnN[1] << "  -     -     -     -     -     -     -     -    " << std::endl;
+        dc << "CMS_vhbb_Wj2b_SF_" << channel_8TeV_1 << "   lnN    -     -     -     -     " << scalefactors_lnN[2] << "  -     -     -     -     -     -     -    " << std::endl;
+        dc << "CMS_vhbb_Zj0b_SF_" << channel_8TeV_1 << "   lnN    -     -     -     -     -     " << scalefactors_lnN[3] << "  -     -     -     -     -     -    " << std::endl;
+        dc << "CMS_vhbb_Zj1b_SF_" << channel_8TeV_1 << "   lnN    -     -     -     -     -     -     " << scalefactors_lnN[4] << "  -     -     -     -     -    " << std::endl;
+        dc << "CMS_vhbb_Zj2b_SF_" << channel_8TeV_1 << "   lnN    -     -     -     -     -     -     -     " << scalefactors_lnN[5] << "  -     -     -     -    " << std::endl;
+        dc << "CMS_vhbb_TT_SF_" << channel_8TeV_1 << "     lnN    -     -     -     -     -     -     -     -     " << scalefactors_lnN[6] << "  -     -     -    " << std::endl;
+        dc << "CMS_vhbb_QCD_SF_" << channel_8TeV_1 << "    lnN    -     -     -     -     -     -     -     -     -     -     -     2.00 " << std::endl;
+        dc << "### Shape ######################### #####  ZH    WH    Wj0b  Wj1b  Wj2b  Zj0b  Zj1b  Zj2b  TT    s_Top VV    QCD  " << std::endl;
+        dc << "UEPS                                shape  1.00  1.00  -     -     -     -     -     -     -     1.00  1.00  -    " << std::endl;
+        dc << "CMS_vhbb_eff_b_SIG                  shape  1.00  1.00  -     -     -     -     -     -     -     -     -     -    " << std::endl;
+        dc << "CMS_vhbb_eff_b                      shape  -     -     1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  -    " << std::endl;
+        dc << "CMS_vhbb_fake_b_8TeV                shape  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  -    " << std::endl;
+        dc << "CMS_vhbb_res_j                      shape  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  -    " << std::endl;
+        dc << "CMS_vhbb_scale_j                    shape  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  -    " << std::endl;
+        dc << "CMS_vhbb_trigger_MET_Znunu_8TeV     shape  1.00  1.00  -     -     -     -     -     -     -     1.00  1.00  -    " << std::endl;
+        if (channel != "ZnunuLowPt") {
+        dc << "CMS_vhbb_WJModel_Znunu_8TeV         shape  -     -     1.00  1.00  1.00  -     -     -     -     -     -     -    " << std::endl;
+        dc << "CMS_vhbb_ZJModel_Znunu_8TeV         shape  -     -     -     -     -     1.00  1.00  1.00  -     -     -     -    " << std::endl;
+        }
+        dc << "CMS_vhbb_TTModel_Znunu_8TeV         shape  -     -     -     -     -     -     -     -     1.00  -     -     -    " << std::endl;
+        dc << "CMS_vhbb_statZH_" << channel_8TeV << "    shape  1.00  -     -     -     -     -     -     -     -     -     -     -    " << std::endl;
+        dc << "CMS_vhbb_statWH_" << channel_8TeV << "    shape  -     1.00  -     -     -     -     -     -     -     -     -     -    " << std::endl;
+        dc << "CMS_vhbb_statWj0b_" << channel_8TeV << "  shape  -     -     1.00  -     -     -     -     -     -     -     -     -    " << std::endl;
+        dc << "CMS_vhbb_statWj1b_" << channel_8TeV << "  shape  -     -     -     1.00  -     -     -     -     -     -     -     -    " << std::endl;
+        dc << "CMS_vhbb_statWj2b_" << channel_8TeV << "  shape  -     -     -     -     1.00  -     -     -     -     -     -     -    " << std::endl;
+        dc << "CMS_vhbb_statZj0b_" << channel_8TeV << "  shape  -     -     -     -     -     1.00  -     -     -     -     -     -    " << std::endl;
+        dc << "CMS_vhbb_statZj1b_" << channel_8TeV << "  shape  -     -     -     -     -     -     1.00  -     -     -     -     -    " << std::endl;
+        dc << "CMS_vhbb_statZj2b_" << channel_8TeV << "  shape  -     -     -     -     -     -     -     1.00  -     -     -     -    " << std::endl;
+        dc << "CMS_vhbb_statTT_" << channel_8TeV << "    shape  -     -     -     -     -     -     -     -     1.00  -     -     -    " << std::endl;
+        dc << "CMS_vhbb_stats_Top_" << channel_8TeV << " shape  -     -     -     -     -     -     -     -     -     1.00  -     -    " << std::endl;
+        dc << "CMS_vhbb_statVV_" << channel_8TeV << "    shape  -     -     -     -     -     -     -     -     -     -     1.00  -    " << std::endl;
+        dc << "CMS_vhbb_statQCD_" << channel_8TeV << "   shape  -     -     -     -     -     -     -     -     -     -     -     1.00 " << std::endl;
+        dc << "################################### #####  ZH    WH    Wj0b  Wj1b  Wj2b  Zj0b  Zj1b  Zj2b  TT    s_Top VV    QCD  " << std::endl;
+#else
+        dc << "bin         "; for (int j=0; j!=jmax+1; j++)  dc << channel_8TeV << " "; dc << std::endl;
+        dc << "process     ZH         WH         Wj0b       Wj1b       Wj2b       Zj0b       Zj1b       Zj2b       TT         s_Top      VVLF       VVHF       QCD        " << std::endl;
+        dc << "process     11         12         1          2          3          4          5          6          7          8          9          0          10         " << std::endl;
+        dc << "rate        " << setw(10) << right << hZH->Integral() << " " << setw(10) << right << hWH->Integral() << " " << setw(10) << right << hWj0b->Integral() << " " << setw(10) << right << hWj1b->Integral() << " " << setw(10) << right << hWj2b->Integral() << " " << setw(10) << right << hZj0b->Integral() << " " << setw(10) << right << hZj1b->Integral() << " " << setw(10) << right << hZj2b->Integral() << " " << setw(10) << right << hTT->Integral() << " " << setw(10) << right << hs_Top->Integral() << " " << setw(10) << right << hVVLF->Integral() << " " << setw(10) << right << hVVHF->Integral() << " " << setw(10) << right << hQCD->Integral() << std::endl;
+        dc.precision(2);
+        dc << "-----------------------------------" << std::endl;
+        dc << "" << std::endl;
+        dc << "### Flat ########################## #####  ZH    WH    Wj0b  Wj1b  Wj2b  Zj0b  Zj1b  Zj2b  TT    s_Top VVLF  VVHF  QCD  " << std::endl;
+        dc << "lumi_8TeV                           lnN    1.05  1.05  -     -     -     -     -     -     -     1.05  1.05  1.05  1.05 " << std::endl;
+        dc << "pdf_qqbar                           lnN    1.01  1.01  -     -     -     -     -     -     -     -     1.01  1.01  -    " << std::endl;
+        dc << "pdf_gg                              lnN    -     -     -     -     -     -     -     -     -     1.01  -     -     1.01 " << std::endl;
+        dc << "QCDscale_VH                         lnN    1.04  1.04  -     -     -     -     -     -     -     -     -     -     -    " << std::endl;
+        dc << "QCDscale_ttbar                      lnN    -     -     -     -     -     -     -     -     -     1.06  -     -     -    " << std::endl;
+        dc << "QCDscale_VV                         lnN    -     -     -     -     -     -     -     -     -     -     1.04  1.04  -    " << std::endl;
+        dc << "QCDscale_QCD                        lnN    -     -     -     -     -     -     -     -     -     -     -     -     1.30 " << std::endl;
+        dc << "CMS_vhbb_boost_EWK                  lnN    1.05  1.10  -     -     -     -     -     -     -     -     -     -     -    " << std::endl;
+        dc << "CMS_vhbb_boost_QCD                  lnN    1.10  1.10  -     -     -     -     -     -     -     -     -     -     -    " << std::endl;
+        dc << "CMS_vhbb_ST                         lnN    -     -     -     -     -     -     -     -     -     1.25  -     -     -    " << std::endl;
+        dc << "CMS_vhbb_VV                         lnN    -     -     -     -     -     -     -     -     -     -     1.30  1.30  -    " << std::endl;
+        dc << "#CMS_vhbb_MET_nojets                lnN    1.03  1.03  -     -     -     -     -     -     -     1.03  1.03  1.03  -    " << std::endl;
+        dc << "#CMS_vhbb_trigger_MET               lnN    1.03  1.03  -     -     -     -     -     -     -     1.03  1.03  1.03  -    " << std::endl;
+        dc << "CMS_vhbb_Wj0b_SF_" << channel_8TeV_1 << "   lnN    -     -     " << scalefactors_lnN[0] << "  -     -     -     -     -     -     -     -     -     -    " << std::endl;
+        dc << "CMS_vhbb_Wj1b_SF_" << channel_8TeV_1 << "   lnN    -     -     -     " << scalefactors_lnN[1] << "  -     -     -     -     -     -     -     -     -    " << std::endl;
+        dc << "CMS_vhbb_Wj2b_SF_" << channel_8TeV_1 << "   lnN    -     -     -     -     " << scalefactors_lnN[2] << "  -     -     -     -     -     -     -     -    " << std::endl;
+        dc << "CMS_vhbb_Zj0b_SF_" << channel_8TeV_1 << "   lnN    -     -     -     -     -     " << scalefactors_lnN[3] << "  -     -     -     -     -     -     -    " << std::endl;
+        dc << "CMS_vhbb_Zj1b_SF_" << channel_8TeV_1 << "   lnN    -     -     -     -     -     -     " << scalefactors_lnN[4] << "  -     -     -     -     -     -    " << std::endl;
+        dc << "CMS_vhbb_Zj2b_SF_" << channel_8TeV_1 << "   lnN    -     -     -     -     -     -     -     " << scalefactors_lnN[5] << "  -     -     -     -     -    " << std::endl;
+        dc << "CMS_vhbb_TT_SF_" << channel_8TeV_1 << "     lnN    -     -     -     -     -     -     -     -     " << scalefactors_lnN[6] << "  -     -     -     -    " << std::endl;
+        dc << "CMS_vhbb_QCD_SF_" << channel_8TeV_1 << "    lnN    -     -     -     -     -     -     -     -     -     -     -     -     2.00 " << std::endl;
+        dc << "### Shape ######################### #####  ZH    WH    Wj0b  Wj1b  Wj2b  Zj0b  Zj1b  Zj2b  TT    s_Top VVLF  VVHF  QCD  " << std::endl;
+        dc << "UEPS                                shape  1.00  1.00  -     -     -     -     -     -     -     1.00  1.00  1.00  -    " << std::endl;
+        dc << "CMS_vhbb_eff_b_SIG                  shape  1.00  1.00  -     -     -     -     -     -     -     -     -     -     -    " << std::endl;
+        dc << "CMS_vhbb_eff_b                      shape  -     -     1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  -    " << std::endl;
+        dc << "CMS_vhbb_fake_b_8TeV                shape  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  -    " << std::endl;
+        dc << "CMS_vhbb_res_j                      shape  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  -    " << std::endl;
+        dc << "CMS_vhbb_scale_j                    shape  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  -    " << std::endl;
+        dc << "CMS_vhbb_trigger_MET_Znunu_8TeV     shape  1.00  1.00  -     -     -     -     -     -     -     1.00  1.00  1.00  -    " << std::endl;
+        if (channel != "ZnunuLowPt") {
+        dc << "CMS_vhbb_WJModel_Znunu_8TeV         shape  -     -     1.00  1.00  1.00  -     -     -     -     -     -     -     -    " << std::endl;
+        dc << "CMS_vhbb_ZJModel_Znunu_8TeV         shape  -     -     -     -     -     1.00  1.00  1.00  -     -     -     -     -    " << std::endl;
+        }
+        dc << "CMS_vhbb_TTModel_Znunu_8TeV         shape  -     -     -     -     -     -     -     -     1.00  -     -     -     -    " << std::endl;
+        dc << "CMS_vhbb_statZH_" << channel_8TeV << "    shape  1.00  -     -     -     -     -     -     -     -     -     -     -     -    " << std::endl;
+        dc << "CMS_vhbb_statWH_" << channel_8TeV << "    shape  -     1.00  -     -     -     -     -     -     -     -     -     -     -    " << std::endl;
+        dc << "CMS_vhbb_statWj0b_" << channel_8TeV << "  shape  -     -     1.00  -     -     -     -     -     -     -     -     -     -    " << std::endl;
+        dc << "CMS_vhbb_statWj1b_" << channel_8TeV << "  shape  -     -     -     1.00  -     -     -     -     -     -     -     -     -    " << std::endl;
+        dc << "CMS_vhbb_statWj2b_" << channel_8TeV << "  shape  -     -     -     -     1.00  -     -     -     -     -     -     -     -    " << std::endl;
+        dc << "CMS_vhbb_statZj0b_" << channel_8TeV << "  shape  -     -     -     -     -     1.00  -     -     -     -     -     -     -    " << std::endl;
+        dc << "CMS_vhbb_statZj1b_" << channel_8TeV << "  shape  -     -     -     -     -     -     1.00  -     -     -     -     -     -    " << std::endl;
+        dc << "CMS_vhbb_statZj2b_" << channel_8TeV << "  shape  -     -     -     -     -     -     -     1.00  -     -     -     -     -    " << std::endl;
+        dc << "CMS_vhbb_statTT_" << channel_8TeV << "    shape  -     -     -     -     -     -     -     -     1.00  -     -     -     -    " << std::endl;
+        dc << "CMS_vhbb_stats_Top_" << channel_8TeV << " shape  -     -     -     -     -     -     -     -     -     1.00  -     -     -    " << std::endl;
+        dc << "CMS_vhbb_statVVLF_" << channel_8TeV << "  shape  -     -     -     -     -     -     -     -     -     -     1.00  -     -    " << std::endl;
+        dc << "CMS_vhbb_statVVHF_" << channel_8TeV << "  shape  -     -     -     -     -     -     -     -     -     -     -     1.00  -    " << std::endl;
+        dc << "CMS_vhbb_statQCD_" << channel_8TeV << "   shape  -     -     -     -     -     -     -     -     -     -     -     -     1.00 " << std::endl;
+        dc << "################################### #####  ZH    WH    Wj0b  Wj1b  Wj2b  Zj0b  Zj1b  Zj2b  TT    s_Top VVLF  VVHF  QCD  " << std::endl;
+#endif
+        dc.close();
+        
+        std::clog << "MakePlots(): The datacard is written." << std::endl;
+    } // end if syst == NONE
+
+
+    if (syst == "NONE") {
+        std::clog << "MakePlots(): Setting up histograms..." << std::endl;
+        
+        // Setup canvas and pads
+        TCanvas * c1 = new TCanvas("c1", "c1", 700, 700);
+        //TCanvas * c1 = new TCanvas("c1", "c1", 600, 600);
+
+        TPad * pad1 = new TPad("pad1", "top pad"   , 0.0, 0.3, 1.0, 1.0);
+        pad1->SetBottomMargin(0.0);
+        pad1->Draw();
+        TPad * pad2 = new TPad("pad2", "bottom pad", 0.0, 0.0, 1.0, 0.3);
+        pad2->SetTopMargin(0.0);
+        pad2->SetBottomMargin(0.35);
+        pad2->Draw();
+        pad1->cd();
+        pad1->SetLogy(plotLog);
+
+        // Setup histogram styles and stack the histograms.
+        setHisto(hVH, "VH");
+        setHisto(hZH, "VH");
+        setHisto(hWH, "VH");
+        setHisto(hWj0b, "WjLF");
+        setHisto(hWj1b, "WjHFc");
+        setHisto(hWj2b, "WjHFb");
+        setHisto(hZj0b, "ZjLF");
+        setHisto(hZj1b, "ZjHFc");
+        setHisto(hZj2b, "ZjHFb");
+        setHisto(hTT, "TT");
+        setHisto(hs_Top, "s_Top");
+        setHisto(hVV, "VV");
+        setHisto(hVVLF, "VV");
+        setHisto(hVVHF, "VVHF");
+        setHisto(hQCD, "QCD");
+        
+        TH1F * hdata_plot = (TH1F *) hdata_obs->Clone("hdata_plot");  // blinded plot
+        TH1F * hmc_test = (TH1F *) hmc_exp->Clone("hmc_test");  // for chi2 and KS test
+        hdata_plot->Sumw2();
+        hmc_test->Sumw2();
+        Int_t nbins_plot = hdata_plot->GetNbinsX();
+        assert(nbins_plot == hmc_test->GetNbinsX());
+        if (!plotData) {  // be blind to the most sensitive bins
+            for (Int_t i = TMath::Max(Int_t(nbins_plot*0.75), nbins_plot-5); i < nbins_plot+2; i++) {
+                hdata_plot->SetBinContent(i, 0.);
+                hdata_plot->SetBinError(i, 0.);
+                hmc_test->SetBinContent(i, 0.);
+                hmc_test->SetBinError(i, 0.);
+            }
+        }
+        setHisto(hdata_plot, "data_obs");
+
+        std::clog << "MakePlots(): Setting up the stack..." << std::endl;
+        THStack * hs = new THStack("hs", "");
+#ifndef VV_AS_SIGNAL
+        hs->Add(hVV);
+#else
+        hs->Add(hVVLF);
+        //hs->Add(hVH);
+#endif
+        hs->Add(hQCD);
+        hs->Add(hs_Top);
+        hs->Add(hTT);
+        hs->Add(hWj0b);
+        hs->Add(hWj1b);
+        hs->Add(hWj2b);
+        hs->Add(hZj0b);
+        hs->Add(hZj1b);
+        hs->Add(hZj2b);
+        if (plotSig) {
+#ifdef VV_AS_SIGNAL
+            hs->Add(hVVHF);
+#endif
+            hs->Add(hVH);
+        }
+        
+        double ymax = TMath::Max(hdata_plot->GetMaximum(), hs->GetMaximum());
+        hs->SetMaximum(ymax + ymax / 2.0 + (ymax>1 ? sqrt(ymax) : 0.));
+        if (plotLog)
+            hs->SetMaximum(ymax * 200 + (ymax>1 ? sqrt(ymax) : 0.));
+        hs->SetMinimum(0.01);
+        
+        // Setup auxiliary histograms
+        std::clog << "MakePlots(): Setting up auxiliary histograms..." << std::endl;
+        TH1F * staterr = (TH1F *) hmc_exp->Clone("staterr");
+        staterr->Sumw2();
+        staterr->SetFillColor(kRed);
+        staterr->SetMarkerSize(0);
+        staterr->SetFillStyle(3013);
+        
+        TH1F * ratio = (TH1F *) hdata_plot->Clone("ratio");
+        ratio->Sumw2();
+        ratio->SetMarkerSize(0.8);
+        //ratio->SetMarkerSize(0.5);
+        ratio->Divide(hdata_plot, hmc_exp, 1., 1., "");
+        
+        TH1F * ratiostaterr = (TH1F *) hmc_exp->Clone("ratiostaterr");
+        ratiostaterr->Sumw2();
+        ratiostaterr->SetStats(0);
+        ratiostaterr->SetTitle("");
+        ratiostaterr->GetXaxis()->SetTitle(xtitle);
+        ratiostaterr->GetYaxis()->SetTitle("Data/MC");
+        ratiostaterr->SetMaximum(2.2);
+        ratiostaterr->SetMinimum(0);
+        ratiostaterr->SetMarkerSize(0);
+        ratiostaterr->SetFillColor(kRed);
+        ratiostaterr->SetFillStyle(3013);
+        //ratiostaterr->SetFillStyle(3001);
+        ratiostaterr->GetXaxis()->CenterTitle();
+        ratiostaterr->GetXaxis()->SetLabelSize(0.12);
+        ratiostaterr->GetXaxis()->SetTitleSize(0.14);
+        ratiostaterr->GetXaxis()->SetTitleOffset(1.10);
+        ratiostaterr->GetYaxis()->CenterTitle();
+        ratiostaterr->GetYaxis()->SetLabelSize(0.10);
+        ratiostaterr->GetYaxis()->SetTitleSize(0.12);
+        //ratiostaterr->GetYaxis()->SetTitleSize(0.10);
+        ratiostaterr->GetYaxis()->SetTitleOffset(0.6);
+        ratiostaterr->GetYaxis()->SetNdivisions(505);
+        
+        for (Int_t i = 0; i < hmc_exp->GetNbinsX()+2; i++) {
+            ratiostaterr->SetBinContent(i, 1.0);
+            if (hmc_exp->GetBinContent(i) > 1e-6) {  // use smaller tolerance?
+                double binerror = hmc_exp->GetBinError(i) / hmc_exp->GetBinContent(i);
+                ratiostaterr->SetBinError(i, binerror);
+            } else {
+                ratiostaterr->SetBinError(i, 999.);
+            }
+            
+            //if (!(hdata_plot->GetBinContent(i) > 1e-6)) {
+            //    ratiostaterr->SetBinError(i, 0.);
+            //}
+        }
+        
+        TH1F * ratiosysterr = (TH1F *) ratiostaterr->Clone("ratiosysterr");
+        ratiosysterr->Sumw2();
+        ratiosysterr->SetMarkerSize(0);
+        //ratiosysterr->SetFillColor(kBlue);
+        ratiosysterr->SetFillColor(kYellow-4);
+        //ratiosysterr->SetFillStyle(3002);
+        ratiosysterr->SetFillStyle(1001);
+        
+        for (Int_t i = 0; i < hmc_exp->GetNbinsX()+2; i++) {
+            if (hmc_exp->GetBinContent(i) > 1e-6) {  // use smaller tolerance?
+#ifndef VV_AS_SIGNAL
+                double binerror2 = (pow(hmc_exp->GetBinError(i), 2) +
+                                    pow(0.05 * hWj0b->GetBinContent(i), 2) +
+                                    pow(0.25 * hWj1b->GetBinContent(i), 2) +
+                                    pow(0.20 * hWj2b->GetBinContent(i), 2) +
+                                    pow(0.05 * hZj0b->GetBinContent(i), 2) +
+                                    pow(0.15 * hZj1b->GetBinContent(i), 2) +
+                                    pow(0.10 * hZj2b->GetBinContent(i), 2) +
+                                    pow(0.04 * hTT->GetBinContent(i), 2) +
+                                    pow(0.25 * hs_Top->GetBinContent(i), 2) +
+                                    pow(0.30 * hVV->GetBinContent(i), 2));
+#else
+                double binerror2 = (pow(hmc_exp->GetBinError(i), 2) +
+                                    pow(0.05 * hWj0b->GetBinContent(i), 2) +
+                                    pow(0.25 * hWj1b->GetBinContent(i), 2) +
+                                    pow(0.20 * hWj2b->GetBinContent(i), 2) +
+                                    pow(0.05 * hZj0b->GetBinContent(i), 2) +
+                                    pow(0.15 * hZj1b->GetBinContent(i), 2) +
+                                    pow(0.10 * hZj2b->GetBinContent(i), 2) +
+                                    pow(0.04 * hTT->GetBinContent(i), 2) +
+                                    pow(0.25 * hs_Top->GetBinContent(i), 2) +
+                                    pow(0.30 * hVVLF->GetBinContent(i), 2));  // FIXME: add VH as background?
+#endif
+                double binerror = sqrt(binerror2) / hmc_exp->GetBinContent(i);
+                ratiosysterr->SetBinError(i, binerror);
+            }
+        }
+
+        // Setup legends
+        std::clog << "MakePlots(): Setting up legends..." << std::endl;
+        TLegend * leg = new TLegend(0.72, 0.62, 0.92, 0.92);
+        leg->SetFillColor(0);
+        leg->SetLineColor(0);
+        leg->SetShadowColor(0);
+        leg->SetTextFont(62);
+        leg->SetTextSize(0.03);
+        leg->AddEntry(hdata_plot, "Data", "p");
+        if (plotSig)
+            leg->AddEntry(hVH, Form("VH(%i)", massH), "l");
+        leg->AddEntry(hZj2b, "Z + b#bar{b}", "f");
+        leg->AddEntry(hZj1b, "Z + b", "f");
+        leg->AddEntry(hZj0b, "Z + udscg", "f");
+        leg->AddEntry(hWj2b, "W + b#bar{b}", "f");
+        leg->AddEntry(hWj1b, "W + b", "f");
+        leg->AddEntry(hWj0b, "W + udscg", "f");
+        leg->AddEntry(hTT, "t#bar{t}", "f");
+        leg->AddEntry(hs_Top, "single top", "f");
+        leg->AddEntry(hQCD, "QCD", "f");
+#ifndef VV_AS_SIGNAL
+        leg->AddEntry(hVV, "VV", "f");
+#else
+        leg->AddEntry(hVVHF, "VV(b#bar{b})", "f");
+        leg->AddEntry(hVVLF, "VV(udscg)", "f");
+#endif
+        leg->AddEntry(staterr, "MC uncert. (stat)", "fl");
+
+        TLegend * ratioleg1 = new TLegend(0.54, 0.86, 0.72, 0.96);
+        //TLegend * ratioleg1 = new TLegend(0.50, 0.86, 0.69, 0.96);
+        ratioleg1->AddEntry(ratiostaterr, "MC uncert. (stat)", "f");
+        ratioleg1->SetFillColor(0);
+        ratioleg1->SetLineColor(0);
+        ratioleg1->SetShadowColor(0);
+        ratioleg1->SetTextFont(62);
+        ratioleg1->SetTextSize(0.06);
+        ratioleg1->SetBorderSize(1);
+        
+        TLegend * ratioleg2 = new TLegend(0.72, 0.86, 0.95, 0.96);
+        //TLegend * ratioleg2 = new TLegend(0.69, 0.86, 0.9, 0.96);
+        ratioleg2->AddEntry(ratiosysterr, "MC uncert. (stat+syst)", "f");
+        ratioleg2->SetFillColor(0);
+        ratioleg2->SetLineColor(0);
+        ratioleg2->SetShadowColor(0);
+        ratioleg2->SetTextFont(62);
+        ratioleg2->SetTextSize(0.06);
+        ratioleg2->SetBorderSize(1);
+
+        // Draw MC signal and background
+        std::clog << "MakePlots(): Drawing..." << std::endl;
+        pad1->cd();
+        if (plotLog) pad1->SetLogy();
+        hs->Draw("hist");
+        hs->GetXaxis()->SetLabelSize(0);
+        double binwidth = (xup - xlow) / nbins_plot;
+        TString ytitle = Form("Events / %.3f", binwidth);
+        hs->GetYaxis()->SetTitle(ytitle);
+        
+        staterr->Draw("e2 same");
+        if (plotSig) {
+            hVH->SetLineWidth(3);
+            hVH->SetFillColor(0);
+            hVH->Draw("hist same");
+        }
+        
+        // Draw data
+        hdata_plot->Draw("e1 same");
+        
+        // Draw legends
+        leg->Draw();
+        TLatex * latex = new TLatex();
+        latex->SetNDC();
+        latex->SetTextAlign(12);
+        latex->SetTextFont(62);
+        latex->SetTextSize(0.052);
+        latex->DrawLatex(0.19, 0.89, "CMS Preliminary");
+        latex->SetTextSize(0.04);
+        latex->DrawLatex(0.19, 0.84, "#sqrt{s} = 8 TeV, L = 19.0 fb^{-1}");
+        latex->DrawLatex(0.19, 0.79, "Z(#nu#bar{#nu})H(b#bar{b})");
+        
+        // Under/overflows a la TMVA
+        TString uoflow = Form("U/O-flow (Data,MC): (%.1f, %.1f) / (%.1f, %.1f)", hdata_plot->GetBinContent(0), hmc_exp->GetBinContent(0), hdata_plot->GetBinContent(nbins_plot+1), hmc_exp->GetBinContent(nbins_plot+1));
+        TLatex * latex2 = new TLatex(0.99, 0.1, uoflow);
+        latex2->SetNDC();
+        latex2->SetTextSize(0.02);
+        latex2->SetTextAngle(90);
+        latex2->AppendPad();
+        
+        // Draw ratio
+        pad2->cd();
+        pad2->SetGridy(0);
+        ratiostaterr->Draw("e2");
+        ratiosysterr->Draw("e2 same");
+        ratiostaterr->Draw("e2 same");
+        ratio->Draw("e1 same");
+        
+        // Draw ratio legends
+        ratioleg1->Draw();
+        ratioleg2->Draw();
+
+        // Kolmogorov-Smirnov test and Chi2 test
+        TPaveText * pave = new TPaveText(0.18, 0.85, 0.35, 0.96, "brNDC");
+        pave->SetTextAlign(12);
+        pave->SetLineColor(0);
+        pave->SetFillColor(0);
+        pave->SetShadowColor(0);
+        pave->SetBorderSize(1);
+        double nchisq = hdata_plot->Chi2Test(hmc_test, "UWCHI2/NDF");  // MC uncert. (stat)
+        double kolprob = hdata_plot->KolmogorovTest(hmc_test);  // MC uncert. (stat)
+        TText * text = pave->AddText(Form("#chi_{#nu}^{2} = %.3f, K_{s} = %.3f", nchisq, kolprob));
+        text->SetTextFont(62);
+        text->SetTextSize(0.06);
+        pave->Draw();
+
+        std::clog << "MakePlots(): Printing..." << std::endl;
+        pad1->cd();
+        gPad->RedrawAxis();
+        gPad->Modified();
+        gPad->Update();
+        pad2->cd();
+        gPad->RedrawAxis();
+        gPad->Modified();
+        gPad->Update();
+        c1->cd();
+        TString plotname = Form("%s_%s_%s", channel.Data(), region.Data(), var.Data());
+        FormatFileName(plotname);
+        gPad->Print(g_plotdir+plotname+".png");
+        gPad->Print(g_plotdir+plotname+".pdf");
+        
+        delete hdata_plot;
+        delete hmc_test;
+        delete staterr;
+        delete ratio;
+        delete ratiostaterr;
+        delete ratiosysterr;
+        delete leg;
+        delete ratioleg1;
+        delete ratioleg2;
+        delete latex;
+        delete pave;
+        delete hs;
+        delete pad1;
+        delete pad2;
+        delete c1;
+    }  // end if syst == NONE
+
+    if (writeRoot) {
+        std::clog << "MakePlots(): Writing out histograms..." << std::endl;
+        TFile * out(0);
+        TString rootname = g_rootname;
+        rootname.ReplaceAll("$CHANNEL", channel);
+        if (syst == "NONE") {
+            out = TFile::Open(rootname, "RECREATE");
+            out->mkdir(channel);
+        } else {
+            out = TFile::Open(rootname, "UPDATE");
+        }
+        out->cd(channel);
+
+        // Write the histograms
+        for (UInt_t ih = 0; ih < histos.size(); ih++) {
+            if (syst == "NONE") {
+                histos.at(ih)->Write(histos.at(ih)->GetName());
+            } else {
+                const TString p = histos.at(ih)->GetName();
+                if (p != "data_obs") {
+                    histos.at(ih)->Write(histos.at(ih)->GetName() + ("_" + syst));
+                }
+            }
+        }
+
+        // Add histograms for stat, WjModel, ZjModel, TTModel
+        if (syst == "NONE") {
+            std::clog << "MakePlots(): Writing out stat, model syst histograms..." << std::endl;
+            TString name;
+            for (UInt_t ih = 0; ih < histos.size(); ih++) {
+                const TString p = histos.at(ih)->GetName();
+                if (p != "data_obs") {
+                    name = Form("%s_CMS_vhbb_stat%s_%s_8TeVUp", p.Data(), p.Data(), channel.Data());
+                    TH1F * h_statUp = (TH1F *) VaryStatErrors((TH1F *) histos.at(ih), 1.0, name);
+                    name = Form("%s_CMS_vhbb_stat%s_%s_8TeVDown", p.Data(), p.Data(), channel.Data());
+                    TH1F * h_statDown = (TH1F *) VaryStatErrors((TH1F *) histos.at(ih), -1.0, name);
+                    h_statUp->Write(h_statUp->GetName());
+                    h_statDown->Write(h_statDown->GetName());
+                    
+                    delete h_statUp;
+                    delete h_statDown;
+                }
+            }
+            
+            name = "Wj0b_CMS_vhbb_WJModel_Znunu_8TeVUp";
+            TH1F * hWj0b_modelUp = VaryModelErrors((TH1F *) hWj0b, (TH1F *) hWj0b_syst, 1.0, name);
+            name = "Wj1b_CMS_vhbb_WJModel_Znunu_8TeVUp";
+            TH1F * hWj1b_modelUp = VaryModelErrors((TH1F *) hWj1b, (TH1F *) hWj1b_syst, 1.0, name);
+            name = "Wj2b_CMS_vhbb_WJModel_Znunu_8TeVUp";
+            TH1F * hWj2b_modelUp = VaryModelErrors((TH1F *) hWj2b, (TH1F *) hWj2b_syst, 1.0, name);
+            name = "Wj0b_CMS_vhbb_WJModel_Znunu_8TeVDown";
+            TH1F * hWj0b_modelDown = VaryModelErrors((TH1F *) hWj0b, (TH1F *) hWj0b_syst, -1.0, name);
+            name = "Wj1b_CMS_vhbb_WJModel_Znunu_8TeVDown";
+            TH1F * hWj1b_modelDown = VaryModelErrors((TH1F *) hWj1b, (TH1F *) hWj1b_syst, -1.0, name);
+            name = "Wj2b_CMS_vhbb_WJModel_Znunu_8TeVDown";
+            TH1F * hWj2b_modelDown = VaryModelErrors((TH1F *) hWj2b, (TH1F *) hWj2b_syst, -1.0, name);
+            hWj0b_modelUp->Write(hWj0b_modelUp->GetName());
+            hWj1b_modelUp->Write(hWj1b_modelUp->GetName());
+            hWj2b_modelUp->Write(hWj2b_modelUp->GetName());
+            hWj0b_modelDown->Write(hWj0b_modelDown->GetName());
+            hWj1b_modelDown->Write(hWj1b_modelDown->GetName());
+            hWj2b_modelDown->Write(hWj2b_modelDown->GetName());
+            
+            delete hWj0b_modelUp;
+            delete hWj1b_modelUp;
+            delete hWj2b_modelUp;
+            delete hWj0b_modelDown;
+            delete hWj1b_modelDown;
+            delete hWj2b_modelDown;
+            
+            name = "Zj0b_CMS_vhbb_ZJModel_Znunu_8TeVUp";
+            TH1F * hZj0b_modelUp = VaryModelErrors((TH1F *) hZj0b, (TH1F *) hZj0b_syst, 1.0, name);
+            name = "Zj1b_CMS_vhbb_ZJModel_Znunu_8TeVUp";
+            TH1F * hZj1b_modelUp = VaryModelErrors((TH1F *) hZj1b, (TH1F *) hZj1b_syst, 1.0, name);
+            name = "Zj2b_CMS_vhbb_ZJModel_Znunu_8TeVUp";
+            TH1F * hZj2b_modelUp = VaryModelErrors((TH1F *) hZj2b, (TH1F *) hZj2b_syst, 1.0, name);
+            name = "Zj0b_CMS_vhbb_ZJModel_Znunu_8TeVDown";
+            TH1F * hZj0b_modelDown = VaryModelErrors((TH1F *) hZj0b, (TH1F *) hZj0b_syst, -1.0, name);
+            name = "Zj1b_CMS_vhbb_ZJModel_Znunu_8TeVDown";
+            TH1F * hZj1b_modelDown = VaryModelErrors((TH1F *) hZj1b, (TH1F *) hZj1b_syst, -1.0, name);
+            name = "Zj2b_CMS_vhbb_ZJModel_Znunu_8TeVDown";
+            TH1F * hZj2b_modelDown = VaryModelErrors((TH1F *) hZj2b, (TH1F *) hZj2b_syst, -1.0, name);
+            hZj0b_modelUp->Write(hZj0b_modelUp->GetName());
+            hZj1b_modelUp->Write(hZj1b_modelUp->GetName());
+            hZj2b_modelUp->Write(hZj2b_modelUp->GetName());
+            hZj0b_modelDown->Write(hZj0b_modelDown->GetName());
+            hZj1b_modelDown->Write(hZj1b_modelDown->GetName());
+            hZj2b_modelDown->Write(hZj2b_modelDown->GetName());
+            
+            delete hZj0b_modelUp;
+            delete hZj1b_modelUp;
+            delete hZj2b_modelUp;
+            delete hZj0b_modelDown;
+            delete hZj1b_modelDown;
+            delete hZj2b_modelDown;
+            
+            name = "TT_CMS_vhbb_TTModel_Znunu_8TeVUp";
+            TH1F * hTT_modelUp = VaryModelErrors((TH1F *) hTT, (TH1F *) hTT_syst, 1.0, name);
+            name = "TT_CMS_vhbb_TTModel_Znunu_8TeVDown";
+            TH1F * hTT_modelDown = VaryModelErrors((TH1F *) hTT, (TH1F *) hTT_syst, -1.0, name);
+            hTT_modelUp->Write(hTT_modelUp->GetName());
+            hTT_modelDown->Write(hTT_modelDown->GetName());
+            
+            delete hTT_modelUp;
+            delete hTT_modelDown;
+            
+            TH1F * hWj0b_slopeUp_0    = new TH1F("Wj0b_slopeUp_0"   , "", nbins, xlow, xup);
+            TH1F * hWj1b_slopeUp_0    = new TH1F("Wj1b_slopeUp_0"   , "", nbins, xlow, xup);
+            TH1F * hWj2b_slopeUp_0    = new TH1F("Wj2b_slopeUp_0"   , "", nbins, xlow, xup);
+            TH1F * hZj0b_slopeUp_0    = new TH1F("Zj0b_slopeUp_0"   , "", nbins, xlow, xup);
+            TH1F * hZj1b_slopeUp_0    = new TH1F("Zj1b_slopeUp_0"   , "", nbins, xlow, xup);
+            TH1F * hZj2b_slopeUp_0    = new TH1F("Zj2b_slopeUp_0"   , "", nbins, xlow, xup);
+            TH1F * hWj0b_slopeDown_0  = new TH1F("Wj0b_slopeDown_0" , "", nbins, xlow, xup);
+            TH1F * hWj1b_slopeDown_0  = new TH1F("Wj1b_slopeDown_0" , "", nbins, xlow, xup);
+            TH1F * hWj2b_slopeDown_0  = new TH1F("Wj2b_slopeDown_0" , "", nbins, xlow, xup);
+            TH1F * hZj0b_slopeDown_0  = new TH1F("Zj0b_slopeDown_0" , "", nbins, xlow, xup);
+            TH1F * hZj1b_slopeDown_0  = new TH1F("Zj1b_slopeDown_0" , "", nbins, xlow, xup);
+            TH1F * hZj2b_slopeDown_0  = new TH1F("Zj2b_slopeDown_0" , "", nbins, xlow, xup);
+            
+            cutwjslope = Form("VaryVptSlope(genW.pt, %f, 130)", (WJSlope + 1.0) * WJSlopeErr);
+            cutzjslope = Form("VaryVptSlope(genZ.pt, %f, 130)", (ZJSlope + 1.0) * ZJSlopeErr);
+            
+            TCut cutslope = "1.0";
+            cutsf = Form("%f", ev->sf_Wj0b);
+            ev->Wj0b->Project("Wj0b_slopeUp_0", var, cutmc * cutsf * cutwjslope);
+            cutsf = Form("%f", ev->sf_Wj1b);
+            ev->Wj1b->Project("Wj1b_slopeUp_0", var, cutmc * cutsf * cutwjslope);
+            cutsf = Form("%f", ev->sf_Wj2b);
+            ev->Wj2b->Project("Wj2b_slopeUp_0", var, cutmc * cutsf * cutwjslope);
+            cutsf = Form("%f", ev->sf_Zj0b);
+            ev->Zj0b->Project("Zj0b_slopeUp_0", var, cutmc * cutsf * cutzjslope);
+            cutsf = Form("%f", ev->sf_Zj1b);
+            ev->Zj1b->Project("Zj1b_slopeUp_0", var, cutmc * cutsf * cutzjslope);
+            cutsf = Form("%f", ev->sf_Zj2b);
+            ev->Zj2b->Project("Zj2b_slopeUp_0", var, cutmc * cutsf * cutzjslope);
+            
+            cutwjslope = Form("VaryVptSlope(genW.pt, %f, 130)", (WJSlope - 1.0) * WJSlopeErr);
+            cutzjslope = Form("VaryVptSlope(genZ.pt, %f, 130)", (ZJSlope - 1.0) * ZJSlopeErr);
+            
+            cutsf = Form("%f", ev->sf_Wj0b);
+            ev->Wj0b->Project("Wj0b_slopeDown_0", var, cutmc * cutsf * cutwjslope);
+            cutsf = Form("%f", ev->sf_Wj1b);
+            ev->Wj1b->Project("Wj1b_slopeDown_0", var, cutmc * cutsf * cutwjslope);
+            cutsf = Form("%f", ev->sf_Wj2b);
+            ev->Wj2b->Project("Wj2b_slopeDown_0", var, cutmc * cutsf * cutwjslope);
+            cutsf = Form("%f", ev->sf_Zj0b);
+            ev->Zj0b->Project("Zj0b_slopeDown_0", var, cutmc * cutsf * cutzjslope);
+            cutsf = Form("%f", ev->sf_Zj1b);
+            ev->Zj1b->Project("Zj1b_slopeDown_0", var, cutmc * cutsf * cutzjslope);
+            cutsf = Form("%f", ev->sf_Zj2b);
+            ev->Zj2b->Project("Zj2b_slopeDown_0", var, cutmc * cutsf * cutzjslope);
+            
+            TH1F * hWj0b_slopeUp    = rebinner->rebin(hWj0b_slopeUp_0   , newnbins, "Wj0b_CMS_vhbb_WJSlope_Znunu_8TeVUp"    );
+            TH1F * hWj1b_slopeUp    = rebinner->rebin(hWj1b_slopeUp_0   , newnbins, "Wj1b_CMS_vhbb_WJSlope_Znunu_8TeVUp"    );
+            TH1F * hWj2b_slopeUp    = rebinner->rebin(hWj2b_slopeUp_0   , newnbins, "Wj2b_CMS_vhbb_WJSlope_Znunu_8TeVUp"    );
+            TH1F * hZj0b_slopeUp    = rebinner->rebin(hZj0b_slopeUp_0   , newnbins, "Zj0b_CMS_vhbb_ZJSlope_Znunu_8TeVUp"    );
+            TH1F * hZj1b_slopeUp    = rebinner->rebin(hZj1b_slopeUp_0   , newnbins, "Zj1b_CMS_vhbb_ZJSlope_Znunu_8TeVUp"    );
+            TH1F * hZj2b_slopeUp    = rebinner->rebin(hZj2b_slopeUp_0   , newnbins, "Zj2b_CMS_vhbb_ZJSlope_Znunu_8TeVUp"    );
+            TH1F * hWj0b_slopeDown  = rebinner->rebin(hWj0b_slopeDown_0 , newnbins, "Wj0b_CMS_vhbb_WJSlope_Znunu_8TeVDown"  );
+            TH1F * hWj1b_slopeDown  = rebinner->rebin(hWj1b_slopeDown_0 , newnbins, "Wj1b_CMS_vhbb_WJSlope_Znunu_8TeVDown"  );
+            TH1F * hWj2b_slopeDown  = rebinner->rebin(hWj2b_slopeDown_0 , newnbins, "Wj2b_CMS_vhbb_WJSlope_Znunu_8TeVDown"  );
+            TH1F * hZj0b_slopeDown  = rebinner->rebin(hZj0b_slopeDown_0 , newnbins, "Zj0b_CMS_vhbb_ZJSlope_Znunu_8TeVDown"  );
+            TH1F * hZj1b_slopeDown  = rebinner->rebin(hZj1b_slopeDown_0 , newnbins, "Zj1b_CMS_vhbb_ZJSlope_Znunu_8TeVDown"  );
+            TH1F * hZj2b_slopeDown  = rebinner->rebin(hZj2b_slopeDown_0 , newnbins, "Zj2b_CMS_vhbb_ZJSlope_Znunu_8TeVDown"  );
+            
+            hWj0b_slopeUp->Scale(hWj0b->GetSumOfWeights() / hWj0b_slopeUp->GetSumOfWeights());
+            hWj1b_slopeUp->Scale(hWj1b->GetSumOfWeights() / hWj1b_slopeUp->GetSumOfWeights());
+            hWj2b_slopeUp->Scale(hWj2b->GetSumOfWeights() / hWj2b_slopeUp->GetSumOfWeights());
+            hZj0b_slopeUp->Scale(hZj0b->GetSumOfWeights() / hZj0b_slopeUp->GetSumOfWeights());
+            hZj1b_slopeUp->Scale(hZj1b->GetSumOfWeights() / hZj1b_slopeUp->GetSumOfWeights());
+            hZj2b_slopeUp->Scale(hZj2b->GetSumOfWeights() / hZj2b_slopeUp->GetSumOfWeights());
+            hWj0b_slopeDown->Scale(hWj0b->GetSumOfWeights() / hWj0b_slopeDown->GetSumOfWeights());
+            hWj1b_slopeDown->Scale(hWj1b->GetSumOfWeights() / hWj1b_slopeDown->GetSumOfWeights());
+            hWj2b_slopeDown->Scale(hWj2b->GetSumOfWeights() / hWj2b_slopeDown->GetSumOfWeights());
+            hZj0b_slopeDown->Scale(hZj0b->GetSumOfWeights() / hZj0b_slopeDown->GetSumOfWeights());
+            hZj1b_slopeDown->Scale(hZj1b->GetSumOfWeights() / hZj1b_slopeDown->GetSumOfWeights());
+            hZj2b_slopeDown->Scale(hZj2b->GetSumOfWeights() / hZj2b_slopeDown->GetSumOfWeights());
+            
+            hWj0b_slopeUp->Write(hWj0b_slopeUp->GetName());
+            hWj1b_slopeUp->Write(hWj1b_slopeUp->GetName());
+            hWj2b_slopeUp->Write(hWj2b_slopeUp->GetName());
+            hZj0b_slopeUp->Write(hZj0b_slopeUp->GetName());
+            hZj1b_slopeUp->Write(hZj1b_slopeUp->GetName());
+            hZj2b_slopeUp->Write(hZj2b_slopeUp->GetName());
+            hWj0b_slopeDown->Write(hWj0b_slopeDown->GetName());
+            hWj1b_slopeDown->Write(hWj1b_slopeDown->GetName());
+            hWj2b_slopeDown->Write(hWj2b_slopeDown->GetName());
+            hZj0b_slopeDown->Write(hZj0b_slopeDown->GetName());
+            hZj1b_slopeDown->Write(hZj1b_slopeDown->GetName());
+            hZj2b_slopeDown->Write(hZj2b_slopeDown->GetName());
+            
+            delete hWj0b_slopeUp;
+            delete hWj1b_slopeUp;
+            delete hWj2b_slopeUp;
+            delete hZj0b_slopeUp;
+            delete hZj1b_slopeUp;
+            delete hZj2b_slopeUp;
+            delete hWj0b_slopeDown;
+            delete hWj1b_slopeDown;
+            delete hWj2b_slopeDown;
+            delete hZj0b_slopeDown;
+            delete hZj1b_slopeDown;
+            delete hZj2b_slopeDown;
+        }
+        out->Close();
+        delete out;
+    }
+
+    for (UInt_t ih = 0; ih < histos_0.size(); ih++)
+        delete histos_0.at(ih);
+    for (UInt_t ih = 0; ih < histos.size(); ih++)
+        delete histos.at(ih);
+
+    std::clog << "MakePlots(): DONE!" << std::endl;
+
+    return;
+}
+
+
+EventsJ11 * Read(bool isControlRegion, const TCut cutallmc, const TCut cutalldata)
+{
+    std::clog << "Read(): Using cutallmc = " << cutallmc << ", cutalldata = " << cutalldata << std::endl;
+    std::clog << "Read():       indir = " << indir << std::endl;
+    
+    const TString treename = Form("tree_%s_%s", channel.Data(), (isControlRegion ? "ctrl" : "test"));
+    
+    TChain ZH(treename);
+    ZH.Add(indir + prefix + Form("ZH%i", massH) + suffix);
+    
+    TChain WH(treename);
+    WH.Add(indir + prefix + Form("WH%i", massH) + suffix);
+    
+    TChain Wj(treename);
+    Wj.Add(indir + prefix + "Wj" + suffix);
+    
+    TChain Zj(treename);
+    Zj.Add(indir + prefix + "Zj" + suffix);
+    
+    TChain TT(treename);
+    TT.Add(indir + prefix + "TT" + suffix);
+    
+    TChain s_Top(treename);
+    s_Top.Add(indir + prefix + "s_Top" + suffix);
+    
+    TChain VV(treename);
+    VV.Add(indir + prefix + "VV" + suffix);
+    
+    TChain QCD(treename);
+    QCD.Add(indir + prefix + "QCD" + suffix);
+    
+    TChain Wj_syst(treename);
+    Wj_syst.Add(indir + prefix + "WjHW" + suffix);
+    
+    TChain Zj_syst(treename);
+    Zj_syst.Add(indir + prefix + "ZjHW" + suffix);
+    
+    TChain TT_syst(treename);
+    TT_syst.Add(indir + prefix + "TTPowheg" + suffix);
+    
+    TChain ZH_SM(treename);
+    ZH_SM.Add(indir + prefix + "ZH125" + suffix);
+    
+    TChain WH_SM(treename);
+    WH_SM.Add(indir + prefix + "WH125" + suffix);
+    
+    TChain data_obs(treename);
+    data_obs.Add(indir + prefix + "data_obs" + suffix);
+
+    // Start copying trees
+    const TCut cutHF = "eventFlav==5";
+    const TCut cutLF = "eventFlav!=5";
+
+    const TCut cut2b = "abs(hJet_flavour[0])==5 && abs(hJet_flavour[1])==5";
+    const TCut cut1b = "(abs(hJet_flavour[0])==5 && abs(hJet_flavour[1])!=5) || (abs(hJet_flavour[0])!=5 && abs(hJet_flavour[1])==5)";
+    const TCut cut0b = "abs(hJet_flavour[0])!=5 && abs(hJet_flavour[1])!=5";
+    
+    EventsJ11 * ev = new EventsJ11();
+    ev->ZH = (TTree *) ZH.CopyTree(cutallmc);
+    std::clog << "... DONE: ZH copy tree." << std::endl;
+    ev->WH = (TTree *) WH.CopyTree(cutallmc);
+    std::clog << "... DONE: WH copy tree." << std::endl;
+    ev->Wj0b = (TTree *) Wj.CopyTree(cutallmc + cut0b);
+    std::clog << "... DONE: Wj0b copy tree." << std::endl;
+    ev->Wj1b = (TTree *) Wj.CopyTree(cutallmc + cut1b);
+    std::clog << "... DONE: Wj1b copy tree." << std::endl;
+    ev->Wj2b = (TTree *) Wj.CopyTree(cutallmc + cut2b);
+    std::clog << "... DONE: Wj2b copy tree." << std::endl;
+    ev->Zj0b = (TTree *) Zj.CopyTree(cutallmc + cut0b);
+    std::clog << "... DONE: Zj0b copy tree." << std::endl;
+    ev->Zj1b = (TTree *) Zj.CopyTree(cutallmc + cut1b);
+    std::clog << "... DONE: Zj1b copy tree." << std::endl;
+    ev->Zj2b = (TTree *) Zj.CopyTree(cutallmc + cut2b);
+    std::clog << "... DONE: Zj2b copy tree." << std::endl;
+    ev->TT = (TTree *) TT.CopyTree(cutallmc);
+    std::clog << "... DONE: TT copy tree." << std::endl;
+    ev->s_Top = (TTree *) s_Top.CopyTree(cutallmc);
+    std::clog << "... DONE: s_Top copy tree." << std::endl;
+    ev->VVLF = (TTree *) VV.CopyTree(cutallmc + cutLF);
+    std::clog << "... DONE: VVLF copy tree." << std::endl;
+    ev->VVHF = (TTree *) VV.CopyTree(cutallmc + cutHF);
+    std::clog << "... DONE: VVHF copy tree." << std::endl;
+    ev->QCD = (TTree *) QCD.CopyTree(cutallmc);
+    std::clog << "... DONE: QCD copy tree." << std::endl;
+    ev->Wj0b_syst = (TTree *) Wj_syst.CopyTree(cutallmc + cut0b);
+    std::clog << "... DONE: Wj0b_syst copy tree." << std::endl;
+    ev->Wj1b_syst = (TTree *) Wj_syst.CopyTree(cutallmc + cut1b);
+    std::clog << "... DONE: Wj1b_syst copy tree." << std::endl;
+    ev->Wj2b_syst = (TTree *) Wj_syst.CopyTree(cutallmc + cut2b);
+    std::clog << "... DONE: Wj2b_syst copy tree." << std::endl;
+    ev->Zj0b_syst = (TTree *) Zj_syst.CopyTree(cutallmc + cut0b);
+    std::clog << "... DONE: Zj0b_syst copy tree." << std::endl;
+    ev->Zj1b_syst = (TTree *) Zj_syst.CopyTree(cutallmc + cut1b);
+    std::clog << "... DONE: Zj1b_syst copy tree." << std::endl;
+    ev->Zj2b_syst = (TTree *) Zj_syst.CopyTree(cutallmc + cut2b);
+    std::clog << "... DONE: Zj2b_syst copy tree." << std::endl;
+    ev->TT_syst = (TTree *) TT_syst.CopyTree(cutallmc);
+    std::clog << "... DONE: TT_syst copy tree." << std::endl;
+    ev->ZH_SM = (TTree *) ZH_SM.CopyTree(cutallmc);
+    std::clog << "... DONE: ZH_SM copy tree." << std::endl;
+    ev->WH_SM = (TTree *) WH_SM.CopyTree(cutallmc);
+    std::clog << "... DONE: WH_SM copy tree." << std::endl;
+    
+    ev->data_obs = (TTree *) data_obs.CopyTree(cutalldata);
+    std::clog << "... DONE: data_obs copy tree." << std::endl;
+
+    return ev;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// Main                                                                     ///
+////////////////////////////////////////////////////////////////////////////////
+
+void BDTShapeJ11(int nbins=500, long long newnbins=15, double rebinerrorf=0.35, bool freerebin=false, bool isControlRegion=false)  // 2000, 12121212 for multi-BDT
+{
+    gROOT->LoadMacro("tdrstyle.C");
+    gROOT->ProcessLine("setTDRStyle()");
+    gROOT->LoadMacro("HelperFunctions.h");  // FIXME
+    gROOT->LoadMacro("HelperBDTShape.h");  // FIXME
+    
+    TH1::SetDefaultSumw2(1);
+    gROOT->SetBatch(1);
+    
+    //if (!TString(gROOT->GetVersion()).Contains("5.34")) {
+    //    std::cout << "INCORRECT ROOT VERSION! Please use 5.34:" << std::endl;
+    //    std::cout << "source /uscmst1/prod/sw/cms/slc5_amd64_gcc472/lcg/root/5.34.03-cms4/bin/thisroot.csh" << std::endl;
+    //    std::cout << "Return without doing anything." << std::endl;
+    //    return;
+    //}
+
+    if (gSystem->AccessPathName(g_plotdir))
+        gSystem->mkdir(g_plotdir);
+
+    const bool makeslice = (newnbins > 100);
+    if (!makeslice)  assert(nbins > newnbins);
+    const int begin = (isControlRegion) ?   1 : 0;
+    const int end   = (isControlRegion) ? 1+5 : 1;
+    
+    
+    ///-- ZnunuHighPt ----------------------------------------------------------
+    channel = "ZnunuHighPt";
+    std::clog << "\n*** " << channel << " ***\n" << std::endl;
+
+    EventsJ11 * ev = Read(isControlRegion, g_cutallmc, g_cutalldata);
+    ev->check();
+
+    /// Select scale factors
+    const double * scalefactors     = g_scalefactors_ZnunuHighPt;
+    const double * scalefactors_lnN = g_scalefactors_lnN_ZnunuHighPt;
+
+    for (int ireg=begin; ireg<end; ireg++) {
+        if (ireg==0) {  // signal region
+            /// Reset rebinner
+            delete rebinner; rebinner = 0;
+            
+            /// Make BDT plots
+            /// Loop over systematics
+            for (int isyst = 0; isyst < nsyst; isyst++) {
+                ev->set_scalefactors(&scalefactors[0]);
+                std::clog << "isyst " << isyst << ": scale factors: " << ev->sf_Wj0b << " (Wj0b), " << ev->sf_Wj1b << " (Wj1b), " << ev->sf_Wj2b << " (Wj2b), " << ev->sf_Zj0b << " (Zj0b), " << ev->sf_Zj1b << " (Zj1b), " << ev->sf_Zj2b << " (Zj2b), " << ev->sf_TT << " (TT)." << std::endl;
+                
+                /// Replace "ISYST" with the index of systematic
+                TString var = (!makeslice) ? g_var : g_varslice;
+                TString ssyst=Form("%i",isyst);
+                var.ReplaceAll("ISYST",ssyst);
+                
+                TCut cutmc_test   = Form("2.0 * weightsMC[%i] * (selectFlags[0][%i]) * triggercorr2012ABCD( (triggerFlags[42]==1 || triggerFlags[39]==1), (triggerFlags[41]==1), METtype1corr.et, max(hJet_csv_nominal[0],hJet_csv_nominal[1]), naJets_Znn ) * 19040/19624", isyst, isyst); // FIXME
+                if (g_systematics[isyst] == "CMS_vhbb_trigger_MET_Znunu_8TeVUp")
+                    cutmc_test   = Form("2.0 * weightsMC[%i] * (selectFlags[0][%i]) * triggercorr2012ABCD_up( (triggerFlags[42]==1 || triggerFlags[39]==1), (triggerFlags[41]==1), METtype1corr.et, max(hJet_csv_nominal[0],hJet_csv_nominal[1]), naJets_Znn ) * 19040/19624", isyst, isyst); // FIXME
+                TCut cutdata_test = Form("selectFlags[0][%i]", isyst);
+                
+                MakePlots(ev, var, cutmc_test, cutdata_test, g_systematics[isyst], g_regions[ireg], "BDT", nbins, g_xlow, g_xup, newnbins, rebinerrorf, scalefactors_lnN, "printStat:printCard:writeRoot:!plotData:plotLog:plotSig");
+            }
+        }
+        
+        if (g_manyplots) {
+            /// Make plots of 13 input variables
+            ev->set_scalefactors(&scalefactors[0]);
+            TCut cutmc_ctrl = Form("weightsMC[0] * (selectFlags[%i][0]) * triggercorr2012ABCD( (triggerFlags[42]==1 || triggerFlags[39]==1), (triggerFlags[41]==1), METtype1corr.et, max(hJet_csv_nominal[0],hJet_csv_nominal[1]), naJets_Znn ) * 19040/19624", ireg);  // FIXME
+            TCut cutdata_ctrl = Form("(selectFlags[%i][0])", ireg);
+            TCut cutmass_ctrl = "";
+            if (ireg==0) {  // signal region
+                cutmc_ctrl = Form("2.0 * weightsMC[0] * (selectFlags[%i][0]) * triggercorr2012ABCD( (triggerFlags[42]==1 || triggerFlags[39]==1), (triggerFlags[41]==1), METtype1corr.et, max(hJet_csv_nominal[0],hJet_csv_nominal[1]), naJets_Znn ) * 19040/19624", ireg);  // FIXME
+                cutmass_ctrl = "(HmassReg<100 || 140<HmassReg)";
+            }
+            
+            if (ireg!=0) {  // control region
+                MakePlots(ev, Form("BDTregular_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "BDT", nbins, g_xlow, g_xup, newnbins, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
+            }
+            MakePlots(ev, "HmassReg", cutmc_ctrl*cutmass_ctrl, cutdata_ctrl*cutmass_ctrl, g_systematics[0], g_regions[ireg], "H mass [GeV]", 23, 20, 250, 23, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");  // apply mass veto
+            MakePlots(ev, "HptReg", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "H p_{T} [GeV]", 23, 115, 460, 23, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "max(hJet_ptReg[0],hJet_ptReg[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "H j1 p_{T} [GeV]", 20, 50, 350, 20, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "min(hJet_ptReg[0],hJet_ptReg[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "H j2 p_{T} [GeV]", 13, 15, 210, 13, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "deltaR(hJet_eta[0], hJet_phi[0], hJet_eta[1], hJet_phi[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "#Delta R(j1,j2)", 14, 0, 3.5, 14, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "abs(hJet_eta[0]-hJet_eta[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "|#Delta #eta|(j1,j2)", 14, 0, 3.5, 14, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "min(abs(deltaPullAngle),pi)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "|#Delta #theta_{pull}|(j1,j2)", 16, 0, 3.2, 16, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "METtype1corr.et", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "Type-1 corr. pfMET [GeV]", 20, 155, 455, 20, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "HMETdPhi", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "|#Delta #varphi|(H, pfMET)", 16, 1.6, 3.2, 16, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "mindPhiMETJet_dPhi", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "min |#Delta #varphi|(pfMET, j25)", 17, -0.1, 3.3, 17, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "max(hJet_csv_nominal[0],hJet_csv_nominal[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "CSV_{max}(j1,j2)", 30, 0.0, 1.08, 30, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "min(hJet_csv_nominal[0],hJet_csv_nominal[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "CSV_{min}(j1,j2)", 30, 0.0, 1.08, 30, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "naJets_Znn", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "# of add. jets", 8, 0, 8, 8, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:plotData:!plotLog:plotSig");
+            MakePlots(ev, "MaxIf$(max(aJet_csv_nominal,0), aJet_pt>20 && abs(aJet_eta)<2.5)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "CSV_{max}(add. cj20)", 30, 0.0, 1.08, 30, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "min(mindRHJet_dR,5.653)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "min #DeltaR(H, add. j25)", 23, 0, 5.75, 23, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            
+            // Bkg specific BDT
+            MakePlots(ev, Form("BDTtt_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "BDTtt", 15, -1, 1, 15, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
+            MakePlots(ev, Form("BDTvjlf_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "BDTvjlf", 15, -1, 1, 15, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
+            MakePlots(ev, Form("BDTzz_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "BDTzz", 15, -1, 1, 15, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
+            
+            // QCD check
+            MakePlots(ev, "METtype1corr.et/sqrt(METtype1corr.sumet)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "Type-1 corr. pfMET/sqrt(sumET) [GeV]", 20, 0, 18, 20, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "METtype1corr.sig", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "Type-1 corr. pfMET significance", 18, 0, 360, 18, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "nPVs", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "# of primary vertices", 20, 0, 40, 20, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "mindPhiMETCtrJet_dPhi", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "min |#Delta #varphi|(pfMET, cj20)", 17, -0.1, 3.3, 17, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            
+            // Angle (need the definition of the functions)
+            //MakePlots(ev, "abs(evalCosThetaHbb(hJet_ptReg[0], hJet_pt[0], hJet_eta[0], hJet_phi[0], hJet_e[0], hJet_ptReg[1], hJet_pt[1], hJet_eta[1], hJet_phi[1], hJet_e[1]))", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "cos #theta* (H,j)", 20, 0, 1, 20, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            //MakePlots(ev, "evalHMETMt(HptReg, H.phi, METtype1corr.et, METtype1corr.phi)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "mass_{T}(H,pfMET)", 25, 250, 1000, 20, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            //MakePlots(ev, "evalHMETMassiveMt(HptReg, H.phi, METtype1corr.et, METtype1corr.phi)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "massive mass_{T}(H,pfMET)", 25, 250, 1000, 20, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            
+            // FatH.filteredmass
+            MakePlots(ev, "FatH.filteredmass * (nfathFilterJets>0 && FatH.FatHiggsFlag==1)", cutmc_ctrl*cutmass_ctrl, cutdata_ctrl*cutmass_ctrl, g_systematics[0], g_regions[ireg], "H_{fj} mass [GeV]", 25, 0, 250, 25, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");  // apply mass veto
+            //MakePlots(ev, "FatH.filteredpt * (nfathFilterJets>0 && FatH.FatHiggsFlag==1)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "H_{fj} p_{T} [GeV]", 20, 50, 450, 20, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            
+            // FatHmassReg
+            MakePlots(ev, "FatHmassReg * (nfathFilterJets>0 && FatH.FatHiggsFlag==1)", cutmc_ctrl*cutmass_ctrl, cutdata_ctrl*cutmass_ctrl, g_systematics[0], g_regions[ireg], "H_{fj} mass [GeV]", 25, 0, 250, 25, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");  // apply mass veto
+            //MakePlots(ev, "FatHptReg * (nfathFilterJets>0 && FatH.FatHiggsFlag==1)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "H_{fj} p_{T} [GeV]", 20, 50, 450, 20, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            //MakePlots(ev, "fathFilterJets_ptReg[0] * (nfathFilterJets>0 && FatH.FatHiggsFlag==1)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "H fj1 p_{T} [GeV]", 20, 50, 350, 20, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            //MakePlots(ev, "fathFilterJets_ptReg[1] * (nfathFilterJets>0 && FatH.FatHiggsFlag==1)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "H fj2 p_{T} [GeV]", 10, 20, 170, 10, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            
+            // Out of the box
+            MakePlots(ev, "hJet_pt[0]", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "H j1 p_{T} [GeV] (no regression)", 20, 50, 350, 20, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "hJet_pt[1]", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "H j2 p_{T} [GeV] (no regression)", 13, 15, 210, 13, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "H.pt", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "H p_{T} [GeV] (no regression)", 23, 115, 460, 23, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "MET.et", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "Type-1 corr. pfMET [GeV] (no JEC update)", 20, 155, 455, 20, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "V.pt", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "V p_{T} [GeV] (no JEC update)", 20, 155, 455, 20, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "Sum$(aJet_pt>30 && abs(aJet_eta)<4.5 && aJet_id==1 && aJet_puJetIdL>0)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "# of add. jets (p_{T} > 30 GeV)", 8, 0, 8, 8, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:plotData:!plotLog:plotSig");
+        }
+    }  // end loop over regions
+    delete ev;
+
+
+    ///-- ZnunuMedPt -----------------------------------------------------------
+    channel = "ZnunuMedPt";
+    std::clog << "\n*** " << channel << " ***\n" << std::endl;
+    if (!freerebin) {  // use hardcoded binning choice
+        newnbins = (!makeslice) ? 15 : 11111111;
+        rebinerrorf = 0.35;
+    }
+
+    ev = Read(isControlRegion, g_cutallmc, g_cutalldata);
+    ev->check();
+
+    /// Select scale factors
+    scalefactors     = g_scalefactors_ZnunuMedPt;
+    scalefactors_lnN = g_scalefactors_lnN_ZnunuMedPt;
+
+    for (int ireg=begin; ireg<end; ireg++) {
+        if (ireg==0) {  // signal region
+            /// Reset rebinner
+            delete rebinner; rebinner = 0;
+            
+            /// Make BDT plots
+            /// Loop over systematics
+            for (int isyst = 0; isyst < nsyst; isyst++) {
+                ev->set_scalefactors(&scalefactors[0]);
+                std::clog << "isyst " << isyst << ": scale factors: " << ev->sf_Wj0b << " (Wj0b), " << ev->sf_Wj1b << " (Wj1b), " << ev->sf_Wj2b << " (Wj2b), " << ev->sf_Zj0b << " (Zj0b), " << ev->sf_Zj1b << " (Zj1b), " << ev->sf_Zj2b << " (Zj2b), " << ev->sf_TT << " (TT)." << std::endl;
+                
+                /// Replace "ISYST" with the index of systematic
+                TString var = (!makeslice) ? g_var : g_varslice;
+                TString ssyst=Form("%i",isyst);
+                var.ReplaceAll("ISYST",ssyst);
+                
+                TCut cutmc_test   = Form("2.0 * weightsMC[%i] * (selectFlags[0][%i]) * triggercorr2012ABCD( (triggerFlags[42]==1 || triggerFlags[39]==1), (triggerFlags[41]==1), METtype1corr.et, max(hJet_csv_nominal[0],hJet_csv_nominal[1]), naJets_Znn ) * 19040/19624", isyst, isyst); // FIXME
+                if (g_systematics[isyst] == "CMS_vhbb_trigger_MET_Znunu_8TeVUp")
+                    cutmc_test   = Form("2.0 * weightsMC[%i] * (selectFlags[0][%i]) * triggercorr2012ABCD_up( (triggerFlags[42]==1 || triggerFlags[39]==1), (triggerFlags[41]==1), METtype1corr.et, max(hJet_csv_nominal[0],hJet_csv_nominal[1]), naJets_Znn ) * 19040/19624", isyst, isyst); // FIXME
+                TCut cutdata_test = Form("selectFlags[0][%i]", isyst);
+                
+                MakePlots(ev, var, cutmc_test, cutdata_test, g_systematics[isyst], g_regions[ireg], "BDT", nbins, g_xlow, g_xup, newnbins, rebinerrorf, scalefactors_lnN, "printStat:printCard:writeRoot:!plotData:plotLog:plotSig");
+            }
+        }
+        
+        if (g_manyplots) {
+            /// Make plots of 13 input variables
+            ev->set_scalefactors(&scalefactors[0]);
+            TCut cutmc_ctrl = Form("weightsMC[0] * (selectFlags[%i][0]) * triggercorr2012ABCD( (triggerFlags[42]==1 || triggerFlags[39]==1), (triggerFlags[41]==1), METtype1corr.et, max(hJet_csv_nominal[0],hJet_csv_nominal[1]), naJets_Znn ) * 19040/19624", ireg);  // FIXME
+            TCut cutdata_ctrl = Form("(selectFlags[%i][0])", ireg);
+            TCut cutmass_ctrl = "";
+            if (ireg==0) {  // signal region
+                cutmc_ctrl = Form("2.0 * weightsMC[0] * (selectFlags[%i][0]) * triggercorr2012ABCD( (triggerFlags[42]==1 || triggerFlags[39]==1), (triggerFlags[41]==1), METtype1corr.et, max(hJet_csv_nominal[0],hJet_csv_nominal[1]), naJets_Znn ) * 19040/19624", ireg);  // FIXME
+                cutmass_ctrl = "(HmassReg<100 || 140<HmassReg)";
+            }
+            
+            if (ireg!=0) {  // control region
+                MakePlots(ev, Form("BDTregular_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "BDT", nbins, g_xlow, g_xup, newnbins, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
+            }
+            MakePlots(ev, "HmassReg", cutmc_ctrl*cutmass_ctrl, cutdata_ctrl*cutmass_ctrl, g_systematics[0], g_regions[ireg], "H mass [GeV]", 23, 20, 250, 23, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");  // apply mass veto
+            MakePlots(ev, "HptReg", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "H p_{T} [GeV]", 23, 115, 460, 23, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "max(hJet_ptReg[0],hJet_ptReg[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "H j1 p_{T} [GeV]", 20, 50, 350, 20, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "min(hJet_ptReg[0],hJet_ptReg[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "H j2 p_{T} [GeV]", 13, 15, 210, 13, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "deltaR(hJet_eta[0], hJet_phi[0], hJet_eta[1], hJet_phi[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "#Delta R(j1,j2)", 14, 0, 3.5, 14, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "abs(hJet_eta[0]-hJet_eta[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "|#Delta #eta|(j1,j2)", 14, 0, 3.5, 14, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "min(abs(deltaPullAngle),pi)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "|#Delta #theta_{pull}|(j1,j2)", 16, 0, 3.2, 16, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "METtype1corr.et", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "Type-1 corr. pfMET [GeV]", 12, 120, 180, 12, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "HMETdPhi", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "|#Delta #varphi|(H, pfMET)", 16, 1.6, 3.2, 16, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "mindPhiMETJet_dPhi", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "min |#Delta #varphi|(pfMET, j25)", 17, -0.1, 3.3, 17, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "max(hJet_csv_nominal[0],hJet_csv_nominal[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "CSV_{max}(j1,j2)", 30, 0.0, 1.08, 30, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "min(hJet_csv_nominal[0],hJet_csv_nominal[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "CSV_{min}(j1,j2)", 30, 0.0, 1.08, 30, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "naJets_Znn", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "# of add. jets", 8, 0, 8, 8, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:plotData:!plotLog:plotSig");
+            MakePlots(ev, "MaxIf$(max(aJet_csv_nominal,0), aJet_pt>20 && abs(aJet_eta)<2.5)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "CSV_{max}(add. cj20)", 30, 0.0, 1.08, 30, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "min(mindRHJet_dR,5.653)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "min #DeltaR(H, add. j25)", 23, 0, 5.75, 23, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            
+            // Bkg specific BDT
+            MakePlots(ev, Form("BDTtt_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "BDTtt", 15, -1, 1, 15, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
+            MakePlots(ev, Form("BDTvjlf_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "BDTvjlf", 15, -1, 1, 15, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
+            MakePlots(ev, Form("BDTzz_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "BDTzz", 15, -1, 1, 15, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
+            
+            // QCD check
+            MakePlots(ev, "METtype1corr.et/sqrt(METtype1corr.sumet)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "Type-1 corr. pfMET/sqrt(sumET) [GeV]", 20, 0, 12, 20, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "METtype1corr.sig", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "Type-1 corr. pfMET significance", 15, 0, 270, 15, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "nPVs", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "# of primary vertices", 20, 0, 40, 20, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "mindPhiMETCtrJet_dPhi", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "min |#Delta #varphi|(pfMET, cj20)", 17, -0.1, 3.3, 17, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            
+            // Out of the box
+            MakePlots(ev, "hJet_pt[0]", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "H j1 p_{T} [GeV] (no regression)", 20, 50, 350, 20, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "hJet_pt[1]", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "H j2 p_{T} [GeV] (no regression)", 13, 15, 210, 13, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "H.pt", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "H p_{T} [GeV] (no regression)", 23, 115, 460, 23, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "MET.et", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "Type-1 corr. pfMET [GeV] (no JEC update)", 12, 120, 180, 12, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "V.pt", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "V p_{T} [GeV] (no JEC update)", 20, 120, 220, 20, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "Sum$(aJet_pt>30 && abs(aJet_eta)<4.5 && aJet_id==1 && aJet_puJetIdL>0)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "# of add. jets (p_{T} > 30 GeV)", 8, 0, 8, 8, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:plotData:!plotLog:plotSig");
+        }
+    }  // end loop over regions
+    delete ev;
+
+
+    ///-- ZnunuLowPt -----------------------------------------------------------
+    channel = "ZnunuLowPt";
+    std::clog << "\n*** " << channel << " ***\n" << std::endl;
+    if (!freerebin) {  // use hardcoded binning choice
+        newnbins = (!makeslice) ? 13 : 10101010;
+        rebinerrorf = 0.35;
+    }
+
+    ev = Read(isControlRegion, g_cutallmc, g_cutalldata);
+    ev->check();
+
+    /// Select scale factors
+    scalefactors     = g_scalefactors_ZnunuLowPt;
+    scalefactors_lnN = g_scalefactors_lnN_ZnunuLowPt;
+    
+    for (int ireg=begin; ireg<end; ireg++) {
+        if (ireg==0) {  // signal region
+            /// Reset rebinner
+            delete rebinner; rebinner = 0;
+            
+            /// Make BDT plots
+            /// Loop over systematics
+            for (int isyst = 0; isyst < nsyst; isyst++) {
+                ev->set_scalefactors(&scalefactors[0]);
+                std::clog << "isyst " << isyst << ": scale factors: " << ev->sf_Wj0b << " (Wj0b), " << ev->sf_Wj1b << " (Wj1b), " << ev->sf_Wj2b << " (Wj2b), " << ev->sf_Zj0b << " (Zj0b), " << ev->sf_Zj1b << " (Zj1b), " << ev->sf_Zj2b << " (Zj2b), " << ev->sf_TT << " (TT)." << std::endl;
+                
+                /// Replace "ISYST" with the index of systematic
+                TString var = (!makeslice) ? g_var : g_varslice;
+                TString ssyst=Form("%i",isyst);
+                var.ReplaceAll("ISYST",ssyst);
+                
+                TCut cutmc_test   = Form("2.0 * weightsMC[%i] * (selectFlags[0][%i]) * triggercorr2012ABCD( (triggerFlags[42]==1 || triggerFlags[39]==1), (triggerFlags[41]==1), METtype1corr.et, max(hJet_csv_nominal[0],hJet_csv_nominal[1]), naJets_Znn ) * 19040/19624", isyst, isyst); // FIXME
+                if (g_systematics[isyst] == "CMS_vhbb_trigger_MET_Znunu_8TeVUp")
+                    cutmc_test   = Form("2.0 * weightsMC[%i] * (selectFlags[0][%i]) * triggercorr2012ABCD_up( (triggerFlags[42]==1 || triggerFlags[39]==1), (triggerFlags[41]==1), METtype1corr.et, max(hJet_csv_nominal[0],hJet_csv_nominal[1]), naJets_Znn ) * 19040/19624", isyst, isyst); // FIXME
+                TCut cutdata_test = Form("selectFlags[0][%i]", isyst);
+                
+                MakePlots(ev, var, cutmc_test, cutdata_test, g_systematics[isyst], g_regions[ireg], "BDT", nbins, g_xlow, g_xup, newnbins, rebinerrorf, scalefactors_lnN, "printStat:printCard:writeRoot:!plotData:plotLog:plotSig");
+            }
+        }
+        
+        if (g_manyplots) {
+            /// Make plots of 13 input variables
+            ev->set_scalefactors(&scalefactors[0]);
+            TCut cutmc_ctrl = Form("weightsMC[0] * (selectFlags[%i][0]) * triggercorr2012ABCD( (triggerFlags[42]==1 || triggerFlags[39]==1), (triggerFlags[41]==1), METtype1corr.et, max(hJet_csv_nominal[0],hJet_csv_nominal[1]), naJets_Znn ) * 19040/19624", ireg);  // FIXME
+            TCut cutdata_ctrl = Form("(selectFlags[%i][0])", ireg);
+            TCut cutmass_ctrl = "";
+            if (ireg==0) {  // signal region
+                cutmc_ctrl = Form("2.0 * weightsMC[0] * (selectFlags[%i][0]) * triggercorr2012ABCD( (triggerFlags[42]==1 || triggerFlags[39]==1), (triggerFlags[41]==1), METtype1corr.et, max(hJet_csv_nominal[0],hJet_csv_nominal[1]), naJets_Znn ) * 19040/19624", ireg);  // FIXME
+                cutmass_ctrl = "(HmassReg<100 || 140<HmassReg)";
+            }
+            
+            if (ireg!=0) {  // control region
+                MakePlots(ev, Form("BDTregular_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "BDT", nbins, g_xlow, g_xup, newnbins, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
+            }
+            MakePlots(ev, "HmassReg", cutmc_ctrl*cutmass_ctrl, cutdata_ctrl*cutmass_ctrl, g_systematics[0], g_regions[ireg], "H mass [GeV]", 23, 20, 250, 23, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");  // apply mass veto
+            MakePlots(ev, "HptReg", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "H p_{T} [GeV]", 24, 45, 405, 24, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "max(hJet_ptReg[0],hJet_ptReg[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "H j1 p_{T} [GeV]", 20, 15, 315, 20, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "min(hJet_ptReg[0],hJet_ptReg[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "H j2 p_{T} [GeV]", 13, 15, 210, 13, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "deltaR(hJet_eta[0], hJet_phi[0], hJet_eta[1], hJet_phi[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "#Delta R(j1,j2)", 14, 0, 3.5, 14, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "abs(hJet_eta[0]-hJet_eta[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "|#Delta #eta|(j1,j2)", 14, 0, 3.5, 14, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "min(abs(deltaPullAngle),pi)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "|#Delta #theta_{pull}|(j1,j2)", 16, 0, 3.2, 16, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "METtype1corr.et", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "Type-1 corr. pfMET [GeV]", 10, 90, 140, 10, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "HMETdPhi", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "|#Delta #varphi|(H, pfMET)", 16, 1.6, 3.2, 16, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "mindPhiMETJet_dPhi", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "min |#Delta #varphi|(pfMET, j25)", 17, -0.1, 3.3, 17, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "max(hJet_csv_nominal[0],hJet_csv_nominal[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "CSV_{max}(j1,j2)", 30, 0.0, 1.08, 30, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "min(hJet_csv_nominal[0],hJet_csv_nominal[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "CSV_{min}(j1,j2)", 30, 0.0, 1.08, 30, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "naJets_Znn", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "# of add. jets", 8, 0, 8, 8, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:plotData:!plotLog:plotSig");
+            MakePlots(ev, "MaxIf$(max(aJet_csv_nominal,0), aJet_pt>20 && abs(aJet_eta)<2.5)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "CSV_{max}(add. cj20)", 30, 0.0, 1.08, 30, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "min(mindRHJet_dR,5.653)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "min #DeltaR(H, add. j25)", 23, 0, 5.75, 23, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            
+            // Bkg specific BDT
+            MakePlots(ev, Form("BDTtt_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "BDTtt", 15, -1, 1, 15, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
+            MakePlots(ev, Form("BDTvjlf_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "BDTvjlf", 15, -1, 1, 15, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
+            MakePlots(ev, Form("BDTzz_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "BDTzz", 15, -1, 1, 15, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
+            
+            // QCD check
+            MakePlots(ev, "METtype1corr.et/sqrt(METtype1corr.sumet)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "Type-1 corr. pfMET/sqrt(sumET) [GeV]", 20, 0, 10, 20, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "METtype1corr.sig", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "Type-1 corr. pfMET significance", 12, 0, 180, 12, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "nPVs", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "# of primary vertices", 20, 0, 40, 20, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "mindPhiMETCtrJet_dPhi", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "min |#Delta #varphi|(pfMET, cj20)", 17, -0.1, 3.3, 17, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            
+            // Out of the box
+            MakePlots(ev, "hJet_pt[0]", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "H j1 p_{T} [GeV] (no regression)", 20, 15, 315, 20, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "hJet_pt[1]", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "H j2 p_{T} [GeV] (no regression)", 13, 15, 210, 13, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "H.pt", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "H p_{T} [GeV] (no regression)", 24, 45, 405, 24, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "MET.et", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "Type-1 corr. pfMET [GeV] (no JEC update)", 10, 90, 140, 10, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "V.pt", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "V p_{T} [GeV] (no JEC update)", 20, 90, 190, 20, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "Sum$(aJet_pt>30 && abs(aJet_eta)<4.5 && aJet_id==1 && aJet_puJetIdL>0)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "# of add. jets (p_{T} > 30 GeV)", 8, 0, 8, 8, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:plotData:!plotLog:plotSig");
+        }
+    }  // end loop over regions
+    delete ev;
+
+/*
+    ///-- ZnunuLowCSV ----------------------------------------------------------
+    /// FIXME: names given by g_regions[ireg] are wrong
+    channel = "ZnunuLowCSV";
+    std::clog << "\n*** " << channel << " ***\n" << std::endl;
+    if (!freerebin) {  // use hardcoded binning choice
+        newnbins = (!makeslice) ? 11 : 10101010;
+        rebinerrorf = 0.35;
+    }
+
+    ev = Read(isControlRegion, g_cutallmc, g_cutalldata);
+    ev->check();
+
+    /// Select scale factors
+    scalefactors     = g_scalefactors_ZnunuLowCSV;
+    scalefactors_lnN = g_scalefactors_lnN_ZnunuLowCSV;
+    
+    for (int ireg=begin; ireg<TMath::Min(end,3); ireg++) {
+        if (ireg==0) {  // signal region
+            /// Reset rebinner
+            delete rebinner; rebinner = 0;
+            
+            /// Make BDT plots
+            /// Loop over systematics
+            for (int isyst = 0; isyst < nsyst; isyst++) {
+                ev->set_scalefactors(&scalefactors[0]);
+                std::clog << "isyst " << isyst << ": scale factors: " << ev->sf_Wj0b << " (Wj0b), " << ev->sf_Wj1b << " (Wj1b), " << ev->sf_Wj2b << " (Wj2b), " << ev->sf_Zj0b << " (Zj0b), " << ev->sf_Zj1b << " (Zj1b), " << ev->sf_Zj2b << " (Zj2b), " << ev->sf_TT << " (TT)." << std::endl;
+                
+                /// Replace "ISYST" with the index of systematic
+                TString var = (!makeslice) ? g_var : g_varslice;
+                TString ssyst=Form("%i",isyst);
+                var.ReplaceAll("ISYST",ssyst);
+                
+                TCut cutmc_test   = Form("2.0 * weightsMC[%i] * (selectFlags[0][%i])", isyst, isyst);
+                TCut cutdata_test = Form("selectFlags[0][%i]", isyst);
+
+                MakePlots(ev, var, cutmc_test, cutdata_test, g_systematics[isyst], g_regions[ireg], "BDT", nbins, g_xlow, g_xup, newnbins, rebinerrorf, scalefactors_lnN, "printStat:printCard:writeRoot:!plotData:plotLog:plotSig");
+            }
+        }
+        
+        if (g_manyplots) {
+            /// Make plots of 13 input variables
+            ev->set_scalefactors(&scalefactors[0]);
+            TCut cutmc_ctrl = Form("weightsMC[0] * (selectFlags[%i][0])", ireg);
+            TCut cutdata_ctrl = Form("(selectFlags[%i][0])", ireg);
+            TCut cutmass_ctrl = "";
+            if (ireg==0) {  // signal region
+                cutmc_ctrl = Form("2.0 * weightsMC[0] * (selectFlags[%i][0])", ireg);
+                cutmass_ctrl = "(HmassReg<100 || 140<HmassReg)";
+            }
+            
+            if (ireg!=0) {  // control region
+                MakePlots(ev, Form("BDTregular_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "BDT", nbins, g_xlow, g_xup, newnbins, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
+            }
+            MakePlots(ev, "HmassReg", cutmc_ctrl*cutmass_ctrl, cutdata_ctrl*cutmass_ctrl, g_systematics[0], g_regions[ireg], "H mass [GeV]", 23, 20, 250, 23, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");  // apply mass veto
+            MakePlots(ev, "HptReg", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "H p_{T} [GeV]", 23, 115, 460, 23, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "max(hJet_ptReg[0],hJet_ptReg[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "H j1 p_{T} [GeV]", 20, 50, 350, 20, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "min(hJet_ptReg[0],hJet_ptReg[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "H j2 p_{T} [GeV]", 13, 15, 210, 13, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "deltaR(hJet_eta[0], hJet_phi[0], hJet_eta[1], hJet_phi[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "#Delta R(j1,j2)", 14, 0, 3.5, 14, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "abs(hJet_eta[0]-hJet_eta[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "|#Delta #eta|(j1,j2)", 14, 0, 3.5, 14, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "min(abs(deltaPullAngle),pi)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "|#Delta #theta_{pull}|(j1,j2)", 16, 0, 3.2, 16, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "METtype1corr.et", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "Type-1 corr. pfMET [GeV]", 20, 155, 455, 20, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "HMETdPhi", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "|#Delta #varphi|(H, pfMET)", 16, 1.6, 3.2, 16, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "mindPhiMETJet_dPhi", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "min |#Delta #varphi|(pfMET, j25)", 17, -0.1, 3.3, 17, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "max(hJet_csv_nominal[0],hJet_csv_nominal[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "CSV_{max}(j1,j2)", 30, 0.0, 1.08, 30, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "min(hJet_csv_nominal[0],hJet_csv_nominal[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "CSV_{min}(j1,j2)", 30, 0.0, 1.08, 30, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "naJets_Znn", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "# of add. jets", 8, 0, 8, 8, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:plotData:!plotLog:plotSig");
+            MakePlots(ev, "MaxIf$(max(aJet_csv_nominal,0), aJet_pt>20 && abs(aJet_eta)<2.5)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "CSV_{max}(add. cj20)", 30, 0.0, 1.08, 30, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "min(mindRHJet_dR,5.653)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "min #DeltaR(H, add. j25)", 23, 0, 5.75, 23, rebinerrorf, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+        }
+    }  // end loop over regions
+    delete ev;
+*/
+}
