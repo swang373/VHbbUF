@@ -1,0 +1,49 @@
+import os, sys
+usage = "usage: %s fileName line"   %         os.path.basename(sys.argv[0])
+
+if len(sys.argv) < 2:
+      print usage
+      sys.exit(2)
+else:
+      argv = sys.argv
+      infile = argv[1]
+      line = argv[2]
+#      print argv[1]
+      f = open(infile, 'read')
+               
+
+
+##f = open('runlog.log', 'r')
+
+#for in in f.readlines():
+#   run= i.rstrip()
+#   fileloc = 'https://cmsweb.cern.ch/dqm/offline/data/browse/ROOT/OfflineData/Run2010/Mu/000'+ str(run[0:3]) + 'xx/DQM_V0001_R000' + str(run) + '__Mu__Run2010A-PromptReco-v1__RECO.root'
+#   print fileloc
+
+
+run= f.readlines()[int(line)].rstrip()
+filelocv1 = 'https://cmsweb.cern.ch/dqm/offline/data/browse/ROOT/OfflineData/Run2010/Mu/000'+ str(run[0:4]) + 'xx/DQM_V0001_R000' + str(run) + '__Mu__Run2010A-PromptReco-v1__RECO.root'
+filenamev1 = '/tmp/degrutto/DQM_V0001_R000' + str(run) + '__Mu__Run2010A-PromptReco-v1__RECO.root'
+print filelocv1
+print filenamev1
+filelocv2 = 'https://cmsweb.cern.ch/dqm/offline/data/browse/ROOT/OfflineData/Run2010/Mu/000'+ str(run[0:4]) + 'xx/DQM_V0001_R000' + str(run) + '__Mu__Run2010A-PromptReco-v2__RECO.root'
+filenamev2 = '/tmp/degrutto/DQM_V0001_R000' + str(run) + '__Mu__Run2010A-PromptReco-v2__RECO.root'
+print filelocv2
+print filenamev2
+
+print run
+
+
+ 
+
+#import os
+#l= os.popen("rfdir /castor/cern.ch/cms/store/express/Run2010A/ExpressPhysics/FEVT/v2/000/136/088").readlines()
+#for i in range(len(l)):
+   #print l 
+#   lstrip =l[i].split(' ')
+#   file= lstrip[len(lstrip) - 1].rstrip()
+   #### selectong the hour
+#   if lstrip[len(lstrip) - 2][:3] == '18:' :  
+#     print'"rfio:/castor/cern.ch/cms/store/express/Run2010A/ExpressPhysics/FEVT/v2/000/136/088/' + file + '",'
+
+   

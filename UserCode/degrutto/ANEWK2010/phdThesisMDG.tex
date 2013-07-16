@@ -1,0 +1,180 @@
+
+\documentclass[a4paper,12pt]{book}
+\usepackage[latin1]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage{graphicx}
+\usepackage{multirow}
+\usepackage{amssymb}
+\usepackage{mathrsfs}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+\usepackage{chngpage} 
+\usepackage{calc} 
+\usepackage{mdwlist}
+\usepackage{slashed}
+\usepackage[bf,small]{caption}
+%\documentstyle[fancyhdr]{fancyhdr}
+\pagestyle{fancy}
+% i comandi seguenti impediscono la scrittura in maiuscolo
+% dei nomi dei capitoli e dei paragrafi nelle intestazioni
+\renewcommand{\chaptermark}[1]{\markboth{\thechapter.\ #1}{}}
+\renewcommand{\sectionmark}[1]{\markright{\thesection\ #1}}
+\fancyhf{}
+% rimuove l'attuale contenuto dell'intestazione e del pi\`e dipagina
+\fancyhead[LE,RO]{\slshape\thepage} \fancyhead[LO]{\slshape\rightmark}
+% bfseries per il grassetto e slshape per il corsivo
+\fancyhead[RE]{\slshape\leftmark}
+\renewcommand{\headrulewidth}{0.7pt}
+%\renewcommand{\footrulewidth}{0pt}
+\addtolength{\headheight}{0.5pt} % riserva spazio per la linea
+\addtolength{\headwidth}{40pt}
+
+\fancypagestyle{plain}{
+%\fancyhf{}
+\fancyfoot[C]{\slshape \thepage} \fancyhead{}
+% ignora, nello stile plain, le intestazioni
+\renewcommand{\headrulewidth}{0pt} % e la linea
+%\renewcommand{footrulewidth}{0pt}
+}
+
+
+
+
+\hyphenation{stand-alo-ne} \hyphenation{cms-Run}
+\include{epsf}
+
+
+
+\newcommand{\Zmm}{$Z\rightarrow \mu^+ \mu^- \:$}
+\newcommand{\Wmn}{$W\rightarrow\mu\nu \:$}
+
+\newcommand{\Ztomumu}{Z\rightarrow\mu^+\mu^-}
+\newcommand{\Wtomunu}{W^+\rightarrow\mu^+\nu}
+
+\newcommand{\nonIso}{\mathrm{non\,iso}}
+
+\newcommand{\mumu}{\mu\mu}
+\newcommand{\Zmumu}{Z_{\mumu}}
+\newcommand{\Zmus}{Z_{\mu s}}
+\newcommand{\Zmut}{Z_{\mu t}}
+\newcommand{\ZmumuNonIso}{\Zmumu^\nonIso}
+\newcommand{\ZmumuTwoHlt}{\Zmumu^{2\mathrm{HLT}}}
+\newcommand{\ZmumuOneHlt}{\Zmumu^{1\mathrm{HLT}}}
+
+\newcommand{\NZtomumu}{N_{\Ztomumu}}
+
+\newcommand{\Nmumu}{N_{\mumu}}
+\newcommand{\Nmus}{N_{\mu s}}
+\newcommand{\Nmut}{N_{\mu t}}
+\newcommand{\NmumuNonIso}{\Nmumu^\nonIso}
+\newcommand{\NmumuTwoHlt}{\Nmumu^{2\mathrm{HLT}}}
+\newcommand{\NmumuOneHlt}{\Nmumu^{1\mathrm{HLT}}}
+
+
+\newcommand{\effHlt}{\epsilon_\mathrm{HLT}}
+\newcommand{\effIso}{\epsilon_\mathrm{iso}}
+\newcommand{\effTrk}{\epsilon_{trk}}
+\newcommand{\effSa}{\epsilon_{sa}}
+
+
+
+
+
+
+\textwidth=430pt %% 390pt di default
+\oddsidemargin=13mm \evensidemargin=-4mm
+
+
+
+\bibliographystyle{unsrt}
+
+\begin{document}
+\frontmatter
+%\renewcommand{\abstractname}{}
+\begin{titlepage}
+
+%per centrare la prima pagina
+\changetext{}{}{}{ ((\paperwidth - \textwidth) / 2) - \oddsidemargin - \hoffset - 1in}{}
+
+
+\begin{center} 
+
+\begin{center}
+\centerline{\Huge{\bf Universit\`{a} degli Studi di Napoli}} \centerline{\Huge {\bf
+``Federico II''}} \vspace*{0.1 cm}
+
+
+\begin{figure}[h]
+%\epsfxsize=3cm \epsfysize=3cm
+%
+\begin{center}
+\resizebox{0.2\textwidth}{!}{\includegraphics{FII.jpg}}
+\end{center}
+\end{figure}
+\vspace*{.5 cm} \centerline{\LARGE \bf Facolt\`{a} di Scienze
+  MM. FF. NN.} \vspace{0.4cm}
+\Large{\bf PHD Thesis} \vspace{1.4 cm} \centerline{{\bf \Large{\bf XXIII cycle} }}
+ \vspace{0.2cm} \centerline{\LARGE {\bf The \Zmm decay channel in the}}
+ \vspace{0.2 cm} \centerline{\LARGE {\bf CMS experiment at
+     LHC: from cross-section}}
+ \vspace{0.2 cm} \centerline{\LARGE {\bf measurement with the 2010 7
+     TeV collision}}
+  \vspace{0.2 cm} \centerline{\LARGE {\bf data-set to offline machine luminosity monitor}}
+
+  \vspace{4cm}
+\begin{flushleft}
+ { \large  Relatori:} \hfill {\large  Studente:}\\
+\large Ch.mo Prof. C.Sciacca \hfill {\large  de Gruttola Michele}\\
+\large{Dott. L.Lista} \\
+\end{flushleft}
+\end{center}
+\end{center}
+\end{titlepage}
+
+\newpage
+
+\clearpage{\pagestyle{empty}\cleardoublepage} \thispagestyle{empty}
+ \vspace*{6cm} \hspace*{10cm}
+\begin{quotation}
+%\begin{flushright}
+ {\footnotesize{\noindent 
+...............
+ }}
+ %\end{flushright}
+ \end{quotation}
+\newpage
+ \clearpage{\pagestyle{empty}\cleardoublepage}
+ \pagenumbering{Roman}
+ \tableofcontents
+\clearpage{\pagestyle{empty}\cleardoublepage} \thispagestyle{empty}
+\addcontentsline{toc}{section}{List of figures} \listoffigures
+
+\addcontentsline{toc}{section}{List of Tables} \listoftables
+\newpage
+
+
+\clearpage{\pagestyle{empty}\cleardoublepage} \thispagestyle{empty}
+%\newpage
+
+\pagenumbering{arabic}
+\part{Overview}
+%\addcontentsline{toc}{part}{Overview} 
+\input{Introduction/Introduction}
+
+\input{FirstChapter/Physics}
+\input{SecondChapter/CMS}
+\part{CMS data processing workflow: non event data}
+%\addcontentsline{toc}{part}{CMS computing: non event data} 
+
+\input{ThirdChapter/NonEventData}
+\part{\Zmm cross section measurement and luminosity monitor}
+%\addcontentsline{toc}{part}{\Zmm cross section measurement and luminosity monitor} 
+
+\input{FourthChapter/MuonAndZ}
+\input{FifthChapter/ZAnalysis}
+
+%\bibliographystyle{unsrt}
+\input{Bibliography/Bibliography.bib}
+
+\end{document}

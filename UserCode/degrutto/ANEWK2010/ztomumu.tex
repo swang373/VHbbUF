@@ -1,0 +1,142 @@
+
+
+\documentclass{cmspaper}
+\usepackage{multirow}
+\begin{document}
+
+\newcommand{\Zmm}{$Z\rightarrow \mu^+ \mu^- \:$}
+\newcommand{\Wmn}{$W\rightarrow\mu\nu \:$}
+
+
+\newcommand{\Ztomumu}{Z\rightarrow\mu^+\mu^-}
+\newcommand{\Wtomunu}{W^+\rightarrow\mu^+\nu}
+
+\newcommand{\nonIso}{\mathrm{non\,iso}}
+
+\newcommand{\mumu}{\mu\mu}
+\newcommand{\Zmumu}{Z_{\mumu}}
+\newcommand{\Zmus}{Z_{\mu s}}
+\newcommand{\Zmut}{Z_{\mu t}}
+\newcommand{\ZmumuNonIso}{\Zmumu^\nonIso}
+\newcommand{\ZmumuTwoHlt}{\Zmumu^{2\mathrm{HLT}}}
+\newcommand{\ZmumuOneHlt}{\Zmumu^{1\mathrm{HLT}}}
+
+\newcommand{\NZtomumu}{N_{\Ztomumu}}
+
+\newcommand{\Nmumu}{N_{\mumu}}
+\newcommand{\Nmus}{N_{\mu s}}
+\newcommand{\Nmut}{N_{\mu t}}
+\newcommand{\NmumuNonIso}{\Nmumu^\nonIso}
+\newcommand{\NmumuTwoHlt}{\Nmumu^{2\mathrm{HLT}}}
+\newcommand{\NmumuOneHlt}{\Nmumu^{1\mathrm{HLT}}}
+
+
+\newcommand{\effHlt}{\epsilon_\mathrm{HLT}}
+\newcommand{\effIso}{\epsilon_\mathrm{iso}}
+\newcommand{\effTrk}{\epsilon_{trk}}
+\newcommand{\effSa}{\epsilon_{sa}}
+
+
+%==============================================================================
+% title page for few authors
+
+
+%\special{!userdict begin /bop-hook{gsave 
+%   200 30 translate
+%   65 rotate 
+%   /Helvetica findfont 
+%    120 scalefont setfont
+%   20 20 moveto 
+%   0.9 setgray 
+%   (DRAFT) show 
+%   grestore} def end}
+
+\begin{titlepage}
+
+{\hfill\Large\bf CMS AN-2010/XXX}
+\begin{center}
+\resizebox{1.0\textwidth}{!}{\includegraphics{cms_an.pdf}}
+\end{center}
+
+   \date{27 Apr 2009}
+
+  \title{Determination of the $pp\rightarrow Z X\rightarrow\mu^+\mu^- X$ inclusive cross section with a simultaneous fit of $Z$ yield, muon reconstruction efficiencies and trigger efficiency with the first 2.9 pb$^{-1}$ of 7 TeV collision data}
+
+\begin{Authlist}
+  M.~De Gruttola, A.~De Cosa, F.~Fabozzi\Aref{a}, L.~Lista 
+  \Instfoot{infn}{INFN Sezione di Napoli, Naples, Italy}
+  \Instfoot{fedii}{Universit\`a degli Studi di Napoli ``Federico II'', Naples, Italy.}
+  \Anotfoot{a}{Also with Universit\`a della Basilicata, Potenza, Italy.}
+  D.~Piccolo
+  \Instfoot{lnf}{Laboratori Nazionali INFN di Frascati, Italy.}
+\end{Authlist}
+
+\begin{abstract}
+We present the results for the determination of the inclusive cross 
+section of the process $pp\rightarrow Z X\rightarrow\mu^+\mu^- X$.
+The method to extract the cross section is based on a simultaneous
+fit of the yield of $\Ztomumu$ events, the
+average reconstruction muon efficiencies in the tracker and in
+the muon detector, the trigger efficiency, 
+as well as the efficiency of the cut applied to select isolated muons. 
+The extracted Z yield has to be just corrected for the geometrical acceptance and for
+the integrated luminosity in order to measure the cross section.
+The measurements obtained with the first 2.9 pb$^{-1}$ is $\bf{\sigma (pp \rightarrow  ZX) \times BF ( Z \rightarrow \mu^+ \mu^-) = 0.924 � 0.031 (stat.) � 0.022 (syst.) � 0.101 (lumi.
+) nb}$, in agreement with the Standard Model prediction.
+
+\end{abstract} 
+  
+\end{titlepage}
+
+\tableofcontents
+
+\newpage
+
+\setcounter{page}{2}%JPP
+
+\section{Introduction}
+In the CMS notes~\cite{cmsnote}, ~\cite{oldnote} and \cite{lastnote}  we studied the measurement of the 
+inclusive cross section of the process $pp\rightarrow Z X\rightarrow\mu^+\mu^- X$
+suggesting a way to fit simultaneously the total yield, the muon reconstructions efficiencies, the isolation cut efficiency and the trigger efficiency directly on data, without any estimate of those efficiencies from Monte Carlo (MC).
+In order to measure the cross section, the Z yield had to be corrected for the trigger efficiency
+that in Ref.~\cite{oldnote} was quoted from the MC truth.
+In this note we finally apply the strategy on 7 TeV collision data and measure the $\Ztomumu$ cross-section with a very reduced systematic error.   
+
+
+
+\input{FifthChapter/ZAnalysis}
+
+
+\begin{thebibliography}{9}
+  \bibitem {cmsnote} N. Adam {\it et al.}, Towards a measurement of the inclusive $W\rightarrow\mu\nu$ and $\Ztomumu$ cross sections in pp collisions at $\sqrt{s} = 14$~TeV, {\em CMS AN-2007/031 }.
+\bibitem {oldnote} M. De Gruttola {\it et al.}, Determination of the $pp\rightarrow Z X\rightarrow\mu^+\mu^- X$ inclusive cross section with a simultaneous fit of $Z$ yield and muon reconstruction efficiencies, {\em CMS AN-2008/062 }.
+\bibitem {lastnote} M. De Gruttola {\it et al.}, Determination of the $pp\rightarrow Z X\rightarrow\mu^+\mu^- X$ inclusive cross section with a simultaneous fit of $Z$ yield, muon reconstruction efficiencies and High Level Trigger efficiency {\em CMS AN-2009/005 }.
+
+\bibitem{ICHEP2010} http://www.ichep2010.fr/.
+\bibitem{GEANT} GEANT4 Collaboration, S. Agostinelli et al., GEANT4: A simulation
+toolkit, Nucl. Instrum. Meth. A506 (2003) 250303.
+\bibitem{CMSLumi} CMS Collaboration, ``Measurement of CMS luminosity'', CMS PAS EWK-2010-004 (2010).
+\bibitem{PASEWK} CMS Collaboration, ``Measurements of Inclusive W and Z Cross Sections in pp Collisions at $\sqrt{7}$  TeV'',
+ CMS PAS EWK-2010-002 (2010).
+\bibitem{ClopperPearson} Clopper, C.; Pearson, E. S. (1934). ``The use of confidence or fiducial limits illustrated in the cas
+e of the binomial''. Biometrika 26: 404-413.
+\bibitem{PLR} S. Baker and R. Cousins, Clarification of the Use
+of Chi-Square and Likelihood Functions in Fits to Histograms, NIM
+221:437 (1984)
+\bibitem{MCFM} J. Campbell and R.K. Ellis, Monte Carlo for FeMtobarn processes,
+1449 http://mcfm.fnal.gov/.
+\bibitem{AN_2010_264}  CMS Collaboration, ``Updated Measurements ofInclusiveW and Z Cross Sections at 7 TeV'', CMS AN-2010-26
+4
+\bibitem{PerugiaLumi}  ``Luminosity measurements at LHC''. S. de Capua, (CERN) , F. Ferro, (INFN, Genoa) , M. De Gruttola, (I
+NFN, Naples) , M. Villa, (INFN, Bologna) . 2008. 12pp.
+Prepared for 5th Italian Workshop on LHC Physics (In Italian), Perugia, Italy, 30 Jan - 2 Feb 2008.
+Published in Nuovo Cim.123B:423-434,2008.
+
+
+\end{thebibliography}
+ 
+
+%------------------------------------------------------------------------------
+\pagebreak
+
+\end{document}

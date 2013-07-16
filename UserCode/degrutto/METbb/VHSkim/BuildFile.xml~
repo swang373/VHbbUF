@@ -1,0 +1,8 @@
+<library?
+<export>
+  <lib name="1"/>
+<library
+<use   name="DataFormats/PatCandidates"/>
+<use   name="PhysicsTools/Utilities"/>
+
+</export>

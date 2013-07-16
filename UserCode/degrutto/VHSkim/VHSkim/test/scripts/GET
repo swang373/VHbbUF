@@ -1,0 +1,39 @@
+#! /usr/bin/env python
+
+
+import sys
+import os
+import commands
+import string
+
+
+def fib(n):
+	os.system("lcg-cp -V cms --srm-timeout=6000 -n 1 --connect-timeout=6000 -T srmv2 -U srmv2 'srm://cmsdcache.pi.infn.it:8443/srm/managerv2?SFN=/pnfs/pi.infn.it/data/cms/store/arizzi/sept28Ntuple//%s' %s" % (n,n))
+	
+
+
+
+
+#var = raw_input("What File?")
+#fib(var)
+
+
+L = [
+"TestT_TuneZ2_t-channel_7TeV-powheg-tauola_HBB_EDMNtupleV9_ProcV1.root",
+"TestZZ_TuneZ2_7TeV_pythia6_tauola_HBB_EDMNtupleV9_ProcV1.root",
+"TestTTJets_TuneZ2_7TeV-madgraph-tauola_HBB_EDMNtupleV9_ProcV1.root",
+"TestZJetsToLL_Pt-100_7TeV-herwigpp_HBB_EDMNtupleV9_ProcV1.root",
+"TestTbar_TuneZ2_tW-channel-DR_7TeV-powheg-tauola_HBB_EDMNtupleV9_ProcV1.root",
+"TestTbar_TuneZ2_s-channel_7TeV-powheg-tauola_HBB_EDMNtupleV9_ProcV1.root",
+"TestTbar_TuneZ2_tW-channel-DS_7TeV-powheg-tauola_HBB_EDMNtupleV9_ProcV1.root",
+"TestTbar_TuneZ2_t-channel_7TeV-powheg-tauola_HBB_EDMNtupleV9_ProcV1.root",
+"TestT_TuneZ2_tW-channel-DR_7TeV-powheg-tauola_HBB_EDMNtupleV9_ProcV1.root",
+"TestDYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola_HBB_EDMNtupleV9_ProcV1.root",
+"TestDYJetsToLL_PtZ-100_TuneZ2_7TeV-madgraph-tauola_HBB_EDMNtupleV9_ProcV1.root",
+"TestT_TuneZ2_tW-channel-DS_7TeV-powheg-tauola_HBB_EDMNtupleV9_ProcV1.root"
+]
+
+for item in L:
+        fib(item)
+
+

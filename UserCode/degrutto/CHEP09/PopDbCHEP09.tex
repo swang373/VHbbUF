@@ -1,0 +1,315 @@
+\documentclass[a4paper]{jpconf}
+\usepackage{graphicx}
+\usepackage{multirow}
+
+	
+	
+\begin{document}
+\title{First experience in operating the population of the condition database for the CMS experiment}
+\author{Michele de Gruttola$^{1,2,}$\footnote[3]{Also with {\it{Universit\`a  degli studi di Napoli ``Federico II'
+', Corso Umberto I, 40 - 80143, Naples, Italy}}}, Salvatore di Guida$^2$, Frank Glege$^2$, Vincenzo Innocente$^2$, Pierluigi Paolucci$^{1,2}$, David Futyian$^2$, Giacomo Govi$^2$, Antonio Pierro$^{2,4}$, Dieter Schlatter$^2$}
+  
+ %  D.~Author, E.~Author\Aref{b}, F.~Author
+  %     \Instfoot{ieph}{Institute of Experimental Physics, Hepcity, Wonderland}
+
+
+\address{$^1$ INFN Sezione di Napoli, Compl. Univ. Monte Sant'Angelo, via Cintia, I-80126, Naples, Italy}
+\address{$^2$ CERN, CH 1211 - Geneve 23, Switzerland}
+\address{$^4$ INFN Sezione di Bari - Bari University, Via Orabona 4, Bari 70126, Italy}
+
+
+\ead{michele.de.gruttola@cern.ch}  
+                                   
+\begin{abstract}
+Reliable population of the condition database is critical for the correct operation of the online selection as well as of the offline reconstruction and analysis of data. 
+We will describe here the system put in place in the CMS experiment to populate the database and make condition data promptly available both online for the high-level trigger and offline for reconstruction. 
+The system, designed for high flexibility to cope with very different data sources, uses POOL-ORA technology in order to store data in an object format that best matches the object oriented paradigm for \texttt{C++} programming language used in the CMS offline software. 
+In order to ensure consistency among the various subdetectors, a dedicated package, PopCon (Populator of Condition Objects), is used to store data online. 
+The data are then automatically streamed to the offline database hence immediately accessible offline worldwide. 
+This mechanism was intensively used during 2008 in the test-runs with cosmic rays. 
+The experience of this first months of operation will be discussed in details. 
+\end{abstract}
+
+
+\section{Introduction}
+Databases have become a vital part of the LHC experiments. 
+The large amount of data needed to set up the detectors and produced by them makes the DB system an essential service for the experiments to run: these data, indeed, are used for the calibration of the physical responses of the detectors themselves. 
+Therefore, a central work inside CMS was started many years ago to set up a system able to populate the condition data efficiently. 
+
+This system has been successfully deployed and operated nicely last year during cosmic runs with and without magnetic field.    
+Important requirements constraining the possible DB model design are:
+\begin{itemize}
+\item CMS always requires to be able to operate without network connection to the outside world (IT Meyrin included). Therefore, an independent DB infrastructure should reside in CMS P5 network.
+\item Condition/calibration data access for the offline reconstruction shall hide to the user any underlying database technology. The storing and access mechanism should best match the object oriented paradigm for the \texttt{C++} programming language used in the CMS offline software (\texttt{CMSSW}\cite{CMSSW})  
+\item Offline condition data work-flow should fit a multi-tier structure as the event data one.
+\end{itemize}
+
+Having to tackle all this constraints, the team involved in the CMS db project, in collaboration with the CERN-IT department did choose to rely on 3 great databases for storing non event data:
+\begin{enumerate}
+\item {\textbf{OMDS}}  ({\textbf{O}}nline {\textbf{M}}aster {\textbf{D}atabase} {\textbf{S}}ystem) is in the online network at IP5; it stores the data needed for the configuration and proper settings of the detector, and the condition data produced directly from the front-end electronics. 
+All tables in it are purely relational.
+\item {\textbf{ORCON}} ({\textbf{O}}ffline {\textbf{R}}econstruction  {\textbf{C}ondition} DB {\textbf{ON}}line subset) is in the online  network: it stores all the condition data needed for the physics quantities reconstruction as well as for data quality indicator. 
+These are a small subset of all the online quantities.
+The data in it are written using the POOL-ORA\cite{POOLORA} technology and are retrieved by the HLT programs as {\texttt{C++}} objects for the offline software.  
+\item  {\textbf{ORCOFF}} ({\textbf{O}}ffline {\textbf{R}}econstruction  {\textbf{C}ondition} DB {\textbf{O}}ffline subset) in the T0 site (CERN Meyrin): it is an ORCON copy, made through ORACLE streaming. It contains the entire history of all CMS condition data and serves as imput source for both prompt reconstruction and condition deployment service at T1/T2 sides. 
+Data in it are retrieved by the reconstruction algorithms as \texttt{C++} objects for the offline software. 
+\end{enumerate}
+
+The actual policy of the CMS community is to write any condition/calibration data needed for offline purposes in ORCON. ORACLE streaming provides the transfer from ORCON to ORCOFF. 
+In this paper we will mainly describe the condition data work-flow, i.e. non event data, on ORCON/ORCOFF. The attention will be focused on the system set up to populate centrally the CMS condition database and to monitor the database activity itself. 
+
+\section{Condition data description}
+The non-event data content of ORCON/ORCOFF can be classified in three main groups:
+\begin {itemize}
+\item {\bf Configuration data}: the data needed to bring the detector in running mode. 
+This class includes voltage settings of power supplies, gas pressures, and any programmable parameter for front end electronics and trigger. 
+\item {\bf Condition data}: the data from any detector subsystem describing its state, usually uploaded in OMDS directly from detector back-end devices. For example the Data Control System (DCS) information are stored with the ORACLE interface provided by PVSS\cite{PVSS}. 
+Only a subset of this data is transferred to the offline system for detector performance studies.  
+\item {\bf Calibration data}: the data describing the calibration and alignment of the single pieces of the different sub-detectors. 
+These quantities (such as pedestals offsets, drift values, noises, alignments, etc) are evaluated running offline dedicated algorithms. 
+Since these data are needed both online, in order to be used by the HLT algorithms, and offline, in order to reconstruct properly the physical quantities coming from collision events, they must be stored in the offline condition databases.
+Therefore, they should match the corresponding raw data coming from the collision events revealed by the detector.
+\end{itemize}   
+
+All these data need a tag and an interval of validity as meta-data.
+
+The interval of validity (IOV) is the contiguous (in time) set of events for which non-event data are to be used in reconstruction.
+According to the use-case, the IOV will be defined in terms of GPS-time (mainly for condition data) or run-number\footnote{Progressive number given to a set of contiguous Physics events, coming from either collisions of particles accelerated in the LHC or cosmic rays revealed by the detector} range (usually for calibrations). 
+While the IOV for some electronic related conditions (e.g. pedestals and noises) is identical to the time interval in which these data were used in the online operations, some calibration data may posses an IOV different from the time range in which they have been calculated.
+For this reason, the IOV assignment for a given set of condition data is carried out at the offline level.
+Each payload object, i.e. each data stored as POOL-ORA object in ORCON/ORCOFF, is indexed by its IOV and a  tag\footnote{a label describing the calibration version, while the data themselves do not contain any time validity information; when new better calibrations are evaluated, the tag labelling the data should be changed}.     
+
+The matching with the raw data from the collision events is indeed possible via these meta-data: the reconstruction algorithms for the analysis of a given run query the offline condition data corresponding to the same run grouped through a set of tags, called \emph{global tag}.
+
+\section{Database architecture}
+Different data usage and access from online to offline determines the overall architecture.
+In the online network, the data are mainly written into the database. 
+Data size is expected to become very large (several TBs), and, since condition data will constantly flow into the DB, the time needed to store these data in OMDS is a critical issue. 
+The online data are stored at random time, and the time when their storage occurs is usually not synchronous with respect to the time when they are read, since these data can be taken by different sources. 
+Besides, different data items must be accessible in order to be compared between each other. 
+Therefore, OMDS is designed with relational schemas: each sub-detector designed his own DB schema, reflecting as much as possible the detector structure.
+
+On the contrary, in the offline network data are mainly read from the databases.  These data must be synchronized with the event reprocessing, and grouped before they are read, so that they can be decoded according to predefined rules. An object oriented solution has been carried on for ORCON/ORCOFF.
+
+The general data flow of non event data is the following: configuration data are prepared using the equipment management information and loaded into the detector (hardware and software). 
+While running, the detector produces condition data, which are first stored in OMDS. 
+The offline conditions subset is extracted and sent to the offline sites, as pictured in figure \ref{fig:CondDBArchitecture}. 
+The condition data needed by the HLT farm will be loaded from ORCON. 
+
+A software application named POPCON (Populator of Condition) operates the online to offline condition data transfer and encapsulates the relation data as POOL-ORA objects. 
+PopCon adds meta-data information (tag and IOV) to the condition data, so that they can be read by the offline/HLT software. 
+
+\begin{figure}[hbtp]
+  \begin{center}
+    \resizebox{1.0\textwidth}{!}{\includegraphics{figure/DBArchitecture.pdf}} \caption{CMS condition databases architecture.}
+    \label{fig:CondDBArchitecture}
+  \end{center}
+\end{figure}
+
+Finally, data are transferred to ORCOFF, which is the main condition database for the CMS tier 0, using ORACLE streaming.
+
+From ORCOFF data will be distributed to the other tier centers, through Frontier\cite{FRONTIER} packages. 
+Calibration data evaluated offline will be written to ORCON, using PopCon. 
+Collision event data are therefore processed using the offline condition data. 
+As data taking goes on, we can understand better and better how the detector works; therefore, this will require new calibrations, hence new versions of condition data, identified by new tags.
+
+
+\subsection{PopCon}\label{subsect:POPCON}
+
+PopCon transfers the conditions objects from a user-defined data source to the off-line database.
+
+Popcon is based on cmsRun infrastructure, so the base PopCon application class is the EDAnalyzer. 
+However, it is possible to use different data sources such as databases, ROOT files, ASCII files, etc. 
+For each conditions object (payload) class a PopCon application is created.
+
+The core framework consists of three parameterized classes, as can be seen in figure \ref{fig:PopConSchema}:
+
+\begin{itemize}
+\item PopCon
+\item PopConSourceHandler
+\item PopConAnalyzer 
+\end{itemize}
+
+The ``detector user'' provides the code which handles the data source and specifies the destination for the data, writing a derived class of  PopConSourceHandler, where all the online (source handling) code goes. 
+The user instantiates his/her objects, provides the IOV information for such objects and configures the database output module. 
+PopCon configuration file associates the tag name defined according to some specific rules, to the condition object. 
+Once the object is built, the PopCon application writes the data to the specified database. 
+Subdetector code does not access the target output database: it only passes the objects to the output module.
+
+The analyzer object holds the source handling object. It also serves some additional functionality such as:
+\begin{itemize}
+ \item Locking mechanism
+ \item Transfer logging
+ \item Payload verification (IOV sequence)
+ \item Application state management
+ \item Database output service 
+\end{itemize}
+The writer in PopCon iterates over the container of user objects and stores it in the user-configured data destination. 
+
+\begin{figure}[hbtp]
+  \begin{center}
+    \resizebox{1.0\textwidth}{!}{\includegraphics{figure/uml_popcon.pdf}} \caption{Schema of the classes for the PopCon package.}
+    \label{fig:PopConSchema}
+  \end{center}
+\end{figure}
+
+Any transaction towards ORCON is logged by PopCon, and the process information is sent to a database account as well. A monitoring tool for this information was developed, in order to check the correctness of the various transactions, and to keep trace of every upload for condition data.
+ 
+\section{First experience in operating the population on the condition db in 2008}
+
+In the 2008 global runs (with or without the magnetic field) the great majority of the condition data was transferred offline with a PopCon application. 
+Great effort was devoted by the CMS database project team in the integration of all the software and the infrastructural chain to upload the calibration constants into the CMS condition databases. 
+Many tools were provided in order to help the sub-detector responsible people to populate the database. 
+Indeed, a central procedure, based on an automatic uploader into ORCON on a dedicated machine in the online network, was successfully deployed during 2008, and will be the recommended way to populate ORCON in 2009 data taking. 
+
+
+\subsection{Condition objects written with PopCon in 2008}
+
+As stated above, each condition data (pedestals, Lorentz Angles, drift time, etc.) corresponds to a {\texttt C++} object (``CondObjects'') into the CMS overall software. 
+Each object is associated with a PopCon application which writes the payload into ORCON. 
+Table \ref{tab:page_layout} lists all the CondObjects written by the corresponding sub-detector condition/calibration experts in 2008, grouped according to the subsystem they belong to. 
+For each object the type, the approximate data size in ORCON and the uploading frequency are also reported.
+   
+ \begin{table}[htbp]
+    \caption{2008 CMS condition objects list}
+    \label{tab:page_layout}
+    \begin{center}
+      \begin{tabular}{lllll} \br
+            Subsystem   & Name & Type & Data size & Frequency\\  \mr
+  \multirow{3}{*} {Pixel} & SiPixelFedCablingMap & online configuration& 1K& once (before the run )  \\      
+ & SiPixelLorentzAngle & offline calibration & 1MB & each run (if different) \\ 
+ & SiPixelCalibConfiguration  & online calibrations & 5KB & each calibration run \\ \mr
+  \multirow{5}{*} {Tracker} & SiStripFedCapling & online configuration& 1K&once \\        
+& SiStripBadStrip & online condition & 1MB&  each run (if different)\\ 
+& SiStripTreshold & offline calibration & 1MB&  each run (if different)\\        & SiStripPedestals & offline calibration & 1MB&  each run (if different)\\  
+& SiStripNoise & offline calibration & 1MB&  each run (if different)            
+\\ \mr
+
+  \multirow{2}{*} {Ecal} & EcalPedestals & online calibration& 2MB& daily \\     & EcalLaserAPDPNRatios & online calibration & 2MB& hourly        
+\\ \mr
+
+ \multirow{5}{*} {Hcal} & HcalElectronicsMap & online configurations & 1MB& once (before the run)  \\  
+& HcalGains & offline calibrations & 1MB& each run \\  
+& HcalPedestals & offline calibrations & 1MB& each run \\  
+& HcalPedestalsWidths & offline calibrations & 1MB& each run \\  
+& HcalQIEData & online calibrations & 1MB& each run 
+
+\\ \mr
+
+ \multirow{7}{*} {CSC} & CSCChamberMap & online configuration & 10KB & monthly  \\  
+& CSCCrateMap & online configuration & 10KB & monthly  \\  
+& CSCDDUMap & online configuration & 10KB & monthly  \\  
+& CSCChamberIndex & online configuration & 10KB & monthly  \\  
+& CSCGains & offline calibrations & 2MB& each run  \\  
+& CSCNoiseMatrix & offline calibrations & 2MB& each run  \\  
+& CSCPedestals & offline calibrations & 2MB& each run  \\  
+\mr
+
+\multirow{5}{*} {DT} & DtReadOut & online configuration & 10MB & once  \\  
+ & DtCCBConfig &  online configuration  & 100KB & once (before the run)   \\
+ & DtT0 & offline calibration & 10MB & rare  \\
+ & DtTTrig & offline calibration & 1MB & at trigger change   \\
+ & DtMTime & offline calibration & 1MB & daily   \\
+\mr
+
+
+\multirow{3}{*} {RPC} & RPCEMap & online configuration & 10MB & once  \\
+& L1RPCConfig & online configuration & 10MB & once  \\
+& RPCCond & online conditions & 10MB & daily  \\
+\mr
+
+\multirow{1}{*} {DAQ} & RunSummary & run conditions & 10KB & run start/end  \\
+\br
+     \end{tabular}
+    \end{center}
+  \end{table}
+
+
+\subsection{Central population of the condition database}
+
+A central procedure was set up in 2008 for populating the CMS condition databases: it exploits a central account, i.e. explicitly devoted to condition database population, in the CMS online network. 
+On that account a set of automatic jobs were centrally set up for any single sub-detector user, in order to both populate ORCON and monitor any transaction to it. 
+
+Two possibilities are given to users:
+\begin{enumerate}
+\item running automatically the application that reads from any online source, assigns tag and interval of validity, and uploads the constants into ORCON (mainly for condition). 
+The time interval of the automatic jobs are negotiated with the users.  
+\item using the account as a drop-box: users copy the calibrations in a light format into a dedicated folder for each sub-detector, and then these data are automatically exported in ORCON (mainly for offline calibrations).  
+\end{enumerate}
+
+Figure \ref{fig:DropBox} shows a sketch of the central system to populate the condition database. Each sub-detector responsible person may transfer the payload on the central machine, that runs automatically the exportation into ORCON (referred as  ``SubdetectorExport'' scripts). Other automatic scripts (referred as ``SubdetectorO2O'' scripts in the figure), indeed, control that new conditions have appeared in the online table, and, if that is the case, perform the data transfer from the online relational database to the offline ones.   
+
+The PopCon applications run trasfer each payload into the corresponding account, and all the log information in the PopConLog account on ORCON itself.
+
+\begin{figure}[hbtp]
+  \begin{center}
+    \resizebox{1.0\textwidth}{!}{\includegraphics{figure/PopConCentral.pdf}} \caption{Schematic illustration of the central system to populate ORCON, and of the web monitoring system.}
+    \label{fig:DropBox}
+  \end{center}
+\end{figure}
+
+Each automatic job is associated with a ``watchdog'' tool that monitors its status.
+The job monitoring information are also logged into the PopConLog account on ORCON.
+
+A dedicated web interface, {\it PopCon monitor web interface} was set up on a CMS web server in order to look at all the logged information, hence monitoring the activity on the condition databases. 
+The monitor system is made of three layers:
+\begin{itemize}
+\item a {\it Python} code to query the PopConLog account.   
+\item a Python-JSON code to produce a JSON (JavaScript Object Notation) string. 
+\item a CSS web interface to configure the look and fill of the overall information.
+\end{itemize} 
+
+Two important monitor web pages are then produced:
+\begin{enumerate}
+\item an activity summary, in which the number of transactions towards ORCON, the subsystem involved, the iov and tag uploaded can be displayed, according to the users' requests. An example is shown in figure \ref{fig:PopConAct}. 
+\item the logs of all the central scripts, as produced by the watchdog tools. Looking at those logs, the correct bahaviour of the central uploader machine is controlled, so that an alarm system, based on that information, can recognize if some exportations were not successful and, eventually, inform the end-user of the error occurred. A screenshot of the page is in figure~\ref{fig:WatchDog}.    
+\end{enumerate}
+
+\begin{figure}[hbtp]
+  \begin{center}
+    \resizebox{1.0\textwidth}{!}{\includegraphics{figure/WatchDog.pdf}} \caption{Screenshot of the web page produced by the monitoring system that checks the watchdog tools for the automatic population of ORCON.}
+    \label{fig:WatchDog}
+  \end{center}
+\end{figure}
+
+Figure \ref{fig:PopConAct} reports all the transactions towards the condition database accounts occurred in a month of cosmic data taking. 
+As the summary plot points out, almost all sub-detectors did use PopCon to upload calibration constants to the condition databases.
+An average of one hundred PopCon applications per day were run during the test runs in summer/fall 2008, hence one hundred connections per day to the condition databases took place.
+
+\begin{figure}[hbtp]
+  \begin{center}
+    \resizebox{1.0\textwidth}{!}{\includegraphics{figure/PopConAct.pdf}} \caption{PopCon activity during end September-beginning of October 2008.}
+    \label{fig:PopConAct}
+  \end{center}
+\end{figure}
+
+During the entire year 2008 the total amount of condition data written in the production database was approximatively 1 TB. 
+Indeed, no network problems, neither for the online-offline streaming, nor for Frontier was detected. 
+All the conditions and calibrations were properly evaluated for CRUZET and CRAFT data taken in 2008, leading to several global tags used in 2008 for the reconstruction and the analysis of the cosmic ray data by the whole CMS community. 
+
+\newpage
+
+\section{Conclusion}
+
+A robust system was set up in order to upload, store and retrieve all calibration constants for the CMS experiment. 
+The system relies on ORACLE database for data storage, and on the PoolORA technology, embedded in the PopCon application (written in \texttt{C++}) and integrated in the overall CMSSW architecture, for data handling. 
+The whole chain was deployed and tested succesfully during 2008 challenges with cosmic rays: these tests pointed out that the system we have just described is stable and robust enough for the 2009-2010 collision data taking.
+
+
+
+\section*{References}
+\begin{thebibliography}{9}
+\bibitem{CMSSW} Analysis environments for CMS,C.D. Jones et al. {\em J. Phys.: Conf. 2008 Ser. 119 032027 }. 
+\bibitem{PVSS} The Joint COntrols Project Framework, M. Gonzalez-Berges {\em Int. Conf. on Computing in High Energy Physics, March 2003, La Jolla, California}.
+\bibitem {POOLORA} POOL PERSISTENCY FRAMEWORK FOR THE LHC NEW DEVELOPMENTS AND CMS APPLICATIONS, Z.Xie et al. {\em {Proc. ``Frontier Science 2005: New Frontiers in Sub nuclear Physics, September 12-17,2005 Milan, Italy''}}.
+\bibitem{FRONTIER} CMS conditions data access using FroNTier, B.Blumenfeld et al. {\em 2008 J. Phys.: Conf. Ser. 119 072007}.
+\bibitem{POOL} THE LCG POOL Project - General Overview and Project Structure, D.Dullman et al., { \em Proc. CHEP 2003 MOKToo7, La Jolla, March 24-28 2003}.
+\bibitem{twikiDB} ``https://twiki.cern.ch/twiki/bin/view/CMS/DatabaseWikiHome''
+\bibitem {twikiPopCon} ``Https://twiki.cern.ch/twiki/bin/view/CMS/SWGuidePopConDevelopersManual''
+\bibitem{twikiPopConOperation}  ``https://twiki.cern.ch/twiki/bin/view/CMS/PopConOperationSupport''  
+\end{thebibliography}
+
+
+
+\end{document}
+

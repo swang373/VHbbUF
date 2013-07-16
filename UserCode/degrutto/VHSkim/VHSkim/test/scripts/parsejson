@@ -1,0 +1,7 @@
+sed -i 's@\[@\n@g' json_DCSONLY.txt
+sed -i 's/.*','//g' json_DCSONLY.txt
+sed -i 's@"@@g' json_DCSONLY.txt
+sed -i 's@:@,@g' json_DCSONLY.txt
+sed -i 's@\]\]@@g' json_DCSONLY.txt
+sed -i 's@{@L = [@g' json_DCSONLY.txt
+sed -i 's@}@]@g' json_DCSONLY.txt

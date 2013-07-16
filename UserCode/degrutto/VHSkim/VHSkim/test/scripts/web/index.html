@@ -1,0 +1,27 @@
+<html>
+<body>
+<!-- Codes by Quackit.com -->
+<script type="text/javascript">
+// Popup window code
+function newPopup(url) {
+	popupWindow = window.open(
+		url,'popUpWindow','height=700,width=800,left=10,top=10,resizable=yes,scrollbars=yes,toolbar=yes,menubar=no,location=no,directories=no,status=yes')
+}
+</script>
+<a href="JavaScript:newPopup('http://www.ihepa.ufl.edu/~mfisher/webinterface/vars.html');">Available Variables Here</a>
+
+</br>
+<form action="b.php" method="post">
+Variable: <input type="text" name="var" /> </br>
+X Axis Title: <input type="text" name="xtitle" /></br>
+Cuts: <input type="text" name="cuts" /></br>
+X Low: <input type="text" name="xlow" /></br>
+X High: <input type="text" name="xhigh" /></br>
+Bin Size: <input type="text" name="binsize" /></br>
+<input type="checkbox" name="log" value="log"> Log Scale<br>
+
+<input type="submit" />
+</form>
+
+</body>
+</html>

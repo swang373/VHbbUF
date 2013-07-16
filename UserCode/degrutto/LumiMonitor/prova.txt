@@ -1,0 +1,40 @@
+#file to process
+cd ~/scratch0/CMSSW_3_6_1_patch2/src
+cmsenv
+cd -
+python runregparse.py > ! runlog.log
+set totrun = `wc runlog.log | awk '{print $1}'` 
+#echo $totrun
+##set totrunp1 = `expr $totrun + 1`	
+touch logWZ.log
+
+set j = 0
+while($j<$totrun)
+  set filelocv1 = `python BuildFileName.py runlog.log $j | awk '{print $1}'`
+  setenv  filenamev1  `python BuildFileName.py runlog.log $j | awk '{print $2}'`
+  set filelocv2 = `python BuildFileName.py runlog.log $j | awk '{print $3}'`
+  setenv filenamev2  `python BuildFileName.py runlog.log $j | awk '{print $4}'`
+  set filelocv4 = `python BuildFileName.py runlog.log $j | awk '{print $5}'`
+  setenv filenamev4  `python BuildFileName.py runlog.log $j | awk '{print $6}'`
+  setenv run   `python BuildFileName.py runlog.log $j | awk '{print $7}'`	   
+#  echo $totrun	       
+  cd /tmp/degrutto
+  echo $filenamev1
+  echo $filenamev2 
+  echo" **** start  wget ****" 
+#  wget --certificate ~/.globus/usercert.pem --private-key ~/.globus/nopassUserkey.pem --ca-directory /afs/cern.ch/project/gd/LCG-share/certificates $filelocv1
+#  wget --certificate ~/.globus/usercert.pem --private-key ~/.globus/nopassUserkey.pem --ca-directory /afs/cern.ch/project/gd/LCG-share/certificates $filelocv2
+#  wget --certificate ~/.globus/usercert.pem --private-key ~/.globus/nopassUserkey.pem --ca-directory /afs/cern.ch/project/gd/LCG-share/certificates $filelocv4
+  cd -
+  root -l -b -q getNWZ.C  >>logWZ.log					    
+#  root -l -b -q getNWZ.C >>logWZ.log					    
+  set j = `expr $j + 1`
+end
+#python BuildHtlm.py
+
+#cd /tmp/degrutto
+#wget --certificate ~/.globus/usercert.pem --private-key ~/.globus/nopassUserkey.pem --ca-directory /afs/cern.ch/project/gd/LCG-share/certificates https://cmsweb.cern.ch/dqm/offline/data/browse/ROOT/OfflineData/Run2010/Mu/0001370xx/DQM_V0001_R000137020__Mu__Run2010A-PromptReco-v2__RECO.root 
+#cd -
+
+# to get the entire directory
+#wget --html-extension -convert-link -k -r -np --certificate ~/.globus/usercert.pem --private-key ~/.globus/nopassUserkey.pem --ca-directory /afs/cern.ch/project/gd/LCG-share/certificates https://cmsweb.cern.ch/dqm/offline/data/browse/ROOT/OfflineData/Run2010/Mu/0001370xx/
