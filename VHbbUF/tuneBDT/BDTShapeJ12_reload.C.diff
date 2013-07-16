@@ -1,0 +1,48 @@
+--- BDTShapeJ12_reload.C.orig	2013-03-29 19:28:16.652542000 -0500
++++ BDTShapeJ12_reload.C	2013-03-29 19:25:52.685224000 -0500
+@@ -66,7 +66,7 @@
+ 
+ //#define HCPANALYSIS
+ 
+-#define QCDSHAPE
++//#define QCDSHAPE
+ 
+ #define VHEWKCORRECTION
+ 
+@@ -75,7 +75,7 @@
+ /// Configuration                                                            ///
+ ////////////////////////////////////////////////////////////////////////////////
+ 
+-const TString indir     = "/uscms_data/d3/lpchbb/jiafu/ZnnH_postHCP/Step4_20130326/reload_20130327/";
++TString indir     = "/uscms_data/d3/lpchbb/jiafu/ZnnH_postHCP/Step4_20130326/reload_20130327/";
+ //const TString indir     = "/uscms_data/d3/lpchbb/jiafu/ZnnH_postHCP/Step4_20130314/reload_20130323/";
+ //const TString indir     = "/uscms_data/d3/lpchbb/jiafu/ZnnH_postHCP/Step4_20130302/reload_20130306/";
+ //const TString indir     = "/uscms_data/d3/lpchbb/jiafu/ZnnH_postHCP/Step4_20130302/reload_20130302/";
+@@ -106,7 +106,7 @@
+ const TString g_plotdir     = "plotsJ12/";
+ 
+ #ifndef VVANALYSIS
+-const TString g_var         = Form("BDTregular_%i[ISYST]", massH);  // ISYST is replaced in the main function.
++TString g_var         = Form("BDTregular_%i[ISYST]", massH);  // ISYST is replaced in the main function.
+ //const TString g_var         = Form("BDTregular_fj_%i[ISYST]", massH);  // ISYST is replaced in the main function.
+ const TString g_varslice    = Form("slice(BDTregular_%i[ISYST], (BDTtt_%i[ISYST]>-0.6), (BDTvjlf_%i[ISYST]>-0.5), (BDTzz_%i[ISYST]>-0.3))", massH, massH, massH, massH);  // BDTzz > -0.35?
+ //const TString g_varslice    = Form("slice(BDTregular_fj_%i[ISYST], (BDTtt_%i[ISYST]>-0.6), (BDTvjlf_%i[ISYST]>-0.5), (BDTzz_%i[ISYST]>-0.3))", massH, massH, massH, massH);
+@@ -1539,11 +1539,17 @@
+ /// Main                                                                     ///
+ ////////////////////////////////////////////////////////////////////////////////
+ 
+-void BDTShapeJ12(int nbins=500, long long newnbins=17, double rebinerrorf=0.35, bool freerebin=false, bool isControlRegion=false)  
++void BDTShapeJ12_reload(TString iindir, int ibdt, int nbins=500, long long newnbins=17, double rebinerrorf=0.35, bool freerebin=false, bool isControlRegion=false)  
+ // 2000,14141414 for multi-BDT
+ // 500,13,0.35,1 for VV BDT
+ // 1500,121212,0.35,1 for VV multi-BDT
+ {
++    indir = iindir + "/";
++    g_var = iindir;
++    g_var.ReplaceAll("skim/skim","");
++    g_var.ToLower();
++    g_var = Form("BDT%i%s_%i[ISYST]", ibdt, g_var.Data(), massH);
++
+     gROOT->LoadMacro("tdrstyle.C");
+     gROOT->ProcessLine("setTDRStyle()");
+     gROOT->LoadMacro("HelperFunctions.h");  // FIXME

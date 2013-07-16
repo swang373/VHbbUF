@@ -1,0 +1,14 @@
+echo "*** ZnunuHighPt ***" >! a1.log
+combine -M Asymptotic -t -1 vhbb_Znn_J12_ZnunuHighPt_8TeV.txt >> a1.log
+echo "*** ZnunuMedPt  ***" >! a2.log
+combine -M Asymptotic -t -1 vhbb_Znn_J12_ZnunuMedPt_8TeV.txt >> a2.log
+echo "*** ZnunuLowPt  ***" >! a3.log
+combine -M Asymptotic -t -1 vhbb_Znn_J12_ZnunuLowPt_8TeV.txt >> a3.log
+#echo "*** ZnunuLowCSV ***" >! a4.log
+#combine -M Asymptotic -t -1 vhbb_Znn_J12_ZnunuLowCSV_8TeV.txt >> a4.log
+echo "*** combo       ***" >! a5.log
+combine -M Asymptotic -t -1 vhbb_Znn_J12_combo_8TeV.txt >> a5.log
+echo "*** combo2      ***" >! a6.log
+combine -M Asymptotic -t -1 vhbb_Znn_J12_combo2_8TeV.txt >> a6.log
+
+cat a1.log a2.log a3.log a5.log a6.log
