@@ -338,6 +338,7 @@ bool isTT(const TString& process) {
     return (process=="TTFullLeptMG" || process=="TTSemiLeptMG" || process=="TTHadronicMG" || process=="TT");
 }
 
+
 //TH1F* h_delta_ew_hw8 = new TH1F("h_delta_ew_hw8", "HW differential NLO EWK correction", 95, 25., 500.);
 //TH1F* h_delta_ew_hll8 = new TH1F("h_delta_ew_hll8", "Hll differential NLO EWK correction", 95, 25., 500.);
 //TH1F* h_delta_ew_hnn8 = new TH1F("h_delta_ew_hnn8", "H#nu#nu differential NLO EWK correction", 95, 25., 500.);
@@ -814,6 +815,12 @@ void TrimTree(TString process="ZnnH125", TString mvaMethod="BDT", Long64_t begin
                     weightSignalEWKNew  = 1.0 / (1.0 + ewk);
                     weightSignalEWKNewP = 1.0 / (1.0 + ewk * 0.0);
                     weightSignalEWKNewM = 1.0 / (1.0 + ewk * 2.0);
+                } else if (process == "ZbbHinv") {
+                    double genhpt = genhptFormula->EvalInstance();
+                    double ewk = ewkZnnH(genhpt);
+                    weightSignalEWKNew  = 1.0 + ewk;
+                    weightSignalEWKNewP = 1.0 + ewk * 0.0;
+                    weightSignalEWKNewM = 1.0 + ewk * 2.0;
                 }
                 
             }  // end loop over systematics again

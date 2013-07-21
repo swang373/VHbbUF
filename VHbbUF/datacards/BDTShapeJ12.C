@@ -1086,7 +1086,8 @@ void MakePlots(const EventsJ12 * ev, TString var_,
         ratiostaterr->Sumw2();
         ratiostaterr->SetStats(0);
         ratiostaterr->SetTitle("");
-        ratiostaterr->GetXaxis()->SetTitle(xtitle);
+        //ratiostaterr->GetXaxis()->SetTitle(xtitle);
+        ratiostaterr->SetTitle(TString(";")+xtitle);
         ratiostaterr->GetYaxis()->SetTitle("Data/MC");
         ratiostaterr->SetMaximum(2.2);
         ratiostaterr->SetMinimum(0);
@@ -1157,33 +1158,67 @@ void MakePlots(const EventsJ12 * ev, TString var_,
 
         // Setup legends
         std::clog << "MakePlots(): Setting up legends..." << std::endl;
-        TLegend * leg = new TLegend(0.74, 0.56, 0.92, 0.92);
-        leg->SetFillColor(0);
-        leg->SetLineColor(0);
-        leg->SetShadowColor(0);
-        leg->SetTextFont(62);
-        leg->SetTextSize(0.03);
-        leg->AddEntry(hdata_test, "Data", "p");
-        if (plotSig)  leg->AddEntry(hVH, Form("VH(%i)", massH), "l");
-#ifdef VVANALYSIS
-        leg->AddEntry(hVVHF, "VV(b#bar{b})", "l");
-#endif
-        leg->AddEntry(hZj2b, "Z + b#bar{b}", "f");
-        leg->AddEntry(hZj1b, "Z + b", "f");
-        leg->AddEntry(hZj0b, "Z + udscg", "f");
-        leg->AddEntry(hWj2b, "W + b#bar{b}", "f");
-        leg->AddEntry(hWj1b, "W + b", "f");
-        leg->AddEntry(hWj0b, "W + udscg", "f");
-        leg->AddEntry(hTT, "t#bar{t}", "f");
-        leg->AddEntry(hs_Top, "single top", "f");
-        leg->AddEntry(hQCD, "QCD", "f");
-        leg->AddEntry(hVVLF, "VV(udscg)", "f");
-#ifndef VVANALYSIS
-        leg->AddEntry(hVVHF, "VV(b#bar{b})", "f");
-#endif
-        leg->AddEntry(staterr, "MC uncert. (stat)", "fl");
+//        TLegend * leg = new TLegend(0.74, 0.56, 0.92, 0.92);
+//        leg->SetFillColor(0);
+//        leg->SetLineColor(0);
+//        leg->SetShadowColor(0);
+//        leg->SetTextFont(62);
+//        leg->SetTextSize(0.03);
+//        leg->AddEntry(hdata_test, "Data", "p");
+//        if (plotSig)  leg->AddEntry(hVH, Form("VH(%i)", massH), "l");
+//#ifdef VVANALYSIS
+//        leg->AddEntry(hVVHF, "VV(b#bar{b})", "l");
+//#endif
+//        leg->AddEntry(hZj2b, "Z + b#bar{b}", "f");
+//        leg->AddEntry(hZj1b, "Z + b", "f");
+//        leg->AddEntry(hZj0b, "Z + udscg", "f");
+//        leg->AddEntry(hWj2b, "W + b#bar{b}", "f");
+//        leg->AddEntry(hWj1b, "W + b", "f");
+//        leg->AddEntry(hWj0b, "W + udscg", "f");
+//        leg->AddEntry(hTT, "t#bar{t}", "f");
+//        leg->AddEntry(hs_Top, "single top", "f");
+//        leg->AddEntry(hQCD, "QCD", "f");
+//        leg->AddEntry(hVVLF, "VV(udscg)", "f");
+//#ifndef VVANALYSIS
+//        leg->AddEntry(hVVHF, "VV(b#bar{b})", "f");
+//#endif
+//        leg->AddEntry(staterr, "MC uncert. (stat)", "fl");
 
-        TLegend * ratioleg1 = new TLegend(0.54, 0.86, 0.72, 0.96);
+        TLegend * leg1 = new TLegend(0.58, 0.68, 0.76, 0.92);
+        leg1->SetFillColor(0);
+        leg1->SetLineColor(0);
+        leg1->SetShadowColor(0);
+        leg1->SetTextFont(62);
+        leg1->SetTextSize(0.03);
+        leg1->AddEntry(hdata_test, "Data", "p");
+        if (plotSig)  leg1->AddEntry(hVH, Form("VH(%i)", massH), "l");
+#ifdef VVANALYSIS
+        leg1->AddEntry(hVVHF, "VV(b#bar{b})", "l");
+#endif
+        leg1->AddEntry(hTT, "t#bar{t}", "f");
+        leg1->AddEntry(hs_Top, "single top", "f");
+        leg1->AddEntry(hQCD, "QCD", "f");
+        leg1->AddEntry(hVVLF, "VV(udscg)", "f");
+#ifndef VVANALYSIS
+        leg1->AddEntry(hVVHF, "VZ(b#bar{b})", "f");
+#endif
+        TLegend * leg2 = new TLegend(0.76, 0.68, 0.94, 0.92);
+        leg2->SetFillColor(0);
+        leg2->SetLineColor(0);
+        leg2->SetShadowColor(0);
+        leg2->SetTextFont(62);
+        leg2->SetTextSize(0.03);
+        leg2->AddEntry(hWj2b, "W + b#bar{b}", "f");
+        leg2->AddEntry(hWj1b, "W + b", "f");
+        leg2->AddEntry(hWj0b, "W + udscg", "f");
+        leg2->AddEntry(hZj2b, "Z + b#bar{b}", "f");
+        leg2->AddEntry(hZj1b, "Z + b", "f");
+        leg2->AddEntry(hZj0b, "Z + udscg", "f");
+        leg2->AddEntry(staterr, "MC uncert. (stat)", "f");
+        
+
+        //TLegend * ratioleg1 = new TLegend(0.54, 0.86, 0.72, 0.96);
+        TLegend * ratioleg1 = new TLegend(0.54, 0.88, 0.72, 0.96);
         //TLegend * ratioleg1 = new TLegend(0.50, 0.86, 0.69, 0.96);
         ratioleg1->AddEntry(ratiostaterr, "MC uncert. (stat)", "f");
         ratioleg1->SetFillColor(0);
@@ -1193,7 +1228,8 @@ void MakePlots(const EventsJ12 * ev, TString var_,
         ratioleg1->SetTextSize(0.06);
         ratioleg1->SetBorderSize(1);
         
-        TLegend * ratioleg2 = new TLegend(0.72, 0.86, 0.95, 0.96);
+        //TLegend * ratioleg2 = new TLegend(0.72, 0.86, 0.95, 0.96);
+        TLegend * ratioleg2 = new TLegend(0.72, 0.88, 0.95, 0.96);
         //TLegend * ratioleg2 = new TLegend(0.69, 0.86, 0.9, 0.96);
         ratioleg2->AddEntry(ratiosysterr, "MC uncert. (stat+syst)", "f");
         ratioleg2->SetFillColor(0);
@@ -1202,6 +1238,18 @@ void MakePlots(const EventsJ12 * ev, TString var_,
         ratioleg2->SetTextFont(62);
         ratioleg2->SetTextSize(0.06);
         ratioleg2->SetBorderSize(1);
+
+//        //TLegend * ratioleg1 = new TLegend(0.72, 0.86, 0.94, 0.96);
+//        TLegend * ratioleg1 = new TLegend(0.76, 0.88, 0.94, 0.96);
+//        //TLegend * ratioleg1 = new TLegend(0.50, 0.86, 0.69, 0.96);
+//        ratioleg1->AddEntry(ratiostaterr, "MC uncert. (stat)", "f");
+//        ratioleg1->SetFillColor(0);
+//        ratioleg1->SetLineColor(0);
+//        ratioleg1->SetShadowColor(0);
+//        ratioleg1->SetTextFont(62);
+//        //ratioleg1->SetTextSize(0.06);
+//        ratioleg1->SetTextSize(0.07);
+//        ratioleg1->SetBorderSize(1);
 
         // Draw MC signal and background
         std::clog << "MakePlots(): Drawing..." << std::endl;
@@ -1212,6 +1260,8 @@ void MakePlots(const EventsJ12 * ev, TString var_,
         double binwidth = (xup - xlow) / nbins_plot;
         TString ytitle = Form("Events / %.3f", binwidth);
         hs->GetYaxis()->SetTitle(ytitle);
+        if (TString(xtitle).Contains(" ; "))
+            hs->SetTitle(TString(";")+xtitle);
         
         staterr->Draw("e2 same");
         if (plotSig) {
@@ -1230,7 +1280,9 @@ void MakePlots(const EventsJ12 * ev, TString var_,
         hdata_test->Draw("e1 same");
         
         // Draw legends
-        leg->Draw();
+        //leg->Draw();
+        leg1->Draw();
+        leg2->Draw();
         TLatex * latex = new TLatex();
         latex->SetNDC();
         latex->SetTextAlign(12);
@@ -1278,7 +1330,8 @@ void MakePlots(const EventsJ12 * ev, TString var_,
         ratioleg2->Draw();
 
         // Kolmogorov-Smirnov test and Chi2 test
-        TPaveText * pave = new TPaveText(0.18, 0.85, 0.35, 0.96, "brNDC");
+        //TPaveText * pave = new TPaveText(0.18, 0.86, 0.35, 0.96, "brNDC");
+        TPaveText * pave = new TPaveText(0.18, 0.86, 0.28, 0.96, "brNDC");
         pave->SetTextAlign(12);
         pave->SetLineColor(0);
         pave->SetFillColor(0);
@@ -1286,9 +1339,11 @@ void MakePlots(const EventsJ12 * ev, TString var_,
         pave->SetBorderSize(1);
         double nchisq = hdata_test->Chi2Test(hmc_test, "UWCHI2/NDF");  // MC uncert. (stat)
         double kolprob = hdata_test->KolmogorovTest(hmc_test);  // MC uncert. (stat)
-        TText * text = pave->AddText(Form("#chi_{#nu}^{2} = %.3f, K_{s} = %.3f", nchisq, kolprob));
+        //TText * text = pave->AddText(Form("#chi_{#nu}^{2} = %.3f, K_{s} = %.3f", nchisq, kolprob));
+        TText * text = pave->AddText(Form("#chi_{#nu}^{2} = %.3f", nchisq));
         text->SetTextFont(62);
-        text->SetTextSize(0.06);
+        //text->SetTextSize(0.06);
+        text->SetTextSize(0.07);
         pave->Draw();
 
         std::clog << "MakePlots(): Printing..." << std::endl;
@@ -1312,7 +1367,9 @@ void MakePlots(const EventsJ12 * ev, TString var_,
         delete ratio;
         delete ratiostaterr;
         delete ratiosysterr;
-        delete leg;
+        //delete leg;
+        delete leg1;
+        delete leg2;
         delete ratioleg1;
         delete ratioleg2;
         delete latex;
@@ -1877,6 +1934,7 @@ void BDTShapeJ12(int nbins=500, long long newnbins=22, double rebinerrorf=0.25, 
             MakePlots(ev, "max(hJet_ptReg[0],hJet_ptReg[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "H j1 p_{T} [GeV]", 20, 50, 350, 20, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "min(hJet_ptReg[0],hJet_ptReg[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "H j2 p_{T} [GeV]", 13, 15, 210, 13, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "deltaR(hJet_eta[0], hJet_phi[0], hJet_eta[1], hJet_phi[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "#Delta R(j1,j2)", 14, 0, 3.5, 14, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "abs(deltaPhi(hJet_phi[0], hJet_phi[1]))", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "#Delta #phi(j1,j2)", 16, 0, 3.2, 16, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "abs(hJet_eta[0]-hJet_eta[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "|#Delta #eta|(j1,j2)", 14, 0, 3.5, 14, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "min(abs(deltaPullAngle),pi)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "|#Delta #theta_{pull}|(j1,j2)", 16, 0, 3.2, 16, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "METtype1corr.et", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "Type-1 corr. pfMET [GeV]", 20, 155, 455, 20, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
@@ -2033,6 +2091,7 @@ void BDTShapeJ12(int nbins=500, long long newnbins=22, double rebinerrorf=0.25, 
             MakePlots(ev, "max(hJet_ptReg[0],hJet_ptReg[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "H j1 p_{T} [GeV]", 20, 50, 350, 20, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "min(hJet_ptReg[0],hJet_ptReg[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "H j2 p_{T} [GeV]", 13, 15, 210, 13, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "deltaR(hJet_eta[0], hJet_phi[0], hJet_eta[1], hJet_phi[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "#Delta R(j1,j2)", 14, 0, 3.5, 14, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "abs(deltaPhi(hJet_phi[0], hJet_phi[1]))", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "#Delta #phi(j1,j2)", 16, 0, 3.2, 16, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "abs(hJet_eta[0]-hJet_eta[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "|#Delta #eta|(j1,j2)", 14, 0, 3.5, 14, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "min(abs(deltaPullAngle),pi)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "|#Delta #theta_{pull}|(j1,j2)", 16, 0, 3.2, 16, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "METtype1corr.et", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "Type-1 corr. pfMET [GeV]", 12, 120, 180, 12, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
@@ -2140,6 +2199,7 @@ void BDTShapeJ12(int nbins=500, long long newnbins=22, double rebinerrorf=0.25, 
             MakePlots(ev, "max(hJet_ptReg[0],hJet_ptReg[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "H j1 p_{T} [GeV]", 20, 15, 315, 20, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "min(hJet_ptReg[0],hJet_ptReg[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "H j2 p_{T} [GeV]", 13, 15, 210, 13, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "deltaR(hJet_eta[0], hJet_phi[0], hJet_eta[1], hJet_phi[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "#Delta R(j1,j2)", 14, 0, 3.5, 14, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "abs(deltaPhi(hJet_phi[0], hJet_phi[1]))", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "#Delta #phi(j1,j2)", 16, 0, 3.2, 16, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "abs(hJet_eta[0]-hJet_eta[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "|#Delta #eta|(j1,j2)", 14, 0, 3.5, 14, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "min(abs(deltaPullAngle),pi)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "|#Delta #theta_{pull}|(j1,j2)", 16, 0, 3.2, 16, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "METtype1corr.et", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "Type-1 corr. pfMET [GeV]", 10, 90, 140, 10, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
@@ -2233,6 +2293,7 @@ void BDTShapeJ12(int nbins=500, long long newnbins=22, double rebinerrorf=0.25, 
             MakePlots(ev, "max(hJet_ptReg[0],hJet_ptReg[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "H j1 p_{T} [GeV]", 20, 50, 350, 20, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "min(hJet_ptReg[0],hJet_ptReg[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "H j2 p_{T} [GeV]", 13, 15, 210, 13, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "deltaR(hJet_eta[0], hJet_phi[0], hJet_eta[1], hJet_phi[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "#Delta R(j1,j2)", 14, 0, 3.5, 14, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "abs(deltaPhi(hJet_phi[0], hJet_phi[1]))", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "#Delta #phi(j1,j2)", 16, 0, 3.2, 16, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "abs(hJet_eta[0]-hJet_eta[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "|#Delta #eta|(j1,j2)", 14, 0, 3.5, 14, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "min(abs(deltaPullAngle),pi)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "|#Delta #theta_{pull}|(j1,j2)", 16, 0, 3.2, 16, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "METtype1corr.et", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "Type-1 corr. pfMET [GeV]", 20, 155, 455, 20, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");

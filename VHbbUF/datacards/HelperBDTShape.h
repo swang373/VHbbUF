@@ -536,6 +536,10 @@ void setHisto(TH1 * h, const TString& p)
         h->SetLineColor  (kRed);
         h->SetFillColor  (kRed);
         h->SetMarkerColor(kRed);
+    } else if (p == "VH_1") {
+        h->SetLineColor  (kPink - 4);
+        h->SetFillColor  (kPink - 4);
+        h->SetMarkerColor(kPink - 4);
     } else if (p == "data_obs" || p == "Data") {
         h->SetMarkerSize(0.8);
         h->SetMarkerStyle(20);
@@ -566,14 +570,14 @@ void setHisto(TH1 * h, const TString& p)
             h->SetFillColor  (kTeal);
             h->SetMarkerColor(kTeal);
         } else if (p == "VV") {
+            h->SetFillColor  (kGray + 2);
+            h->SetMarkerColor(kGray + 2);
+        } else if (p == "VVHF") {
             h->SetFillColor  (kGray);
             h->SetMarkerColor(kGray);
-        } else if (p == "VVHF") {
-            h->SetFillColor  (kGray + 1);
-            h->SetMarkerColor(kGray + 1);
         } else if (p == "QCD") {
-            h->SetFillColor  (kMagenta - 3);
-            h->SetMarkerColor(kMagenta - 3);
+            h->SetFillColor  (kMagenta + 1);
+            h->SetMarkerColor(kMagenta + 1);
         }
     }
 }

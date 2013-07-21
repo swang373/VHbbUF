@@ -448,7 +448,7 @@ void MakePlots(const EventsJ13 * ev, TString var_,
     regexp.Substitute(str, "selectFlags[0][$1] * selectMjj[$1]", "g");  // "g" for global
     cutdata_  = TCut(str);
     
-    if (TString(xtitle) == "BDT") {
+    if (TString(xtitle) == "BDT") {  // will be changed
         var_      = "HmassReg+0";
         if (syst == "CMS_vhbb_Znn_res_jUp")
             var_  = "HmassReg_res_j_up";
@@ -458,6 +458,15 @@ void MakePlots(const EventsJ13 * ev, TString var_,
             var_  = "HmassReg_scale_j_up";
         else if (syst == "CMS_vhbb_Znn_scale_jDown")
             var_  = "HmassReg_scale_j_down";
+        
+        xtitle    = "M_{b#bar{b}} [GeV]";
+        nbins     = 17;
+        xlow      = 0.;
+        xup       = 255.;
+        newnbins  = 17;
+        
+        if (!options.Contains("!plotLog"))
+            options.ReplaceAll("plotLog", "!plotLog");
         
         // FIXME post mortem fix
         if (channel == "ZnunuHighPt") {
@@ -514,14 +523,6 @@ void MakePlots(const EventsJ13 * ev, TString var_,
 
         }
         
-        xtitle    = "M_{b#bar{b}} [GeV]";
-        nbins     = 17;
-        xlow      = 0.;
-        xup       = 255.;
-        newnbins  = 17;
-        
-        if (!options.Contains("!plotLog"))
-            options.ReplaceAll("plotLog", "!plotLog");
     }
 #endif
 
