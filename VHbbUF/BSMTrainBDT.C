@@ -41,7 +41,7 @@ const TString indir     = "/uscms_data/d3/lpchbb/jiafu/ZnnH_postHCP/Step4_201304
 const TString prefix    = "Step4_";
 const TString suffix    = ".root";
 const bool g_splitsig   = false;
-const bool g_fullbkg    = true;
+const bool g_fullbkg    = false;
 const bool g_hybrid     = false;
 
 
@@ -97,14 +97,14 @@ const TMVA::VariableInfo g_variables[] = {
                        "H j2 p_{T}", "GeV", varcounter++, 'F'),
     TMVA::VariableInfo("deltaR := deltaR(hJet_eta[0], hJet_phi[0], hJet_eta[1], hJet_phi[1])", 
                        "#Delta R(j1,j2)", "", varcounter++, 'F'),
-    //TMVA::VariableInfo("deltaEta := abs(hJet_eta[0]-hJet_eta[1])", 
-    //                   "|#Delta #eta|(j1,j2)", "", varcounter++, 'F'),
+    TMVA::VariableInfo("deltaEta := abs(hJet_eta[0]-hJet_eta[1])", 
+                       "|#Delta #eta|(j1,j2)", "", varcounter++, 'F'),
     TMVA::VariableInfo("deltaPullAngle := min(abs(deltaPullAngle),pi)", 
                        "|#Delta #theta_{pull}|(j1,j2)", "", varcounter++, 'F'),
     TMVA::VariableInfo("pfMET := METtype1corr.et", 
                        "Type-1 corr. pfMET", "GeV", varcounter++, 'F'),
-    //TMVA::VariableInfo("HMETdPhi", 
-    //                   "|#Delta #varphi|(H, pfMET)", "", varcounter++, 'F'),
+    TMVA::VariableInfo("HMETdPhi", 
+                       "|#Delta #varphi|(H, pfMET)", "", varcounter++, 'F'),
     TMVA::VariableInfo("mindPhiMETJet_dPhi", 
                        "min |#Delta #varphi|(pfMET, j25)", "", varcounter++, 'F'),
     TMVA::VariableInfo("maxCSV := max(hJet_csv_nominal[0],hJet_csv_nominal[1])", 
@@ -121,8 +121,8 @@ const TMVA::VariableInfo g_variables[] = {
     // new since LHCP
     TMVA::VariableInfo("HMETMt := evalHMETMt(HptReg, H.phi, METtype1corr.et, METtype1corr.phi)",
                        "mass_{T}(H,pfMET)", "GeV", varcounter++, 'F'),
-    TMVA::VariableInfo("cosThetaHbb := abs(evalCosThetaHbb(hJet_ptReg[0], hJet_pt[0], hJet_eta[0], hJet_phi[0], hJet_e[0], hJet_ptReg[1], hJet_pt[1], hJet_eta[1], hJet_phi[1], hJet_e[1]))",
-                       "cos #theta* (H,j)", "", varcounter++, 'F'),
+    //TMVA::VariableInfo("cosThetaHbb := abs(evalCosThetaHbb(hJet_ptReg[0], hJet_pt[0], hJet_eta[0], hJet_phi[0], hJet_e[0], hJet_ptReg[1], hJet_pt[1], hJet_eta[1], hJet_phi[1], hJet_e[1]))",
+    //                   "cos #theta* (H,j)", "", varcounter++, 'F'),
 };
 
 //varcounter = 0;
@@ -326,11 +326,13 @@ void TrainChannelBDT(const TString& channel, int massH, TString whatbkg, TString
     bool sigZZ    = (whatsig == "ZZ");
     bool sigZZHF  = (whatsig == "ZZHF");
     bool sigZbbHinv = (whatsig == "ZbbHinv");
-    bool sigZH2   = (whatsig == "ZH2");
-    std::clog << "OPTION: sigZH=" << sigZH << ", sigVH=" << sigVH << ", sigZZ=" << sigZZ << ", sigZZHF=" << sigZZHF << ", sigZbbHinv=" << sigZbbHinv << ", sigZH2=" << sigZH2 << std::endl;
+    bool sigZHZH   = (whatsig == "ZHZH");
+    bool sigZbbHinvZZHF = (whatsig == "ZbbHinvZZHF");
+    std::clog << "OPTION: sigZH=" << sigZH << ", sigVH=" << sigVH << ", sigZZ=" << sigZZ << ", sigZZHF=" << sigZZHF << ", sigZbbHinv=" << sigZbbHinv << ", sigZHZH=" << sigZHZH << ", sigZbbHinvZZHF=" << sigZbbHinvZZHF << std::endl;
     
     whatbkg.ReplaceAll(" ", "");
     bool bkgAll   = (whatbkg == "") || (whatbkg == "all") || (whatbkg == "ALL");
+    bool bkgAllVV = (whatbkg == "allVV") || (whatbkg == "ALLVV");
     bool bkgAllVH = (whatbkg == "allVH") || (whatbkg == "ALLVH");
     bool bkgTT    = (whatbkg == "TT");
     bool bkgVj    = (whatbkg == "Vj");
@@ -342,7 +344,7 @@ void TrainChannelBDT(const TString& channel, int massH, TString whatbkg, TString
     bool bkgVV    = (whatbkg == "VV");
     bool bkgZZ    = (whatbkg == "ZZ");
     bool bkgZZHF  = (whatbkg == "ZZHF");
-    std::clog << "OPTION: bkgAll=" << bkgAll << ", bkgAllVH=" << bkgAllVH << ", bkgTT=" << bkgTT << ", bkgVj=" << bkgVj << ", bkgVjLF=" << bkgVjLF << ", bkgZjLF=" << bkgZjLF << ", bkgVjHF=" << bkgVjHF << ", bkgZjHF=" << bkgZjHF << ", bkgST=" << bkgST << ", bkgVV=" << bkgVV << ", bkgZZ=" << bkgZZ << ", bkgZZHF=" << bkgZZHF << std::endl;
+    std::clog << "OPTION: bkgAll=" << bkgAll << ", bkgAllVV=" << bkgAllVV << ", bkgAllVH=" << bkgAllVH << ", bkgTT=" << bkgTT << ", bkgVj=" << bkgVj << ", bkgVjLF=" << bkgVjLF << ", bkgZjLF=" << bkgZjLF << ", bkgVjHF=" << bkgVjHF << ", bkgZjHF=" << bkgZjHF << ", bkgST=" << bkgST << ", bkgVV=" << bkgVV << ", bkgZZ=" << bkgZZ << ", bkgZZHF=" << bkgZZHF << std::endl;
     
     whatvar.ReplaceAll(" ", "");
     bool useFJ         = (whatvar == "FJ");
@@ -352,7 +354,9 @@ void TrainChannelBDT(const TString& channel, int massH, TString whatbkg, TString
     bool useMET        = (whatvar == "MET");
     bool useNoMjj      = (whatvar == "NoMjj");
     bool useSuper      = (whatvar == "Super");
-    std::clog << "OPTION: useFJ=" << useFJ << ", useFJReg=" << useFJReg << ", useAngle=" << useAngle << ", useKillTop=" << useKillTop << ", useMET=" << useMET << ", useNoMjj=" << useNoMjj << ", useSuper=" << useSuper << std::endl;
+    bool useMET200     = (whatvar == "MET200");
+    bool useMET220     = (whatvar == "MET220");
+    std::clog << "OPTION: useFJ=" << useFJ << ", useFJReg=" << useFJReg << ", useAngle=" << useAngle << ", useKillTop=" << useKillTop << ", useMET=" << useMET << ", useNoMjj=" << useNoMjj << ", useSuper=" << useSuper << ", useMET200=" << useMET200 << ", useMET220=" << useMET220 << std::endl;
     
     /// Create a ROOT output file where TMVA will store ntuples, histograms, etc.
     TFile* out(0);
@@ -503,17 +507,24 @@ void TrainChannelBDT(const TString& channel, int massH, TString whatbkg, TString
         factory->AddSignalTree(treeZbbHinv_train, 2.0, "Training");
         factory->AddSignalTree(treeZbbHinv_test , 2.0, "Test"    );
         assert(treeZbbHinv_train->GetEntries() > 3);
-    } else if (sigZH2) {
+    } else if (sigZHZH) {
         factory->AddSignalTree(treeZH_train, 2.0, "Training");
         factory->AddSignalTree(treeZH_test , 2.0, "Test"    );
         assert(treeZH_train->GetEntries() > 3);
         factory->AddSignalTree(treeZbbHinv_train, 2.0, "Training");
         factory->AddSignalTree(treeZbbHinv_test , 2.0, "Test"    );
         assert(treeZbbHinv_train->GetEntries() > 3);
-    } 
+    } else if (sigZbbHinvZZHF) {
+        factory->AddSignalTree(treeZbbHinv_train, 2.0, "Training");
+        factory->AddSignalTree(treeZbbHinv_test , 2.0, "Test"    );
+        assert(treeZbbHinv_train->GetEntries() > 3);
+        factory->AddSignalTree(treeZZ_train, 2.0, "Training");
+        factory->AddSignalTree(treeZZ_test , 2.0, "Test"    );
+        assert(treeZZ_train->GetEntries() > 3);
+    }
     
     /// Add background trees
-    if (bkgAll || bkgAllVH) {
+    if (bkgAll || bkgAllVV || bkgAllVH) {
         factory->AddBackgroundTree(treeWj_train, 2.0, "Training");
         factory->AddBackgroundTree(treeWj_test , 2.0, "Test"    );
         factory->AddBackgroundTree(treeZj_train, 2.0, "Training");
@@ -524,7 +535,7 @@ void TrainChannelBDT(const TString& channel, int massH, TString whatbkg, TString
         assert(treeZj_train->GetEntries() > 3);
         assert(treeTT_train->GetEntries() > 3);
         
-        if (g_fullbkg) {
+        if (g_fullbkg) {  // FIXME: cannot be used together with bkgAllVV or bkgAllVH
             factory->AddBackgroundTree(treeST_train, 2.0, "Training");
             factory->AddBackgroundTree(treeST_test , 2.0, "Test"    );            
             assert(treeST_train->GetEntries() > 3);
@@ -533,9 +544,17 @@ void TrainChannelBDT(const TString& channel, int massH, TString whatbkg, TString
                 factory->AddBackgroundTree(treeVV_test , 2.0, "Test"    );
                 assert(treeVV_train->GetEntries() > 3);
             }
-        }
-        if (sigZbbHinv && bkgAllVH) {
-            assert(g_fullbkg == true);
+        
+        } else if (bkgAllVV) {
+            factory->AddBackgroundTree(treeVV_train, 2.0, "Training");
+            factory->AddBackgroundTree(treeVV_test , 2.0, "Test"    );
+            assert(treeVV_train->GetEntries() > 3);
+        
+        } else if (sigZbbHinv && bkgAllVH) {
+            factory->AddBackgroundTree(treeVV_train, 2.0, "Training");
+            factory->AddBackgroundTree(treeVV_test , 2.0, "Test"    );
+            assert(treeVV_train->GetEntries() > 3);
+            
             factory->AddBackgroundTree(treeZH_train, 2.0, "Training");
             factory->AddBackgroundTree(treeZH_test , 2.0, "Test"    );
             assert(treeZH_train->GetEntries() > 3);
@@ -543,6 +562,7 @@ void TrainChannelBDT(const TString& channel, int massH, TString whatbkg, TString
             factory->AddBackgroundTree(treeWH_test , 2.0, "Test"    );
             assert(treeWH_train->GetEntries() > 3);
         }
+        
     } else if (bkgTT) {
         factory->AddBackgroundTree(treeTT_train, 2.0, "Training");
         factory->AddBackgroundTree(treeTT_test , 2.0, "Test"    );
@@ -586,14 +606,26 @@ void TrainChannelBDT(const TString& channel, int massH, TString whatbkg, TString
     TCut cutb = "";
     if (sigZZHF)
         cuts = "eventFlav==5";
+    else if (sigZbbHinvZZHF)
+        cuts = "eventFlav==5";
     if (bkgVjLF || bkgZjLF)
         cutb = "eventFlav!=5";
-    if (bkgVjHF || bkgZjHF)
+    else if (bkgVjHF || bkgZjHF)
         cutb = "eventFlav==5";
-    if (bkgZZHF)
+    else if (bkgZZHF)
         cutb = "eventFlav==5";
-    if (bkgVV && (sigZZ || sigZZHF))
+    else if (bkgVV && (sigZZ || sigZZHF))
         cutb = "processname!=\"ZZ\"";
+    
+    if (channel == "ZnunuHighPt") {
+        if (useMET200) {
+            cuts *= "METtype1corr.et>200";
+            cutb *= "METtype1corr.et>200";
+        } else if (useMET220) {
+            cuts *= "METtype1corr.et>220";
+            cutb *= "METtype1corr.et>220";
+        }
+    }
 
     if (g_splitsig) {
         /// instead of i % 2: (0,1) = (train, test),

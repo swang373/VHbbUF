@@ -533,6 +533,59 @@ void setHisto(TH1 * h, const TString& p)
 {
     //h->Sumw2();
     if (p == "VH") {
+        h->SetLineColor  (2);
+        h->SetFillColor  (2);
+        h->SetMarkerColor(2);
+    } else if (p == "VH_1") {
+        h->SetLineColor  (kPink - 4);
+        h->SetFillColor  (kPink - 4);
+        h->SetMarkerColor(kPink - 4);
+    } else if (p == "data_obs" || p == "Data") {
+        h->SetMarkerSize(0.8);
+        h->SetMarkerStyle(20);
+    } else {
+        h->SetLineColor(kBlack);
+        if (p == "WjLF") {
+            h->SetFillColor  (814);
+            h->SetMarkerColor(814);
+        } else if (p == "WjHFc") {
+            h->SetFillColor  (816);
+            h->SetMarkerColor(816);
+        } else if (p == "WjHFb") {
+            h->SetFillColor  (820);
+            h->SetMarkerColor(820);
+        } else if (p == "ZjLF") {
+            h->SetFillColor  (401);
+            h->SetMarkerColor(401);
+        } else if (p == "ZjHFc") {
+            h->SetFillColor  (41);
+            h->SetMarkerColor(41);
+        } else if (p == "ZjHFb") {
+            h->SetFillColor  (5);
+            h->SetMarkerColor(5);
+        } else if (p == "TT") {
+            h->SetFillColor  (596);
+            h->SetMarkerColor(596);
+        } else if (p == "s_Top") {
+            h->SetFillColor  (840);
+            h->SetMarkerColor(840);
+        } else if (p == "VV") {
+            h->SetFillColor  (922);
+            h->SetMarkerColor(922);
+        } else if (p == "VVHF") {
+            h->SetFillColor  (920);
+            h->SetMarkerColor(920);
+        } else if (p == "QCD") {
+            h->SetFillColor  (616);
+            h->SetMarkerColor(616);
+        }
+    }
+}
+
+void setHisto_Znn(TH1 * h, const TString& p)
+{
+    //h->Sumw2();
+    if (p == "VH") {
         h->SetLineColor  (kRed);
         h->SetFillColor  (kRed);
         h->SetMarkerColor(kRed);
@@ -581,6 +634,7 @@ void setHisto(TH1 * h, const TString& p)
         }
     }
 }
+
 
 void FormatFileName(TString& str)
 {

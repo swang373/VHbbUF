@@ -598,7 +598,7 @@ void MakePlots(const EventsJ12 * ev, TString var_,
 
     TCut cutvhewk = "weightSignalEWKNew";
     TCut cutvhqcd = "weightSignalQCD";
-#ifndef VHEWKCORRECTION
+#if !defined(VHEWKCORRECTION)
     ev->ZH->Project("ZH_0", var, cutmc);
     std::clog << "... DONE: project ZH_0." << std::endl;
     ev->WH->Project("WH_0", var, cutmc);
@@ -683,7 +683,7 @@ void MakePlots(const EventsJ12 * ev, TString var_,
     std::clog << "... DONE: project Zj2b_syst_0." << std::endl;
     ev->TT_syst->Project("TT_syst_0", var, cutmc);
     std::clog << "... DONE: project TT_syst_0." << std::endl;
-    
+
     ev->ZH_SM->Project("ZH_SM_0", var, cutmc);
     std::clog << "... DONE: project ZH_SM_0." << std::endl;
     ev->WH_SM->Project("WH_SM_0", var, cutmc);
@@ -1202,6 +1202,7 @@ void MakePlots(const EventsJ12 * ev, TString var_,
 #ifndef VVANALYSIS
         leg1->AddEntry(hVVHF, "VZ(b#bar{b})", "f");
 #endif
+
         TLegend * leg2 = new TLegend(0.76, 0.68, 0.94, 0.92);
         leg2->SetFillColor(0);
         leg2->SetLineColor(0);

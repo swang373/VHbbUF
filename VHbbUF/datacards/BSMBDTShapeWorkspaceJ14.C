@@ -41,12 +41,12 @@ const double g_xlow         = -1.;
 const double g_xup          =  1.;
 const TString g_realvarname = "CMS_vhbb_BDT_$CHANNEL_8TeV";  // $CHANNEL is replaced in MakeWorkSpace()
 #else
-const double g_xlow         =   0.;
-const double g_xup          = 255.;
+//const double g_xlow         =   0.;
+//const double g_xup          = 255.;
 //const double g_xlow         =  10.;
 //const double g_xup          = 410.;
-//const double g_xlow         = 200.;
-//const double g_xup          = 800.;
+const double g_xlow         = 200.;
+const double g_xup          = 600.;
 //const double g_xlow         = 260.;
 //const double g_xup          = 860.;
 const TString g_realvarname = "CMS_vhbb_MJJ_$CHANNEL_8TeV";  // $CHANNEL is replaced in MakeWorkSpace()
@@ -256,6 +256,51 @@ void MakeSystPlot(const TString& channel, TFile * input, RooWorkspace * ws, cons
     }
 #endif  // defined(GOODNUISHAPE) && !defined(MJJANALYSIS)
 
+
+    // Check Underflow and Overflow
+    //if (h->GetBinContent(h->GetNbinsX()+1)>0) {
+    //    std::cout << "INFO: I'm resetting the overflow bin." << std::endl;
+    //    int lastbin = h->GetNbinsX();
+    //    h->SetBinContent(lastbin, h->GetBinContent(lastbin) + h->GetBinContent(lastbin+1) );
+    //    h->SetBinError  (lastbin, TMath::Sqrt(h->GetBinError(lastbin) * h->GetBinError(lastbin) + h->GetBinError(lastbin+1) * h->GetBinError(lastbin+1)) );
+    //    h->SetBinContent(lastbin+1, 0);
+    //    h->SetBinError(lastbin+1, 0);
+    //}
+    //if (hUp->GetBinContent(hUp->GetNbinsX()+1)>0) {
+    //    //std::cout << "INFO: I'm resetting the overflow bin." << std::endl;
+    //    int lastbin = hUp->GetNbinsX();
+    //    hUp->SetBinContent(lastbin, hUp->GetBinContent(lastbin) + hUp->GetBinContent(lastbin+1) );
+    //    hUp->SetBinError  (lastbin, TMath::Sqrt(hUp->GetBinError(lastbin) * hUp->GetBinError(lastbin) + hUp->GetBinError(lastbin+1) * hUp->GetBinError(lastbin+1)) );
+    //    hUp->SetBinContent(lastbin+1, 0);
+    //    hUp->SetBinError(lastbin+1, 0);
+    //}
+    //if (hDown->GetBinContent(hDown->GetNbinsX()+1)>0) {
+    //    //std::cout << "INFO: I'm resetting the overflow bin." << std::endl;
+    //    int lastbin = hDown->GetNbinsX();
+    //    hDown->SetBinContent(lastbin, hDown->GetBinContent(lastbin) + hDown->GetBinContent(lastbin+1) );
+    //    hDown->SetBinError  (lastbin, TMath::Sqrt(hDown->GetBinError(lastbin) * hDown->GetBinError(lastbin) + hDown->GetBinError(lastbin+1) * hDown->GetBinError(lastbin+1)) );
+    //    hDown->SetBinContent(lastbin+1, 0);
+    //    hDown->SetBinError(lastbin+1, 0);
+    //}
+    if (h->GetBinContent(0)>0) {
+        std::cout << "WARNING: Underflow bin is not zero: " << h->GetName() << std::endl;
+    }
+    if (hUp->GetBinContent(0)>0) {
+        std::cout << "WARNING: Underflow bin is not zero: " << hUp->GetName() << std::endl;
+    }
+    if (hDown->GetBinContent(0)>0) {
+        std::cout << "WARNING: Underflow bin is not zero: " << hDown->GetName() << std::endl;
+    }
+    if (h->GetBinContent(h->GetNbinsX()+1)>0) {
+        std::cout << "WARNING: Overflow bin is not zero: " << h->GetName() << std::endl;
+    }
+    if (hUp->GetBinContent(hUp->GetNbinsX()+1)>0) {
+        std::cout << "WARNING: Overflow bin is not zero: " << hUp->GetName() << std::endl;
+    }
+    if (hDown->GetBinContent(hDown->GetNbinsX()+1)>0) {
+        std::cout << "WARNING: Overflow bin is not zero: " << hDown->GetName() << std::endl;
+    }
+    
 
     /// Fix normalizations for systematics that have control regions
     if (process == "Wj0b" || process == "Wj1b" || process == "Wj2b" || process == "Zj0b" || process == "Zj1b" || process == "Zj2b" || process == "TT" ) {

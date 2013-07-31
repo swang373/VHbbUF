@@ -12,7 +12,12 @@ const std::string singleeltrigger = "EVENT.json && ( (190456<=EVENT.run && EVENT
 const double lumi = 19624.0;
 std::map<std::string, float> GetLumis() {
     std::map<std::string, float> values;
+    values["ZbbHinv105"      ] = lumi *       0.102060 /   476181.5312;
+    values["ZbbHinv115"      ] = lumi *       0.077369 /   500446.8750;
     values["ZbbHinv125"      ] = lumi *       0.059618 /   500025.3438;
+    values["ZbbHinv135"      ] = lumi *       0.046479 /   500053.1562;
+    values["ZbbHinv145"      ] = lumi *       0.036651 /   530427.8125;
+    values["ZbbHinv150"      ] = lumi *       0.032644 /   484800.0938;
     values["ZnnH110"         ] = lumi *       0.087331 /  1000249.0000;
     values["ZnnH115"         ] = lumi *       0.071945 /  1000952.0625;
     values["ZnnH120"         ] = lumi *       0.058100 /  1001117.8125;

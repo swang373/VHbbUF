@@ -1,1 +1,5 @@
 combineCards.py ZnunuHighPt_8TeV=vhbb_Znn_J14_bbb_ZnunuHighPt_8TeV.txt ZnunuMedPt_8TeV=vhbb_Znn_J14_bbb_ZnunuMedPt_8TeV.txt ZnunuLowPt_8TeV=vhbb_Znn_J14_bbb_ZnunuLowPt_8TeV.txt > ! vhbb_Znn_J14_bbb_combo_8TeV.txt
+combineCards.py ZnunuHighPt_8TeV=vhbb_Znn_J14_bbb_ZnunuHighPt_8TeV.txt ZnunuMedPt_8TeV=vhbb_Znn_J14_bbb_ZnunuMedPt_8TeV.txt > ! vhbb_Znn_J14_bbb_combo2_8TeV.txt
+
+combineCards.py ZnunuHighPt_8TeV=vhbb_Znn_SI_J14_bbb_ZnunuHighPt_8TeV.txt ZnunuMedPt_8TeV=vhbb_Znn_SI_J14_bbb_ZnunuMedPt_8TeV.txt ZnunuLowPt_8TeV=vhbb_Znn_SI_J14_bbb_ZnunuLowPt_8TeV.txt > ! vhbb_Znn_SI_J14_bbb_combo_8TeV.txt
+combineCards.py ZnunuHighPt_8TeV=vhbb_Znn_SI_J14_bbb_ZnunuHighPt_8TeV.txt ZnunuMedPt_8TeV=vhbb_Znn_SI_J14_bbb_ZnunuMedPt_8TeV.txt > ! vhbb_Znn_SI_J14_bbb_combo2_8TeV.txt

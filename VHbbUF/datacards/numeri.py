@@ -228,7 +228,8 @@ def transfer(outdir, afsdir):
     writeme = "\n".join(writeme_)
     with open("afstransfer_"+outdir.strip("/")+".csh", "w") as f:
         f.write(writeme)
-
+    print "To transfer, do: \nsource afstransfer_"+outdir.strip("/")+".csh"
+    
 
 if __name__ == "__main__":
     

@@ -55,7 +55,7 @@ const TString indirStep4  = "/uscms_data/d3/lpchbb/jiafu/ZnnH_postHCP/Step4_2013
 //const TString indirStep4  = "/uscms_data/d3/lpchbb/jiafu/ZnnH_postHCP/Step4_20130302/stitch/";
 //const TString indirStep4  = "/uscms_data/d3/lpchbb/jiafu/ZnnH_postHCP/Step4_20130221/stitch/";
 //TString weightdir         = "./";
-TString weightdir         = "weights_20130620/";
+TString weightdir         = "weights_20130722/";
 //TString weightdir         = "weights_20130401/";
 //TString weightdir         = "weights_20130327_V4a/";
 //TString weightdir         = "weights_20130323/";
@@ -66,58 +66,16 @@ TString weightdir         = "weights_20130620/";
 /// e.g. weightsTT/125/TMVAClassification_BDT.weights_ZnunuHighPt.xml
 
 const char* g_weights[] = {
-    //"weightsRegular",
-    //"weightsTT",
-    //"weightsVj",
-    //"weightsVjLF",
-    //"weightsZjLF",
-    //"weightsVjHF",
-    //"weightsZjHF",
-    //"weightsST",
-    //"weightsVV",
-    //"weightsZZ",
-    //"weightsZZHF",
+    "weightsInvRegular",
+    "weightsInvRegularVV",
+    "weightsInvRegularVH",
+    "weightsInvRegular__sigZHZH",
+    "weightsInvRegular__sigZbbHinvZZHF",
+    "weightsInvZZ",
+    "weightsInvZZHF",
     
-    "weightsRegular_BSM1",
-    "weightsRegular_BSM2",
-    "weightsRegular_BSM3",
-    
-    //"weightsRegular_FJ",
-    //"weightsTT_FJ",
-    //"weightsVjLF_FJ",
-    //"weightsZZ_FJ",
-    //"weightsZZHF_FJ",
-    
-    //"weightsRegular_FJReg",
-    //"weightsTT_FJReg",
-    //"weightsVjLF_FJReg",
-    //"weightsZZ_FJReg",
-    //"weightsZZHF_FJReg",
-    
-    //"weightsRegular_Angle",
-    
-    //"weightsRegular_KillTop",
-    
-    //"weightsRegular_MET",
-    
-    //"weightsRegular_NoMjj",
-    
-    //"weightsRegular__sigZZHF",
-    //"weightsTT__sigZZHF",
-    //"weightsVjLF__sigZZHF",
-    //"weightsVV__sigZZHF",
-    
-    //"weightsRegularSplitSig",
-    //"weightsTTSplitSig",
-    //"weightsVjLFSplitSig",
-    //"weightsZZSplitSig",
-    //"weightsZZHFSplitSig",
-    
-    //"weightsRegularFullBkg",
-    
-    //"weightsRegularHybrid",
-    //"weightsRegularHybrid_FJ",
-    //"weightsRegularHybrid_FJReg",
+    "weightsInvRegularMET200",
+    "weightsInvRegularMET220",
 };
 
 const int g_masses[] = {

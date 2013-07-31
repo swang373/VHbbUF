@@ -85,7 +85,8 @@
 /// Configuration                                                            ///
 ////////////////////////////////////////////////////////////////////////////////
 
-const TString indir     = "/uscms_data/d3/lpchbb/jiafu/ZnnH_postHCP/Step4_20130404/reload_20130620/";
+const TString indir     = "/uscms_data/d3/lpchbb/jiafu/ZnnH_postHCP/Step4_20130404/reload_20130722/";
+//const TString indir     = "/uscms_data/d3/lpchbb/jiafu/ZnnH_postHCP/Step4_20130404/reload_20130620/";
 //const TString indir     = "/uscms_data/d3/lpchbb/jiafu/ZnnH_postHCP/Step4_20130404/reload_20130401/";
 //const TString indir     = "/uscms_data/d3/lpchbb/jiafu/ZnnH_postHCP/Step4_20130326/reload_20130401/";
 //const TString indir     = "/uscms_data/d3/lpchbb/jiafu/ZnnH_postHCP/Step4_20130326/reload_20130401_VV/";
@@ -127,7 +128,7 @@ const TString g_rootname    = "vhbb_Znn_J14_$CHANNEL_TH1.root";
 const TString g_plotdir     = "plotsJ14/";
 
 #ifndef VVANALYSIS
-const TString g_var         = "BDTregular_bsm1_125[ISYST]";  // ISYST is replaced in the main function.
+const TString g_var         = Form("BDTinvregular_%i[ISYST]", massH);  // ISYST is replaced in the main function.
 //const TString g_var         = Form("BDTregular_%i[ISYST]", massH);  // ISYST is replaced in the main function.
 //const TString g_var         = Form("BDTregular_fj_%i[ISYST]", massH);  // ISYST is replaced in the main function.
 const TString g_varslice    = Form("slice(BDTregular_%i[ISYST], (BDTtt_%i[ISYST]>-0.5), (BDTvjlf_%i[ISYST]>-0.5), (BDTzz_%i[ISYST]>-0.3))", massH, massH, massH, massH);  // BDTzz > -0.35?
@@ -219,6 +220,8 @@ const double g_scalefactors_lnN_prefit[7] = {
 
 //const double g_scalefactors_QCD[3] = {0.02, 0.2, 0.5};
 const double g_scalefactors_QCD[3] = {0.004, 0.04, 0.06};
+
+const double g_scalefactor_VV = 1.0;
 ////////////////////////////////////////////////////////////////////////////////
 /// END Configuration                                                        ///
 ////////////////////////////////////////////////////////////////////////////////
@@ -466,21 +469,21 @@ void MakePlots(const EventsJ14 * ev, TString var_,
     cutdata_  = TCut(str);
     
     if (TString(xtitle) == "BDT") {  // will be changed
-        var_      = "HmassReg+0";
-        if (syst == "CMS_vhbb_Znn_res_jUp")
-            var_  = "HmassReg_res_j_up";
-        else if (syst == "CMS_vhbb_Znn_res_jDown")
-            var_  = "HmassReg_res_j_down";
-        else if (syst == "CMS_vhbb_Znn_scale_jUp")
-            var_  = "HmassReg_scale_j_up";
-        else if (syst == "CMS_vhbb_Znn_scale_jDown")
-            var_  = "HmassReg_scale_j_down";
-        
-        xtitle    = "M_{b#bar{b}} [GeV]";
-        nbins     = 17;
-        xlow      = 0.;
-        xup       = 255.;
-        newnbins  = 17;
+        //var_      = "HmassReg+0";
+        //if (syst == "CMS_vhbb_Znn_res_jUp")
+        //    var_  = "HmassReg_res_j_up";
+        //else if (syst == "CMS_vhbb_Znn_res_jDown")
+        //    var_  = "HmassReg_res_j_down";
+        //else if (syst == "CMS_vhbb_Znn_scale_jUp")
+        //    var_  = "HmassReg_scale_j_up";
+        //else if (syst == "CMS_vhbb_Znn_scale_jDown")
+        //    var_  = "HmassReg_scale_j_down";
+        //
+        //xtitle    = "M_{b#bar{b}} [GeV]";
+        //nbins     = 17;
+        //xlow      = 0.;
+        //xup       = 255.;
+        //newnbins  = 17;
         
         //var_      = "METtype1corr.et+0";
         //if (syst == "CMS_vhbb_Znn_res_jUp")
@@ -498,21 +501,38 @@ void MakePlots(const EventsJ14 * ev, TString var_,
         //xup       = 410.;
         //newnbins  = 20;
         
-        //var_      = "evalHMETMt(METtype1corr.et,METtype1corr.phi,HptReg,H.phi)";
-        //if (syst == "CMS_vhbb_Znn_res_jUp")
-        //    var_  = "evalHMETMt(MET_res_j_up,METphi_res_j_up,HptReg_res_j_up,H.phi)";
-        //else if (syst == "CMS_vhbb_Znn_res_jDown")
-        //    var_  = "evalHMETMt(MET_res_j_down,METphi_res_j_down,HptReg_res_j_down,H.phi)";
-        //else if (syst == "CMS_vhbb_Znn_scale_jUp")
-        //    var_  = "evalHMETMt(MET_scale_j_up,METphi_scale_j_up,HptReg_scale_j_up,H.phi)";
-        //else if (syst == "CMS_vhbb_Znn_scale_jDown")
-        //    var_  = "evalHMETMt(MET_scale_j_down,METphi_scale_j_down,HptReg_scale_j_down,H.phi)";
-        //
-        //xtitle    = "M_{T} [GeV]";
-        //nbins     = 20;
-        //xlow      = 200.;
-        //xup       = 800.;
-        //newnbins  = 20;
+        var_      = "evalHMETMt(METtype1corr.et,METtype1corr.phi,HptReg,H.phi)";
+        if (syst == "CMS_vhbb_Znn_res_jUp")
+            var_  = "evalHMETMt(MET_res_j_up,METphi_res_j_up,HptReg_res_j_up,H.phi)";
+        else if (syst == "CMS_vhbb_Znn_res_jDown")
+            var_  = "evalHMETMt(MET_res_j_down,METphi_res_j_down,HptReg_res_j_down,H.phi)";
+        else if (syst == "CMS_vhbb_Znn_scale_jUp")
+            var_  = "evalHMETMt(MET_scale_j_up,METphi_scale_j_up,HptReg_scale_j_up,H.phi)";
+        else if (syst == "CMS_vhbb_Znn_scale_jDown")
+            var_  = "evalHMETMt(MET_scale_j_down,METphi_scale_j_down,HptReg_scale_j_down,H.phi)";
+        
+        xtitle    = "M_{T} [GeV]";
+        nbins     = 7;
+        xlow      = 340.;
+        xup       = 585.;
+        newnbins  = 7;
+        
+        if (channel == "ZnunuHighPt") {
+            var_ = "min(" + var_ + Form(",%i)",int(xup)-1);
+        } else if (channel == "ZnunuMedPt") {
+            nbins     = 4;
+            xlow      = 260.;
+            xup       = 360.;
+            newnbins  = 4;
+            var_ = "min(" + var_ + Form(",%i)",int(xup)-1);
+        } else if (channel == "ZnunuLowPt") {
+            nbins     = 3;
+            xlow      = 220.;
+            xup       = 280.;
+            newnbins  = 3;
+            var_ = "min(" + var_ + Form(",%i)",int(xup)-1);
+        }
+        
         
         //var_      = "evalHMETMassiveMt(125,METtype1corr.et,METtype1corr.phi,HmassReg,HptReg,H.phi)";
         //if (syst == "CMS_vhbb_Znn_res_jUp")
@@ -533,26 +553,25 @@ void MakePlots(const EventsJ14 * ev, TString var_,
         
         if (!options.Contains("!plotLog"))
             options.ReplaceAll("plotLog", "!plotLog");
-        options.ReplaceAll("writeRoot:!plotData", "writeRoot:plotData");
         
-        //if (syst == "CMS_vhbb_Znn_res_jUp") {
-        //    cutmc_   *= "75<HmassReg_res_j_up && HmassReg_res_j_up<110";
-        //    cutdata_ *= "75<HmassReg_res_j_up && HmassReg_res_j_up<110";
-        //} else if (syst == "CMS_vhbb_Znn_res_jDown") {
-        //    cutmc_   *= "75<HmassReg_res_j_down && HmassReg_res_j_down<110";
-        //    cutdata_ *= "75<HmassReg_res_j_down && HmassReg_res_j_down<110";
-        //} else if (syst == "CMS_vhbb_Znn_scale_jUp") {
-        //    cutmc_   *= "75<HmassReg_scale_j_up && HmassReg_scale_j_up<110";
-        //    cutdata_ *= "75<HmassReg_scale_j_up && HmassReg_scale_j_up<110";
-        //} else if (syst == "CMS_vhbb_Znn_scale_jDown") {
-        //    cutmc_   *= "75<HmassReg_scale_j_down && HmassReg_scale_j_down<110";
-        //    cutdata_ *= "75<HmassReg_scale_j_down && HmassReg_scale_j_down<110";
-        //} else {
-        //    cutmc_   *= "75<HmassReg && HmassReg<110";
-        //    cutdata_ *= "75<HmassReg && HmassReg<110";
-        //}
-        //cutmc_   *= "deltaR(hJet_eta[0], hJet_phi[0], hJet_eta[1], hJet_phi[1])<1.8";
-        //cutdata_ *= "deltaR(hJet_eta[0], hJet_phi[0], hJet_eta[1], hJet_phi[1])<1.8";
+        if (syst == "CMS_vhbb_Znn_res_jUp") {
+            cutmc_   *= "75<HmassReg_res_j_up && HmassReg_res_j_up<110";
+            cutdata_ *= "75<HmassReg_res_j_up && HmassReg_res_j_up<110";
+        } else if (syst == "CMS_vhbb_Znn_res_jDown") {
+            cutmc_   *= "75<HmassReg_res_j_down && HmassReg_res_j_down<110";
+            cutdata_ *= "75<HmassReg_res_j_down && HmassReg_res_j_down<110";
+        } else if (syst == "CMS_vhbb_Znn_scale_jUp") {
+            cutmc_   *= "75<HmassReg_scale_j_up && HmassReg_scale_j_up<110";
+            cutdata_ *= "75<HmassReg_scale_j_up && HmassReg_scale_j_up<110";
+        } else if (syst == "CMS_vhbb_Znn_scale_jDown") {
+            cutmc_   *= "75<HmassReg_scale_j_down && HmassReg_scale_j_down<110";
+            cutdata_ *= "75<HmassReg_scale_j_down && HmassReg_scale_j_down<110";
+        } else {
+            cutmc_   *= "75<HmassReg && HmassReg<110";
+            cutdata_ *= "75<HmassReg && HmassReg<110";
+        }
+        cutmc_   *= "deltaR(hJet_eta[0], hJet_phi[0], hJet_eta[1], hJet_phi[1])<1.8";
+        cutdata_ *= "deltaR(hJet_eta[0], hJet_phi[0], hJet_eta[1], hJet_phi[1])<1.8";
         
         
         //if (syst == "CMS_vhbb_Znn_res_jUp") {
@@ -576,58 +595,104 @@ void MakePlots(const EventsJ14 * ev, TString var_,
         
         
         // FIXME post mortem fix
+        //if (channel == "ZnunuHighPt") {
+        //    if (syst == "CMS_vhbb_Znn_res_jUp") {
+        //        cutmc_   *= "HptReg_res_j_up>190";
+        //        cutdata_ *= "HptReg_res_j_up>190";
+        //    } else if (syst == "CMS_vhbb_Znn_res_jDown") {
+        //        cutmc_   *= "HptReg_res_j_down>190";
+        //        cutdata_ *= "HptReg_res_j_down>190";
+        //    } else if (syst == "CMS_vhbb_Znn_scale_jUp") {
+        //        cutmc_   *= "HptReg_scale_j_up>190";
+        //        cutdata_ *= "HptReg_scale_j_up>190";
+        //    } else if (syst == "CMS_vhbb_Znn_scale_jDown") {
+        //        cutmc_   *= "HptReg_scale_j_down>190";
+        //        cutdata_ *= "HptReg_scale_j_down>190";
+        //    } else {
+        //        cutmc_   *= "HptReg>190";
+        //        cutdata_ *= "HptReg>190";
+        //    }
+        //} else if (channel == "ZnunuMedPt") {
+        //    //if (syst == "CMS_vhbb_Znn_res_jUp") {
+        //    //    cutmc_   *= "HptReg_res_j_up>140 && hJet_ptReg_res_j_up[0]>80";
+        //    //    cutdata_ *= "HptReg_res_j_up>140 && hJet_ptReg_res_j_up[0]>80";
+        //    //} else if (syst == "CMS_vhbb_Znn_res_jDown") {
+        //    //    cutmc_   *= "HptReg_res_j_down>140 && hJet_ptReg_res_j_down[0]>80";
+        //    //    cutdata_ *= "HptReg_res_j_down>140 && hJet_ptReg_res_j_down[0]>80";
+        //    //} else if (syst == "CMS_vhbb_Znn_scale_jUp") {
+        //    //    cutmc_   *= "HptReg_scale_j_up>140 && hJet_ptReg_scale_j_up[0]>80";
+        //    //    cutdata_ *= "HptReg_scale_j_up>140 && hJet_ptReg_scale_j_up[0]>80";
+        //    //} else if (syst == "CMS_vhbb_Znn_scale_jDown") {
+        //    //    cutmc_   *= "HptReg_scale_j_down>140 && hJet_ptReg_scale_j_down[0]>80";
+        //    //    cutdata_ *= "HptReg_scale_j_down>140 && hJet_ptReg_scale_j_down[0]>80";
+        //    //} else {
+        //    //    cutmc_   *= "HptReg>140 && hJet_ptReg[0]>80";
+        //    //    cutdata_ *= "HptReg>140 && hJet_ptReg[0]>80";
+        //    //}
+        //    
+        //    if (syst == "CMS_vhbb_Znn_res_jUp") {
+        //        cutmc_   *= "HptReg_res_j_up > 140";
+        //        cutdata_ *= "HptReg_res_j_up > 140";
+        //    } else if (syst == "CMS_vhbb_Znn_res_jDown") {
+        //        cutmc_   *= "HptReg_res_j_down > 140";
+        //        cutdata_ *= "HptReg_res_j_down > 140";
+        //    } else if (syst == "CMS_vhbb_Znn_scale_jUp") {
+        //        cutmc_   *= "HptReg_scale_j_up > 140";
+        //        cutdata_ *= "HptReg_scale_j_up > 140";
+        //    } else if (syst == "CMS_vhbb_Znn_scale_jDown") {
+        //        cutmc_   *= "HptReg_scale_j_down > 140";
+        //        cutdata_ *= "HptReg_scale_j_down > 140";
+        //    } else {
+        //        cutmc_   *= "HptReg > 140";
+        //        cutdata_ *= "HptReg > 140";
+        //    }
+        //
+        //}
+        
         if (channel == "ZnunuHighPt") {
             if (syst == "CMS_vhbb_Znn_res_jUp") {
-                cutmc_   *= "HptReg_res_j_up>190";
-                cutdata_ *= "HptReg_res_j_up>190";
+                cutmc_   *= "HptReg_res_j_up>170";
+                cutdata_ *= "HptReg_res_j_up>170";
             } else if (syst == "CMS_vhbb_Znn_res_jDown") {
-                cutmc_   *= "HptReg_res_j_down>190";
-                cutdata_ *= "HptReg_res_j_down>190";
+                cutmc_   *= "HptReg_res_j_down>170";
+                cutdata_ *= "HptReg_res_j_down>170";
             } else if (syst == "CMS_vhbb_Znn_scale_jUp") {
-                cutmc_   *= "HptReg_scale_j_up>190";
-                cutdata_ *= "HptReg_scale_j_up>190";
+                cutmc_   *= "HptReg_scale_j_up>170";
+                cutdata_ *= "HptReg_scale_j_up>170";
             } else if (syst == "CMS_vhbb_Znn_scale_jDown") {
-                cutmc_   *= "HptReg_scale_j_down>190";
-                cutdata_ *= "HptReg_scale_j_down>190";
+                cutmc_   *= "HptReg_scale_j_down>170";
+                cutdata_ *= "HptReg_scale_j_down>170";
             } else {
-                cutmc_   *= "HptReg>190";
-                cutdata_ *= "HptReg>190";
+                cutmc_   *= "HptReg>170";
+                cutdata_ *= "HptReg>170";
             }
-        } else if (channel == "ZnunuMedPt") {
-            //if (syst == "CMS_vhbb_Znn_res_jUp") {
-            //    cutmc_   *= "HptReg_res_j_up>140 && hJet_ptReg_res_j_up[0]>80";
-            //    cutdata_ *= "HptReg_res_j_up>140 && hJet_ptReg_res_j_up[0]>80";
-            //} else if (syst == "CMS_vhbb_Znn_res_jDown") {
-            //    cutmc_   *= "HptReg_res_j_down>140 && hJet_ptReg_res_j_down[0]>80";
-            //    cutdata_ *= "HptReg_res_j_down>140 && hJet_ptReg_res_j_down[0]>80";
-            //} else if (syst == "CMS_vhbb_Znn_scale_jUp") {
-            //    cutmc_   *= "HptReg_scale_j_up>140 && hJet_ptReg_scale_j_up[0]>80";
-            //    cutdata_ *= "HptReg_scale_j_up>140 && hJet_ptReg_scale_j_up[0]>80";
-            //} else if (syst == "CMS_vhbb_Znn_scale_jDown") {
-            //    cutmc_   *= "HptReg_scale_j_down>140 && hJet_ptReg_scale_j_down[0]>80";
-            //    cutdata_ *= "HptReg_scale_j_down>140 && hJet_ptReg_scale_j_down[0]>80";
-            //} else {
-            //    cutmc_   *= "HptReg>140 && hJet_ptReg[0]>80";
-            //    cutdata_ *= "HptReg>140 && hJet_ptReg[0]>80";
-            //}
-            
+        } else if (channel == "ZnunuLowPt") {
             if (syst == "CMS_vhbb_Znn_res_jUp") {
-                cutmc_   *= "HptReg_res_j_up > 140";
-                cutdata_ *= "HptReg_res_j_up > 140";
+                cutmc_   *= "HptReg_res_j_up>110";
+                cutdata_ *= "HptReg_res_j_up>110";
+                cutmc_   *= "MET_res_j_up>110";
+                cutdata_ *= "MET_res_j_up>110";
             } else if (syst == "CMS_vhbb_Znn_res_jDown") {
-                cutmc_   *= "HptReg_res_j_down > 140";
-                cutdata_ *= "HptReg_res_j_down > 140";
+                cutmc_   *= "HptReg_res_j_down>110";
+                cutdata_ *= "HptReg_res_j_down>110";
+                cutmc_   *= "MET_res_j_down>110";
+                cutdata_ *= "MET_res_j_down>110";
             } else if (syst == "CMS_vhbb_Znn_scale_jUp") {
-                cutmc_   *= "HptReg_scale_j_up > 140";
-                cutdata_ *= "HptReg_scale_j_up > 140";
+                cutmc_   *= "HptReg_scale_j_up>110";
+                cutdata_ *= "HptReg_scale_j_up>110";
+                cutmc_   *= "MET_scale_j_up>110";
+                cutdata_ *= "MET_scale_j_up>110";
             } else if (syst == "CMS_vhbb_Znn_scale_jDown") {
-                cutmc_   *= "HptReg_scale_j_down > 140";
-                cutdata_ *= "HptReg_scale_j_down > 140";
+                cutmc_   *= "HptReg_scale_j_down>110";
+                cutdata_ *= "HptReg_scale_j_down>110";
+                cutmc_   *= "MET_scale_j_down>110";
+                cutdata_ *= "MET_scale_j_down>110";
             } else {
-                cutmc_   *= "HptReg > 140";
-                cutdata_ *= "HptReg > 140";
+                cutmc_   *= "HptReg>110";
+                cutdata_ *= "HptReg>110";
+                cutmc_   *= "METtype1corr.et>110";
+                cutdata_ *= "METtype1corr.et>110";
             }
-
         }
         
     }
@@ -776,13 +841,17 @@ void MakePlots(const EventsJ14 * ev, TString var_,
     
     ev->s_Top->Project("s_Top_0", var, cutmc);
     std::clog << "... DONE: project s_Top_0." << std::endl;
-    ev->VVLF->Project("VVLF_0", var, cutmc);
+    cutsf = Form("%f", g_scalefactor_VV);
+    ev->VVLF->Project("VVLF_0", var, cutmc * cutsf);
     std::clog << "... DONE: project VVLF_0." << std::endl;
-    ev->VVHF->Project("VVHF_0", var, cutmc);
+    cutsf = Form("%f", g_scalefactor_VV);
+    ev->VVHF->Project("VVHF_0", var, cutmc * cutsf);
     std::clog << "... DONE: project VVHF_0." << std::endl;
-    ev->WZHF->Project("WZHF_0", var, cutmc);
+    cutsf = Form("%f", g_scalefactor_VV);
+    ev->WZHF->Project("WZHF_0", var, cutmc * cutsf);
     std::clog << "... DONE: project WZHF_0." << std::endl;
-    ev->ZZHF->Project("ZZHF_0", var, cutmc);
+    cutsf = Form("%f", g_scalefactor_VV);
+    ev->ZZHF->Project("ZZHF_0", var, cutmc * cutsf);
     std::clog << "... DONE: project ZZHF_0." << std::endl;
 
 #ifdef QCDSHAPE
@@ -1069,7 +1138,7 @@ void MakePlots(const EventsJ14 * ev, TString var_,
 #endif
         dc << "CMS_vhbb_ST                          lnN    -     -     -     -     -     -     -     -     -     -     1.15  -     -     -     -    " << std::endl;
 #ifndef VVANALYSIS
-        dc << "CMS_vhbb_VV                          lnN    -     -     -     -     -     -     -     -     -     -     -     1.25  1.25  1.25  -    " << std::endl;
+        dc << "CMS_vhbb_VV                          lnN    -     -     -     -     -     -     -     -     -     -     -     1.15  1.15  1.15  -    " << std::endl;
 #else
         dc << "CMS_vhbb_VV                          lnN    -     -     -     -     -     -     -     -     -     -     -     1.15  1.15  1.15  -    " << std::endl;
         dc << "CMS_vhbb_VH                          lnN    1.50  1.50  1.50  -     -     -     -     -     -     -     -     -     -     -     -    " << std::endl;
@@ -1191,8 +1260,9 @@ void MakePlots(const EventsJ14 * ev, TString var_,
                 hmc_test->SetBinError(i, 0.);
             }
 #else
-            for (Int_t i = hdata_test->FindFixBin(105+1); i < hdata_test->FindFixBin(150-1)+1; i++) {
+            //for (Int_t i = hdata_test->FindFixBin(105+1); i < hdata_test->FindFixBin(150-1)+1; i++) {
             //for (Int_t i = hdata_test->FindFixBin(105+1)-2; i < hdata_test->FindFixBin(150-1)+1; i++) {  // hide VV as well
+            for (Int_t i = 1; i < hdata_test->GetNbinsX()+1; i++) {  // all bins
                 hdata_test->SetBinContent(i, 0.);
                 hdata_test->SetBinError(i, 0.);
                 hmc_test->SetBinContent(i, 0.);
@@ -1258,7 +1328,8 @@ void MakePlots(const EventsJ14 * ev, TString var_,
         ratiostaterr->Sumw2();
         ratiostaterr->SetStats(0);
         ratiostaterr->SetTitle("");
-        ratiostaterr->GetXaxis()->SetTitle(xtitle);
+        //ratiostaterr->GetXaxis()->SetTitle(xtitle);
+        ratiostaterr->SetTitle(TString(";")+xtitle);
         ratiostaterr->GetYaxis()->SetTitle("Data/MC");
         ratiostaterr->SetMaximum(2.2);
         ratiostaterr->SetMinimum(0);
@@ -1329,34 +1400,72 @@ void MakePlots(const EventsJ14 * ev, TString var_,
 
         // Setup legends
         std::clog << "MakePlots(): Setting up legends..." << std::endl;
-        TLegend * leg = new TLegend(0.74, 0.56, 0.92, 0.92);
-        leg->SetFillColor(0);
-        leg->SetLineColor(0);
-        leg->SetShadowColor(0);
-        leg->SetTextFont(62);
-        leg->SetTextSize(0.03);
-        leg->AddEntry(hdata_test, "Data", "p");
-        if (plotSig)  leg->AddEntry(hVH, Form("VH(%i)", massH), "l");  // FIXME
-        if (plotSig)  leg->AddEntry(hZbbHinv, "ZH(invis)", "l");
-#ifdef VVANALYSIS
-        leg->AddEntry(hVVHF, "VV(b#bar{b})", "l");
-#endif
-        leg->AddEntry(hZj2b, "Z + b#bar{b}", "f");
-        leg->AddEntry(hZj1b, "Z + b", "f");
-        leg->AddEntry(hZj0b, "Z + udscg", "f");
-        leg->AddEntry(hWj2b, "W + b#bar{b}", "f");
-        leg->AddEntry(hWj1b, "W + b", "f");
-        leg->AddEntry(hWj0b, "W + udscg", "f");
-        leg->AddEntry(hTT, "t#bar{t}", "f");
-        leg->AddEntry(hs_Top, "single top", "f");
-        leg->AddEntry(hQCD, "QCD", "f");
-        leg->AddEntry(hVVLF, "VV(udscg)", "f");
-#ifndef VVANALYSIS
-        leg->AddEntry(hVVHF, "VV(b#bar{b})", "f");
-#endif
-        leg->AddEntry(staterr, "MC uncert. (stat)", "fl");
+//        TLegend * leg = new TLegend(0.74, 0.56, 0.92, 0.92);
+//        leg->SetFillColor(0);
+//        leg->SetLineColor(0);
+//        leg->SetShadowColor(0);
+//        leg->SetTextFont(62);
+//        leg->SetTextSize(0.03);
+//        leg->AddEntry(hdata_test, "Data", "p");
+//        if (plotSig)  leg->AddEntry(hVH, Form("VH(%i)", massH), "l");
+//        if (plotSig)  leg->AddEntry(hZbbHinv, "ZH(invis)", "l");
+//#ifdef VVANALYSIS
+//        leg->AddEntry(hVVHF, "VV(b#bar{b})", "l");
+//#endif
+//        leg->AddEntry(hZj2b, "Z + b#bar{b}", "f");
+//        leg->AddEntry(hZj1b, "Z + b", "f");
+//        leg->AddEntry(hZj0b, "Z + udscg", "f");
+//        leg->AddEntry(hWj2b, "W + b#bar{b}", "f");
+//        leg->AddEntry(hWj1b, "W + b", "f");
+//        leg->AddEntry(hWj0b, "W + udscg", "f");
+//        leg->AddEntry(hTT, "t#bar{t}", "f");
+//        leg->AddEntry(hs_Top, "single top", "f");
+//        leg->AddEntry(hQCD, "QCD", "f");
+//        leg->AddEntry(hVVLF, "VV(udscg)", "f");
+//#ifndef VVANALYSIS
+//        leg->AddEntry(hVVHF, "VV(b#bar{b})", "f");
+//#endif
+//        leg->AddEntry(staterr, "MC uncert. (stat)", "fl");
 
-        TLegend * ratioleg1 = new TLegend(0.54, 0.86, 0.72, 0.96);
+        //TLegend * leg1 = new TLegend(0.58, 0.68, 0.76, 0.92);
+        TLegend * leg1 = new TLegend(0.50, 0.60, 0.72, 0.92);
+        leg1->SetFillColor(0);
+        leg1->SetLineColor(0);
+        leg1->SetShadowColor(0);
+        leg1->SetTextFont(62);
+        leg1->SetTextSize(0.03);
+        leg1->AddEntry(hdata_test, "Data", "p");
+        if (plotSig)  leg1->AddEntry(hVH, Form("VH(%i)", massH), "l");
+        if (plotSig)  leg1->AddEntry(hZbbHinv, "ZH(invis)", "l");
+#ifdef VVANALYSIS
+        leg1->AddEntry(hVVHF, "VV(b#bar{b})", "l");
+#endif
+        leg1->AddEntry(hTT, "t#bar{t}", "f");
+        leg1->AddEntry(hs_Top, "single top", "f");
+        leg1->AddEntry(hQCD, "QCD", "f");
+        leg1->AddEntry(hVVLF, "VV(udscg)", "f");
+#ifndef VVANALYSIS
+        leg1->AddEntry(hVVHF, "VZ(b#bar{b})", "f");
+#endif
+
+        //TLegend * leg2 = new TLegend(0.72, 0.60, 0.94, 0.92);
+        TLegend * leg2 = new TLegend(0.72, 0.60, 0.94, 0.88);
+        leg2->SetFillColor(0);
+        leg2->SetLineColor(0);
+        leg2->SetShadowColor(0);
+        leg2->SetTextFont(62);
+        leg2->SetTextSize(0.03);
+        leg2->AddEntry(hWj2b, "W + b#bar{b}", "f");
+        leg2->AddEntry(hWj1b, "W + b", "f");
+        leg2->AddEntry(hWj0b, "W + udscg", "f");
+        leg2->AddEntry(hZj2b, "Z + b#bar{b}", "f");
+        leg2->AddEntry(hZj1b, "Z + b", "f");
+        leg2->AddEntry(hZj0b, "Z + udscg", "f");
+        leg2->AddEntry(staterr, "MC uncert. (stat)", "f");
+        
+
+        //TLegend * ratioleg1 = new TLegend(0.54, 0.86, 0.72, 0.96);
+        TLegend * ratioleg1 = new TLegend(0.52, 0.88, 0.72, 0.96);
         //TLegend * ratioleg1 = new TLegend(0.50, 0.86, 0.69, 0.96);
         ratioleg1->AddEntry(ratiostaterr, "MC uncert. (stat)", "f");
         ratioleg1->SetFillColor(0);
@@ -1366,7 +1475,8 @@ void MakePlots(const EventsJ14 * ev, TString var_,
         ratioleg1->SetTextSize(0.06);
         ratioleg1->SetBorderSize(1);
         
-        TLegend * ratioleg2 = new TLegend(0.72, 0.86, 0.95, 0.96);
+        //TLegend * ratioleg2 = new TLegend(0.72, 0.86, 0.95, 0.96);
+        TLegend * ratioleg2 = new TLegend(0.72, 0.88, 0.95, 0.96);
         //TLegend * ratioleg2 = new TLegend(0.69, 0.86, 0.9, 0.96);
         ratioleg2->AddEntry(ratiosysterr, "MC uncert. (stat+syst)", "f");
         ratioleg2->SetFillColor(0);
@@ -1385,6 +1495,8 @@ void MakePlots(const EventsJ14 * ev, TString var_,
         double binwidth = (xup - xlow) / nbins_plot;
         TString ytitle = Form("Events / %.3f", binwidth);
         hs->GetYaxis()->SetTitle(ytitle);
+        if (TString(xtitle).Contains(" ; "))
+            hs->SetTitle(TString(";")+xtitle);
         
         staterr->Draw("e2 same");
         if (plotSig) {
@@ -1408,7 +1520,9 @@ void MakePlots(const EventsJ14 * ev, TString var_,
         hdata_test->Draw("e1 same");
         
         // Draw legends
-        leg->Draw();
+        //leg->Draw();
+        leg1->Draw();
+        leg2->Draw();
         TLatex * latex = new TLatex();
         latex->SetNDC();
         latex->SetTextAlign(12);
@@ -1422,18 +1536,17 @@ void MakePlots(const EventsJ14 * ev, TString var_,
         latex->DrawLatex(0.19, 0.84, "#sqrt{s} = 8 TeV, L = 12.3 fb^{-1}");
 #endif
         
-        if (region == "VH")
-            latex->DrawLatex(0.19, 0.79, "Z(#nu#bar{#nu})H(b#bar{b})");
-        else if (region == "ZjLF")
-            latex->DrawLatex(0.19, 0.79, "Z(#nu#bar{#nu})H(b#bar{b}), Z + udscg enriched");
+        latex->DrawLatex(0.19, 0.79, "Z(#nu#bar{#nu})H(b#bar{b})");
+        if (region == "ZjLF")
+            latex->DrawLatex(0.19, 0.74, "Z + udscg enriched");
         else if (region == "ZjHF")
-            latex->DrawLatex(0.19, 0.79, "Z(#nu#bar{#nu})H(b#bar{b}), Z + b#bar{b} enriched");
+            latex->DrawLatex(0.19, 0.74, "Z + b#bar{b} enriched");
         else if (region == "WjLF")
-            latex->DrawLatex(0.19, 0.79, "Z(#nu#bar{#nu})H(b#bar{b}), W + udscg enriched");
+            latex->DrawLatex(0.19, 0.74, "W + udscg enriched");
         else if (region == "WjHF")
-            latex->DrawLatex(0.19, 0.79, "Z(#nu#bar{#nu})H(b#bar{b}), W + b#bar{b} enriched");
+            latex->DrawLatex(0.19, 0.74, "W + b#bar{b} enriched");
         else if (region == "TT")
-            latex->DrawLatex(0.19, 0.79, "Z(#nu#bar{#nu})H(b#bar{b}), t#bar{t} enriched");
+            latex->DrawLatex(0.19, 0.74, "t#bar{t} enriched");
         
         // Under/overflows a la TMVA
         TString uoflow = Form("U/O-flow (Data,MC): (%.1f, %.1f) / (%.1f, %.1f)", hdata_test->GetBinContent(0), hmc_exp->GetBinContent(0), hdata_test->GetBinContent(nbins_plot+1), hmc_exp->GetBinContent(nbins_plot+1));
@@ -1456,7 +1569,8 @@ void MakePlots(const EventsJ14 * ev, TString var_,
         ratioleg2->Draw();
 
         // Kolmogorov-Smirnov test and Chi2 test
-        TPaveText * pave = new TPaveText(0.18, 0.85, 0.35, 0.96, "brNDC");
+        //TPaveText * pave = new TPaveText(0.18, 0.86, 0.35, 0.96, "brNDC");
+        TPaveText * pave = new TPaveText(0.18, 0.86, 0.28, 0.96, "brNDC");
         pave->SetTextAlign(12);
         pave->SetLineColor(0);
         pave->SetFillColor(0);
@@ -1465,8 +1579,10 @@ void MakePlots(const EventsJ14 * ev, TString var_,
         double nchisq = hdata_test->Chi2Test(hmc_test, "UWCHI2/NDF");  // MC uncert. (stat)
         double kolprob = hdata_test->KolmogorovTest(hmc_test);  // MC uncert. (stat)
         TText * text = pave->AddText(Form("#chi_{#nu}^{2} = %.3f, K_{s} = %.3f", nchisq, kolprob));
+        //TText * text = pave->AddText(Form("#chi_{#nu}^{2} = %.3f", nchisq));
         text->SetTextFont(62);
-        text->SetTextSize(0.06);
+        //text->SetTextSize(0.06);
+        text->SetTextSize(0.07);
         pave->Draw();
 
         std::clog << "MakePlots(): Printing..." << std::endl;
@@ -1490,7 +1606,9 @@ void MakePlots(const EventsJ14 * ev, TString var_,
         delete ratio;
         delete ratiostaterr;
         delete ratiosysterr;
-        delete leg;
+        //delete leg;
+        delete leg1;
+        delete leg2;
         delete ratioleg1;
         delete ratioleg2;
         delete latex;
@@ -1952,7 +2070,7 @@ void BSMBDTShapeJ14(int nbins=500, long long newnbins=-100, double rebinerrorf=0
 #ifndef VVANALYSIS
     double binning_BDT [4*3] = {22, 0.25, 0.25, 14, 0.25, 0.25, 11, 0.25, 0.25};
     double binning_mBDT[4*3] = {10101010, 0.15, 0.15, 8080808, 0.15, 0.15, 6060606, 0.15, 0.15};
-    double binning_nBDT[4*3] = {25, 0.03, 0.25, 25, 0.02, 0.25, 25, 0.025, 0.18};
+    double binning_nBDT[4*3] = {22, 0.024, 0.25, 22, 0.022, 0.20, 22, 0.029, 0.15};
 #else
     double binning_BDT [4*3] = {20, 0.25, 0.25, 14, 0.25, 0.25, 11, 0.25, 0.25};
     double binning_mBDT[4*3] = {101010, 0.15, 0.15, 80808, 0.15, 0.15, 60606, 0.15, 0.15};
@@ -2075,6 +2193,7 @@ void BSMBDTShapeJ14(int nbins=500, long long newnbins=-100, double rebinerrorf=0
             MakePlots(ev, "max(hJet_ptReg[0],hJet_ptReg[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "H j1 p_{T} [GeV]", 20, 50, 350, 20, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "min(hJet_ptReg[0],hJet_ptReg[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "H j2 p_{T} [GeV]", 13, 15, 210, 13, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "deltaR(hJet_eta[0], hJet_phi[0], hJet_eta[1], hJet_phi[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "#Delta R(j1,j2)", 14, 0, 3.5, 14, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "abs(deltaPhi(hJet_phi[0], hJet_phi[1]))", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "#Delta #phi(j1,j2)", 16, 0, 3.2, 16, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "abs(hJet_eta[0]-hJet_eta[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "|#Delta #eta|(j1,j2)", 14, 0, 3.5, 14, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "min(abs(deltaPullAngle),pi)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "|#Delta #theta_{pull}|(j1,j2)", 16, 0, 3.2, 16, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "METtype1corr.et", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "Type-1 corr. pfMET [GeV]", 20, 155, 455, 20, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
@@ -2231,6 +2350,7 @@ void BSMBDTShapeJ14(int nbins=500, long long newnbins=-100, double rebinerrorf=0
             MakePlots(ev, "max(hJet_ptReg[0],hJet_ptReg[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "H j1 p_{T} [GeV]", 20, 50, 350, 20, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "min(hJet_ptReg[0],hJet_ptReg[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "H j2 p_{T} [GeV]", 13, 15, 210, 13, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "deltaR(hJet_eta[0], hJet_phi[0], hJet_eta[1], hJet_phi[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "#Delta R(j1,j2)", 14, 0, 3.5, 14, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "abs(deltaPhi(hJet_phi[0], hJet_phi[1]))", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "#Delta #phi(j1,j2)", 16, 0, 3.2, 16, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "abs(hJet_eta[0]-hJet_eta[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "|#Delta #eta|(j1,j2)", 14, 0, 3.5, 14, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "min(abs(deltaPullAngle),pi)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "|#Delta #theta_{pull}|(j1,j2)", 16, 0, 3.2, 16, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "METtype1corr.et", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "Type-1 corr. pfMET [GeV]", 12, 120, 180, 12, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
@@ -2338,6 +2458,7 @@ void BSMBDTShapeJ14(int nbins=500, long long newnbins=-100, double rebinerrorf=0
             MakePlots(ev, "max(hJet_ptReg[0],hJet_ptReg[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "H j1 p_{T} [GeV]", 20, 15, 315, 20, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "min(hJet_ptReg[0],hJet_ptReg[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "H j2 p_{T} [GeV]", 13, 15, 210, 13, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "deltaR(hJet_eta[0], hJet_phi[0], hJet_eta[1], hJet_phi[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "#Delta R(j1,j2)", 14, 0, 3.5, 14, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "abs(deltaPhi(hJet_phi[0], hJet_phi[1]))", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "#Delta #phi(j1,j2)", 16, 0, 3.2, 16, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "abs(hJet_eta[0]-hJet_eta[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "|#Delta #eta|(j1,j2)", 14, 0, 3.5, 14, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "min(abs(deltaPullAngle),pi)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "|#Delta #theta_{pull}|(j1,j2)", 16, 0, 3.2, 16, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "METtype1corr.et", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "Type-1 corr. pfMET [GeV]", 10, 90, 140, 10, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
@@ -2431,6 +2552,7 @@ void BSMBDTShapeJ14(int nbins=500, long long newnbins=-100, double rebinerrorf=0
             MakePlots(ev, "max(hJet_ptReg[0],hJet_ptReg[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "H j1 p_{T} [GeV]", 20, 50, 350, 20, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "min(hJet_ptReg[0],hJet_ptReg[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "H j2 p_{T} [GeV]", 13, 15, 210, 13, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "deltaR(hJet_eta[0], hJet_phi[0], hJet_eta[1], hJet_phi[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "#Delta R(j1,j2)", 14, 0, 3.5, 14, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
+            MakePlots(ev, "abs(deltaPhi(hJet_phi[0], hJet_phi[1]))", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "#Delta #phi(j1,j2)", 16, 0, 3.2, 16, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "abs(hJet_eta[0]-hJet_eta[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "|#Delta #eta|(j1,j2)", 14, 0, 3.5, 14, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "min(abs(deltaPullAngle),pi)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "|#Delta #theta_{pull}|(j1,j2)", 16, 0, 3.2, 16, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "METtype1corr.et", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "Type-1 corr. pfMET [GeV]", 20, 155, 455, 20, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
