@@ -232,8 +232,8 @@ const double g_scalefactor_VV = 1.0;
 class EventsJ14 {  // jmax = 12 in datacard, with 7 scale factors.
 public:
     EventsJ14()
-      : ZH(0),
-        WH(0),
+      : ZH(0),  //! this holds ZH_SM
+        WH(0),  //! this holds WH_SM
         ZbbHinv(0),
         Wj0b(0),
         Wj1b(0),
@@ -255,8 +255,8 @@ public:
         Zj1b_syst(0),
         Zj2b_syst(0),
         TT_syst(0),
-        ZH_SM(0),
-        WH_SM(0),
+        ZH_BSM(0),
+        WH_BSM(0),  //! this is equal to ZH_BSM for now
         data_obs(0),
         sf_Wj0b(1.), sf_Wj1b(1.), sf_Wj2b(1.), sf_Zj0b(1.), sf_Zj1b(1.), sf_Zj2b(1.), sf_TT(1.) {}
 
@@ -285,8 +285,8 @@ public:
         delete Zj1b_syst;
         delete Zj2b_syst;
         delete TT_syst;
-        delete ZH_SM;
-        delete WH_SM;
+        delete ZH_BSM;
+        delete WH_BSM;
         delete data_obs;
     }
 
@@ -316,8 +316,8 @@ public:
         assert(Zj1b_syst != 0 && Zj1b_syst->GetEntriesFast() > 0);
         assert(Zj2b_syst != 0 && Zj2b_syst->GetEntriesFast() > 0);
         assert(TT_syst   != 0 && TT_syst  ->GetEntriesFast() > 0);
-        assert(ZH_SM     != 0 && ZH_SM    ->GetEntriesFast() > 0);
-        assert(WH_SM     != 0 && WH_SM    ->GetEntriesFast() > 0);
+        assert(ZH_BSM    != 0 && ZH_BSM   ->GetEntriesFast() > 0);
+        assert(WH_BSM    != 0 && WH_BSM   ->GetEntriesFast() > 0);
         assert(data_obs  != 0 && data_obs ->GetEntriesFast() > 0);
         return;
     }
@@ -357,8 +357,8 @@ public:
     TTree * Zj1b_syst;  // for ZJModel
     TTree * Zj2b_syst;  // for ZJModel
     TTree * TT_syst;    // for TTModel
-    TTree * ZH_SM;      // for signal injection
-    TTree * WH_SM;      // for signal injection
+    TTree * ZH_BSM;     // for signal injection
+    TTree * WH_BSM;     // for signal injection
     TTree * data_obs;
     double sf_Wj0b;
     double sf_Wj1b;
@@ -742,8 +742,8 @@ void MakePlots(const EventsJ14 * ev, TString var_,
     TH1F * hZj1b_syst_0 = new TH1F("Zj1b_syst_0", "", nbins, xlow, xup);
     TH1F * hZj2b_syst_0 = new TH1F("Zj2b_syst_0", "", nbins, xlow, xup);
     TH1F * hTT_syst_0   = new TH1F("TT_syst_0"  , "", nbins, xlow, xup);
-    TH1F * hZH_SM_0     = new TH1F("ZH_SM_0"    , "", nbins, xlow, xup);
-    TH1F * hWH_SM_0     = new TH1F("WH_SM_0"    , "", nbins, xlow, xup);
+    TH1F * hZH_BSM_0    = new TH1F("ZH_BSM_0"   , "", nbins, xlow, xup);
+    TH1F * hWH_BSM_0    = new TH1F("WH_BSM_0"   , "", nbins, xlow, xup);
     TH1F * hVH_0        = new TH1F("VH_0"       , "", nbins, xlow, xup);
     TH1F * hVV_0        = new TH1F("VV_0"       , "", nbins, xlow, xup);
     TH1F * hmc_exp_0    = new TH1F("mc_exp_0"   , "", nbins, xlow, xup);
@@ -773,8 +773,8 @@ void MakePlots(const EventsJ14 * ev, TString var_,
     histos_0.push_back(hZj1b_syst_0);
     histos_0.push_back(hZj2b_syst_0);
     histos_0.push_back(hTT_syst_0);
-    histos_0.push_back(hZH_SM_0);
-    histos_0.push_back(hWH_SM_0);
+    histos_0.push_back(hZH_BSM_0);
+    histos_0.push_back(hWH_BSM_0);
     histos_0.push_back(hVH_0);
     histos_0.push_back(hVV_0);
     histos_0.push_back(hmc_exp_0);
@@ -806,6 +806,11 @@ void MakePlots(const EventsJ14 * ev, TString var_,
     TCut cutvhqcd_pythia = "weightSignalQCD * hpythia_naJets(min(Sum$(aJet_genPt>20 && abs(aJet_eta)<2.5),4))";
     ev->ZbbHinv->Project("ZbbHinv_0", var, cutmc * cutvhewk_pythia * cutvhqcd_pythia);
     std::clog << "... DONE: project ZbbHinv_0." << std::endl;
+    
+    ev->ZH_BSM->Project("ZH_BSM_0", var, cutmc * cutvhewk_pythia * cutvhqcd_pythia);
+    std::clog << "... DONE: project ZH_BSM_0." << std::endl;
+    ev->WH_BSM->Project("WH_BSM_0", var, cutmc * cutvhewk_pythia * cutvhqcd_pythia);
+    std::clog << "... DONE: project WH_BSM_0." << std::endl;
 
     // Apply slope
     double WJSlopeErr = 0.0020;
@@ -882,11 +887,6 @@ void MakePlots(const EventsJ14 * ev, TString var_,
     std::clog << "... DONE: project Zj2b_syst_0." << std::endl;
     ev->TT_syst->Project("TT_syst_0", var, cutmc);
     std::clog << "... DONE: project TT_syst_0." << std::endl;
-
-    ev->ZH_SM->Project("ZH_SM_0", var, cutmc);
-    std::clog << "... DONE: project ZH_SM_0." << std::endl;
-    ev->WH_SM->Project("WH_SM_0", var, cutmc);
-    std::clog << "... DONE: project WH_SM_0." << std::endl;
     
     ev->data_obs->Project("data_obs_0", var, cutdata);
     std::clog << "... DONE: project data_obs_0." << std::endl;
@@ -957,8 +957,8 @@ void MakePlots(const EventsJ14 * ev, TString var_,
     TH1F * hZj1b_syst = rebinner->rebin(hZj1b_syst_0  , newnbins, "Zj1b_syst" );
     TH1F * hZj2b_syst = rebinner->rebin(hZj2b_syst_0  , newnbins, "Zj2b_syst" );
     TH1F * hTT_syst   = rebinner->rebin(hTT_syst_0    , newnbins, "TT_syst"   );
-    TH1F * hZH_SM     = rebinner->rebin(hZH_SM_0      , newnbins, "ZH_SM0"    );
-    TH1F * hWH_SM     = rebinner->rebin(hWH_SM_0      , newnbins, "WH_SM0"    );
+    TH1F * hZH_BSM    = rebinner->rebin(hZH_BSM_0     , newnbins, "ZH_BSM"    );
+    TH1F * hWH_BSM    = rebinner->rebin(hWH_BSM_0     , newnbins, "WH_BSM"    );
     TH1F * hVH        = rebinner->rebin(hVH_0         , newnbins, "VH"        );
     TH1F * hVV        = rebinner->rebin(hVV_0         , newnbins, "VV"        );
     TH1F * hmc_exp    = rebinner->rebin(hmc_exp_0     , newnbins, "mc_exp"    );
@@ -991,8 +991,8 @@ void MakePlots(const EventsJ14 * ev, TString var_,
     histos.push_back(hZj1b_syst);
     histos.push_back(hZj2b_syst);
     histos.push_back(hTT_syst);
-    histos.push_back(hZH_SM);
-    histos.push_back(hWH_SM);
+    histos.push_back(hZH_BSM);
+    histos.push_back(hWH_BSM);
     histos.push_back(hVH);
     histos.push_back(hVV);
     histos.push_back(hmc_exp);
@@ -1140,8 +1140,8 @@ void MakePlots(const EventsJ14 * ev, TString var_,
 #ifndef VVANALYSIS
         dc << "CMS_vhbb_VV                          lnN    -     -     -     -     -     -     -     -     -     -     -     1.15  1.15  1.15  -    " << std::endl;
 #else
-        dc << "CMS_vhbb_VV                          lnN    -     -     -     -     -     -     -     -     -     -     -     1.15  1.15  1.15  -    " << std::endl;
-        dc << "CMS_vhbb_VH                          lnN    1.50  1.50  1.50  -     -     -     -     -     -     -     -     -     -     -     -    " << std::endl;
+        dc << "CMS_vhbb_VV                          lnN    -     -     -     -     -     -     -     -     -     -     -     1.05  1.05  1.05  -    " << std::endl;
+        dc << "CMS_vhbb_VH                          lnN    1.25  1.25  1.25  -     -     -     -     -     -     -     -     -     -     -     -    " << std::endl;
 #endif
         dc << "##CMS_vhbb_MET_nojets                 lnN    1.03  1.03  1.03  -     -     -     -     -     -     -     1.03  1.03  1.03  1.03  1.03 " << std::endl;
         dc << "##CMS_vhbb_trigger_MET                lnN    1.03  1.03  1.03  -     -     -     -     -     -     -     1.03  1.03  1.03  1.03  1.03 " << std::endl;
@@ -1314,7 +1314,8 @@ void MakePlots(const EventsJ14 * ev, TString var_,
         std::clog << "MakePlots(): Setting up auxiliary histograms..." << std::endl;
         TH1F * staterr = (TH1F *) hmc_exp->Clone("staterr");
         staterr->Sumw2();
-        staterr->SetFillColor(kRed);
+        //staterr->SetFillColor(kRed);
+        staterr->SetFillColor(kGray+3);
         staterr->SetMarkerSize(0);
         staterr->SetFillStyle(3013);
         
@@ -1334,7 +1335,8 @@ void MakePlots(const EventsJ14 * ev, TString var_,
         ratiostaterr->SetMaximum(2.2);
         ratiostaterr->SetMinimum(0);
         ratiostaterr->SetMarkerSize(0);
-        ratiostaterr->SetFillColor(kRed);
+        //ratiostaterr->SetFillColor(kRed);
+        ratiostaterr->SetFillColor(kGray+3);
         ratiostaterr->SetFillStyle(3013);
         //ratiostaterr->SetFillStyle(3001);
         ratiostaterr->GetXaxis()->CenterTitle();
@@ -1347,6 +1349,9 @@ void MakePlots(const EventsJ14 * ev, TString var_,
         //ratiostaterr->GetYaxis()->SetTitleSize(0.10);
         ratiostaterr->GetYaxis()->SetTitleOffset(0.6);
         ratiostaterr->GetYaxis()->SetNdivisions(505);
+        
+        TLine* ratiounity = new TLine(xlow,1,xup,1);
+        ratiounity->SetLineStyle(2);
         
         for (Int_t i = 0; i < hmc_exp->GetNbinsX()+2; i++) {
             ratiostaterr->SetBinContent(i, 1.0);
@@ -1464,27 +1469,39 @@ void MakePlots(const EventsJ14 * ev, TString var_,
         leg2->AddEntry(staterr, "MC uncert. (stat)", "f");
         
 
-        //TLegend * ratioleg1 = new TLegend(0.54, 0.86, 0.72, 0.96);
-        TLegend * ratioleg1 = new TLegend(0.52, 0.88, 0.72, 0.96);
+//        //TLegend * ratioleg1 = new TLegend(0.54, 0.86, 0.72, 0.96);
+//        TLegend * ratioleg1 = new TLegend(0.54, 0.88, 0.72, 0.96);
+//        //TLegend * ratioleg1 = new TLegend(0.50, 0.86, 0.69, 0.96);
+//        ratioleg1->AddEntry(ratiostaterr, "MC uncert. (stat)", "f");
+//        ratioleg1->SetFillColor(0);
+//        ratioleg1->SetLineColor(0);
+//        ratioleg1->SetShadowColor(0);
+//        ratioleg1->SetTextFont(62);
+//        ratioleg1->SetTextSize(0.06);
+//        ratioleg1->SetBorderSize(1);
+//        
+//        //TLegend * ratioleg2 = new TLegend(0.72, 0.86, 0.95, 0.96);
+//        TLegend * ratioleg2 = new TLegend(0.72, 0.88, 0.95, 0.96);
+//        //TLegend * ratioleg2 = new TLegend(0.69, 0.86, 0.9, 0.96);
+//        ratioleg2->AddEntry(ratiosysterr, "MC uncert. (stat+syst)", "f");
+//        ratioleg2->SetFillColor(0);
+//        ratioleg2->SetLineColor(0);
+//        ratioleg2->SetShadowColor(0);
+//        ratioleg2->SetTextFont(62);
+//        ratioleg2->SetTextSize(0.06);
+//        ratioleg2->SetBorderSize(1);
+
+        //TLegend * ratioleg1 = new TLegend(0.72, 0.86, 0.94, 0.96);
+        TLegend * ratioleg1 = new TLegend(0.72, 0.88, 0.94, 0.96);
         //TLegend * ratioleg1 = new TLegend(0.50, 0.86, 0.69, 0.96);
         ratioleg1->AddEntry(ratiostaterr, "MC uncert. (stat)", "f");
         ratioleg1->SetFillColor(0);
         ratioleg1->SetLineColor(0);
         ratioleg1->SetShadowColor(0);
         ratioleg1->SetTextFont(62);
-        ratioleg1->SetTextSize(0.06);
+        //ratioleg1->SetTextSize(0.06);
+        ratioleg1->SetTextSize(0.07);
         ratioleg1->SetBorderSize(1);
-        
-        //TLegend * ratioleg2 = new TLegend(0.72, 0.86, 0.95, 0.96);
-        TLegend * ratioleg2 = new TLegend(0.72, 0.88, 0.95, 0.96);
-        //TLegend * ratioleg2 = new TLegend(0.69, 0.86, 0.9, 0.96);
-        ratioleg2->AddEntry(ratiosysterr, "MC uncert. (stat+syst)", "f");
-        ratioleg2->SetFillColor(0);
-        ratioleg2->SetLineColor(0);
-        ratioleg2->SetShadowColor(0);
-        ratioleg2->SetTextFont(62);
-        ratioleg2->SetTextSize(0.06);
-        ratioleg2->SetBorderSize(1);
 
         // Draw MC signal and background
         std::clog << "MakePlots(): Drawing..." << std::endl;
@@ -1560,13 +1577,14 @@ void MakePlots(const EventsJ14 * ev, TString var_,
         pad2->cd();
         pad2->SetGridy(0);
         ratiostaterr->Draw("e2");
-        ratiosysterr->Draw("e2 same");
+        //ratiosysterr->Draw("e2 same");
         ratiostaterr->Draw("e2 same");
+        ratiounity->Draw();
         ratio->Draw("e1 same");
         
         // Draw ratio legends
         ratioleg1->Draw();
-        ratioleg2->Draw();
+        //ratioleg2->Draw();
 
         // Kolmogorov-Smirnov test and Chi2 test
         //TPaveText * pave = new TPaveText(0.18, 0.86, 0.35, 0.96, "brNDC");
@@ -1578,8 +1596,8 @@ void MakePlots(const EventsJ14 * ev, TString var_,
         pave->SetBorderSize(1);
         double nchisq = hdata_test->Chi2Test(hmc_test, "UWCHI2/NDF");  // MC uncert. (stat)
         double kolprob = hdata_test->KolmogorovTest(hmc_test);  // MC uncert. (stat)
-        TText * text = pave->AddText(Form("#chi_{#nu}^{2} = %.3f, K_{s} = %.3f", nchisq, kolprob));
-        //TText * text = pave->AddText(Form("#chi_{#nu}^{2} = %.3f", nchisq));
+        //TText * text = pave->AddText(Form("#chi_{#nu}^{2} = %.3f, K_{s} = %.3f", nchisq, kolprob));
+        TText * text = pave->AddText(Form("#chi_{#nu}^{2} = %.3f", nchisq));
         text->SetTextFont(62);
         //text->SetTextSize(0.06);
         text->SetTextSize(0.07);
@@ -1610,7 +1628,7 @@ void MakePlots(const EventsJ14 * ev, TString var_,
         delete leg1;
         delete leg2;
         delete ratioleg1;
-        delete ratioleg2;
+        //delete ratioleg2;
         delete latex;
         delete pave;
         delete hs;
@@ -1939,11 +1957,11 @@ EventsJ14 * Read(bool isControlRegion, const TCut cutallmc, const TCut cutalldat
     TChain TT_syst(treename);
     TT_syst.Add(indir + prefix + "TTPowheg" + suffix);
     
-    TChain ZH_SM(treename);
-    ZH_SM.Add(indir + prefix + "ZH125" + suffix);
+    TChain ZH_BSM(treename);
+    ZH_BSM.Add(indir + prefix + "ZbbHinv" + "125" + suffix);
     
-    TChain WH_SM(treename);
-    WH_SM.Add(indir + prefix + "WH125" + suffix);
+    TChain WH_BSM(treename);
+    WH_BSM.Add(indir + prefix + "ZbbHinv" + "125" + suffix);
     
     TChain data_obs(treename);
     data_obs.Add(indir + prefix + "data_obs" + suffix);
@@ -1967,8 +1985,8 @@ EventsJ14 * Read(bool isControlRegion, const TCut cutallmc, const TCut cutalldat
         Wj_syst.AddFile(indir + prefix + "WjHW" + suffix, TChain::kBigNumber, traintreename);
         Zj_syst.AddFile(indir + prefix + "ZjHW" + suffix, TChain::kBigNumber, traintreename);
         TT_syst.AddFile(indir + prefix + "TTPowheg" + suffix, TChain::kBigNumber, traintreename);
-        ZH_SM.AddFile(indir + prefix + "ZH125" + suffix, TChain::kBigNumber, traintreename);
-        WH_SM.AddFile(indir + prefix + "WH125" + suffix, TChain::kBigNumber, traintreename);
+        ZH_BSM.AddFile(indir + prefix + "ZbbHinv" + "125" + suffix, TChain::kBigNumber, traintreename);
+        WH_BSM.AddFile(indir + prefix + "ZbbHinv" + "125" + suffix, TChain::kBigNumber, traintreename);
     }
 #endif  // MJJANALYSIS
 
@@ -2046,10 +2064,10 @@ EventsJ14 * Read(bool isControlRegion, const TCut cutallmc, const TCut cutalldat
     std::clog << "... DONE: Zj2b_syst copy tree." << std::endl;
     ev->TT_syst = (TTree *) TT_syst.CopyTree(cutallmc);
     std::clog << "... DONE: TT_syst copy tree." << std::endl;
-    ev->ZH_SM = (TTree *) ZH_SM.CopyTree(cutallmc);
-    std::clog << "... DONE: ZH_SM copy tree." << std::endl;
-    ev->WH_SM = (TTree *) WH_SM.CopyTree(cutallmc);
-    std::clog << "... DONE: WH_SM copy tree." << std::endl;
+    ev->ZH_BSM = (TTree *) ZH_BSM.CopyTree(cutallmc);
+    std::clog << "... DONE: ZH_BSM copy tree." << std::endl;
+    ev->WH_BSM = (TTree *) WH_BSM.CopyTree(cutallmc);
+    std::clog << "... DONE: WH_BSM copy tree." << std::endl;
     
     ev->data_obs = (TTree *) data_obs.CopyTree(cutalldata);
     std::clog << "... DONE: data_obs copy tree." << std::endl;

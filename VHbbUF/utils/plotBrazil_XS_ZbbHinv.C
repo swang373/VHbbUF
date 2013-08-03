@@ -6,6 +6,8 @@
     gROOT->SetStyle("Plain");
     gROOT->LoadMacro("tdrstyle.C");
     setTDRStyle();
+    gStyle->SetPadRightMargin(0.05);
+    gStyle->SetLineStyleString(11,"16 16");
 
     bool unblind = false;
     int n_points = 6;
@@ -27,7 +29,6 @@
     double y_up_points1[n_points]=  {  0.2718, 0.2238, 0.187, 0.159, 0.1344, 0.1277 };
     double y_up_points2[n_points]=  {  0.3716, 0.3068, 0.2563, 0.2188, 0.1849, 0.1757 };
 
-
     // -------------------------------------------------------------------------
 
     // Prepare error bars
@@ -45,22 +46,22 @@
 
     // Expected
     m_y_line_graph = new TGraph(n_points, x_vals, y_vals);
-    m_y_line_graph->SetLineWidth(3);
-    m_y_line_graph->SetLineStyle(2);
+    m_y_line_graph->SetLineWidth(2);
+    m_y_line_graph->SetLineStyle(11);
     //m_y_line_graph->SetFillColor(kWhite);
 
     // Observed
     m_y_lineObs_graph = new TGraph(n_points, x_vals, y_observed);
     m_y_lineObs_graph->SetLineWidth(1);
-    m_y_lineObs_graph->SetLineStyle(1);
+    //m_y_lineObs_graph->SetLineColor(kBlack);
     //m_y_lineObs_graph->SetFillColor(kWhite);
     m_y_lineObs_graph->SetMarkerStyle(20);
     m_y_lineObs_graph->SetMarkerSize(1.1);
 
     // Signal injected
     m_y_lineSI_graph = new TGraph(n_points, x_vals, y_injected);
-    m_y_lineSI_graph->SetLineWidth(3);
-    m_y_lineSI_graph->SetLineStyle(2);
+    m_y_lineSI_graph->SetLineWidth(2);
+    m_y_lineSI_graph->SetLineStyle(11);
     m_y_lineSI_graph->SetLineColor(kRed);
     //m_y_lineSI_graph->SetFillColor(kWhite);
 
@@ -95,35 +96,39 @@
     m_y_band_graph_2sigma->SetMinimum(0.0);
 
     // y = 1 line
-    //m_one_line = new TLine(m_y_line_graph->GetXaxis()->GetXmin(),1, m_y_line_graph->GetXaxis()->GetXmax(),1);
-    m_one_line = new TLine(105, 1, 150, 1);
+    m_one_line = new TLine(x_vals[0], 1, x_vals[n_points-1], 1);
     //m_one_line = new TLine(110, 1, 150, 1);
     //m_one_line = new TLine(110, 1, 135, 1);
     m_one_line->SetLineColor(2);
     m_one_line->SetLineWidth(2);
 
     // Legend
+    TLegend* m_legend = 0;
     if (unblind) {
         m_legend = new TLegend(0.64,0.72,0.96,0.92);
-        m_legend->SetFillColor(0);
         m_legend->SetTextFont(42);
-        m_legend->AddEntry(m_y_lineObs_graph,"Observed", "lp");
+        m_legend->SetFillStyle(0);
+        //m_legend->SetFillColor(0);
+        //m_legend->SetLineColor(kBlack);
+        m_legend->SetBorderSize(0);
+        //m_legend->SetBorderSize(1);
+        m_legend->AddEntry(m_y_lineObs_graph, "Observed", "lp");
         m_legend->AddEntry(m_y_lineSI_graph, "Signal injected", "l");
         m_legend->AddEntry(m_y_line_graph, "Expected", "l");
         m_legend->AddEntry(m_y_band_graph_1sigma, "Expected #pm 1 #sigma", "f");
         m_legend->AddEntry(m_y_band_graph_2sigma, "Expected #pm 2 #sigma", "f");
-        //m_legend->SetLineColor(kBlack);
-        //m_legend->SetBorderSize(1);
         
     } else {
         m_legend = new TLegend(0.64,0.80,0.96,0.92);
-        m_legend->SetFillColor(0);
         m_legend->SetTextFont(42);
+        m_legend->SetFillStyle(0);
+        //m_legend->SetFillColor(0);
+        //m_legend->SetLineColor(kBlack);
+        m_legend->SetBorderSize(0);
+        //m_legend->SetBorderSize(1);
         m_legend->AddEntry(m_y_line_graph, "Expected", "l");
         m_legend->AddEntry(m_y_band_graph_1sigma, "Expected #pm 1 #sigma", "f");
         m_legend->AddEntry(m_y_band_graph_2sigma, "Expected #pm 2 #sigma", "f");
-        //m_legend->SetLineColor(kBlack);
-        //m_legend->SetBorderSize(1);
     }
 
 
@@ -136,7 +141,7 @@
     // -------------------------------------------------------------------------
 
     TCanvas *c1 = new TCanvas();
-    //TCanvas *c1 = new TCanvas("c1","c1", 300,300,700,500);
+    //TCanvas *c1 = new TCanvas("c1","c1",300,300,700,500);
     //c1->SetGridx();
     //c1->SetGridy();
 
@@ -149,8 +154,8 @@
         m_y_lineObs_graph->Draw("LP");
     }
     
-    //m_one_line->Draw("same");
-    m_legend->Draw("same");
+    //m_one_line->Draw();
+    m_legend->Draw("0");
 
     // Stamp
     TLatex * latex = new TLatex();

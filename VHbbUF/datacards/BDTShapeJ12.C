@@ -603,16 +603,28 @@ void MakePlots(const EventsJ12 * ev, TString var_,
     std::clog << "... DONE: project ZH_0." << std::endl;
     ev->WH->Project("WH_0", var, cutmc);
     std::clog << "... DONE: project WH_0." << std::endl;
+    ev->ZH_SM->Project("ZH_SM_0", var, cutmc);
+    std::clog << "... DONE: project ZH_SM_0." << std::endl;
+    ev->WH_SM->Project("WH_SM_0", var, cutmc);
+    std::clog << "... DONE: project WH_SM_0." << std::endl;
 #elif !defined(VHQCDCORRECTION)
     ev->ZH->Project("ZH_0", var, cutmc * cutvhewk);
     std::clog << "... DONE: project ZH_0." << std::endl;
     ev->WH->Project("WH_0", var, cutmc * cutvhewk);
     std::clog << "... DONE: project WH_0." << std::endl;
+    ev->ZH_SM->Project("ZH_SM_0", var, cutmc * cutvhewk);
+    std::clog << "... DONE: project ZH_SM_0." << std::endl;
+    ev->WH_SM->Project("WH_SM_0", var, cutmc * cutvhewk);
+    std::clog << "... DONE: project WH_SM_0." << std::endl;
 #else
     ev->ZH->Project("ZH_0", var, cutmc * cutvhewk * cutvhqcd);
     std::clog << "... DONE: project ZH_0." << std::endl;
     ev->WH->Project("WH_0", var, cutmc * cutvhewk * cutvhqcd);
     std::clog << "... DONE: project WH_0." << std::endl;
+    ev->ZH_SM->Project("ZH_SM_0", var, cutmc * cutvhewk * cutvhqcd);
+    std::clog << "... DONE: project ZH_SM_0." << std::endl;
+    ev->WH_SM->Project("WH_SM_0", var, cutmc * cutvhewk * cutvhqcd);
+    std::clog << "... DONE: project WH_SM_0." << std::endl;
 #endif
 
 
@@ -683,11 +695,6 @@ void MakePlots(const EventsJ12 * ev, TString var_,
     std::clog << "... DONE: project Zj2b_syst_0." << std::endl;
     ev->TT_syst->Project("TT_syst_0", var, cutmc);
     std::clog << "... DONE: project TT_syst_0." << std::endl;
-
-    ev->ZH_SM->Project("ZH_SM_0", var, cutmc);
-    std::clog << "... DONE: project ZH_SM_0." << std::endl;
-    ev->WH_SM->Project("WH_SM_0", var, cutmc);
-    std::clog << "... DONE: project WH_SM_0." << std::endl;
     
     ev->data_obs->Project("data_obs_0", var, cutdata);
     std::clog << "... DONE: project data_obs_0." << std::endl;
@@ -912,10 +919,10 @@ void MakePlots(const EventsJ12 * ev, TString var_,
 #endif
         dc << "CMS_vhbb_ST                          lnN    -     -     -     -     -     -     -     -     -     1.15  -     -     -    " << std::endl;
 #ifndef VVANALYSIS
-        dc << "CMS_vhbb_VV                          lnN    -     -     -     -     -     -     -     -     -     -     1.25  1.25  -    " << std::endl;
-#else
         dc << "CMS_vhbb_VV                          lnN    -     -     -     -     -     -     -     -     -     -     1.15  1.15  -    " << std::endl;
-        dc << "CMS_vhbb_VH                          lnN    1.50  1.50  -     -     -     -     -     -     -     -     -     -     -    " << std::endl;
+#else
+        dc << "CMS_vhbb_VV                          lnN    -     -     -     -     -     -     -     -     -     -     1.05  1.05  -    " << std::endl;
+        dc << "CMS_vhbb_VH                          lnN    1.25  1.25  -     -     -     -     -     -     -     -     -     -     -    " << std::endl;
 #endif
         dc << "#CMS_vhbb_MET_nojets                 lnN    1.03  1.03  -     -     -     -     -     -     -     1.03  1.03  1.03  1.03 " << std::endl;
         dc << "#CMS_vhbb_trigger_MET                lnN    1.03  1.03  -     -     -     -     -     -     -     1.03  1.03  1.03  1.03 " << std::endl;
@@ -1072,7 +1079,8 @@ void MakePlots(const EventsJ12 * ev, TString var_,
         std::clog << "MakePlots(): Setting up auxiliary histograms..." << std::endl;
         TH1F * staterr = (TH1F *) hmc_exp->Clone("staterr");
         staterr->Sumw2();
-        staterr->SetFillColor(kRed);
+        //staterr->SetFillColor(kRed);
+        staterr->SetFillColor(kGray+3);
         staterr->SetMarkerSize(0);
         staterr->SetFillStyle(3013);
         
@@ -1092,7 +1100,8 @@ void MakePlots(const EventsJ12 * ev, TString var_,
         ratiostaterr->SetMaximum(2.2);
         ratiostaterr->SetMinimum(0);
         ratiostaterr->SetMarkerSize(0);
-        ratiostaterr->SetFillColor(kRed);
+        //ratiostaterr->SetFillColor(kRed);
+        ratiostaterr->SetFillColor(kGray+3);
         ratiostaterr->SetFillStyle(3013);
         //ratiostaterr->SetFillStyle(3001);
         ratiostaterr->GetXaxis()->CenterTitle();
@@ -1105,6 +1114,9 @@ void MakePlots(const EventsJ12 * ev, TString var_,
         //ratiostaterr->GetYaxis()->SetTitleSize(0.10);
         ratiostaterr->GetYaxis()->SetTitleOffset(0.6);
         ratiostaterr->GetYaxis()->SetNdivisions(505);
+        
+        TLine* ratiounity = new TLine(xlow,1,xup,1);
+        ratiounity->SetLineStyle(2);
         
         for (Int_t i = 0; i < hmc_exp->GetNbinsX()+2; i++) {
             ratiostaterr->SetBinContent(i, 1.0);
@@ -1184,7 +1196,8 @@ void MakePlots(const EventsJ12 * ev, TString var_,
 //#endif
 //        leg->AddEntry(staterr, "MC uncert. (stat)", "fl");
 
-        TLegend * leg1 = new TLegend(0.58, 0.68, 0.76, 0.92);
+        //TLegend * leg1 = new TLegend(0.58, 0.68, 0.76, 0.92);
+        TLegend * leg1 = new TLegend(0.50, 0.60, 0.72, 0.92);
         leg1->SetFillColor(0);
         leg1->SetLineColor(0);
         leg1->SetShadowColor(0);
@@ -1202,8 +1215,7 @@ void MakePlots(const EventsJ12 * ev, TString var_,
 #ifndef VVANALYSIS
         leg1->AddEntry(hVVHF, "VZ(b#bar{b})", "f");
 #endif
-
-        TLegend * leg2 = new TLegend(0.76, 0.68, 0.94, 0.92);
+        TLegend * leg2 = new TLegend(0.72, 0.60, 0.94, 0.92);
         leg2->SetFillColor(0);
         leg2->SetLineColor(0);
         leg2->SetShadowColor(0);
@@ -1218,39 +1230,39 @@ void MakePlots(const EventsJ12 * ev, TString var_,
         leg2->AddEntry(staterr, "MC uncert. (stat)", "f");
         
 
-        //TLegend * ratioleg1 = new TLegend(0.54, 0.86, 0.72, 0.96);
-        TLegend * ratioleg1 = new TLegend(0.54, 0.88, 0.72, 0.96);
-        //TLegend * ratioleg1 = new TLegend(0.50, 0.86, 0.69, 0.96);
-        ratioleg1->AddEntry(ratiostaterr, "MC uncert. (stat)", "f");
-        ratioleg1->SetFillColor(0);
-        ratioleg1->SetLineColor(0);
-        ratioleg1->SetShadowColor(0);
-        ratioleg1->SetTextFont(62);
-        ratioleg1->SetTextSize(0.06);
-        ratioleg1->SetBorderSize(1);
-        
-        //TLegend * ratioleg2 = new TLegend(0.72, 0.86, 0.95, 0.96);
-        TLegend * ratioleg2 = new TLegend(0.72, 0.88, 0.95, 0.96);
-        //TLegend * ratioleg2 = new TLegend(0.69, 0.86, 0.9, 0.96);
-        ratioleg2->AddEntry(ratiosysterr, "MC uncert. (stat+syst)", "f");
-        ratioleg2->SetFillColor(0);
-        ratioleg2->SetLineColor(0);
-        ratioleg2->SetShadowColor(0);
-        ratioleg2->SetTextFont(62);
-        ratioleg2->SetTextSize(0.06);
-        ratioleg2->SetBorderSize(1);
-
-//        //TLegend * ratioleg1 = new TLegend(0.72, 0.86, 0.94, 0.96);
-//        TLegend * ratioleg1 = new TLegend(0.76, 0.88, 0.94, 0.96);
+//        //TLegend * ratioleg1 = new TLegend(0.54, 0.86, 0.72, 0.96);
+//        TLegend * ratioleg1 = new TLegend(0.54, 0.88, 0.72, 0.96);
 //        //TLegend * ratioleg1 = new TLegend(0.50, 0.86, 0.69, 0.96);
 //        ratioleg1->AddEntry(ratiostaterr, "MC uncert. (stat)", "f");
 //        ratioleg1->SetFillColor(0);
 //        ratioleg1->SetLineColor(0);
 //        ratioleg1->SetShadowColor(0);
 //        ratioleg1->SetTextFont(62);
-//        //ratioleg1->SetTextSize(0.06);
-//        ratioleg1->SetTextSize(0.07);
+//        ratioleg1->SetTextSize(0.06);
 //        ratioleg1->SetBorderSize(1);
+//        
+//        //TLegend * ratioleg2 = new TLegend(0.72, 0.86, 0.95, 0.96);
+//        TLegend * ratioleg2 = new TLegend(0.72, 0.88, 0.95, 0.96);
+//        //TLegend * ratioleg2 = new TLegend(0.69, 0.86, 0.9, 0.96);
+//        ratioleg2->AddEntry(ratiosysterr, "MC uncert. (stat+syst)", "f");
+//        ratioleg2->SetFillColor(0);
+//        ratioleg2->SetLineColor(0);
+//        ratioleg2->SetShadowColor(0);
+//        ratioleg2->SetTextFont(62);
+//        ratioleg2->SetTextSize(0.06);
+//        ratioleg2->SetBorderSize(1);
+
+        //TLegend * ratioleg1 = new TLegend(0.72, 0.86, 0.94, 0.96);
+        TLegend * ratioleg1 = new TLegend(0.72, 0.88, 0.94, 0.96);
+        //TLegend * ratioleg1 = new TLegend(0.50, 0.86, 0.69, 0.96);
+        ratioleg1->AddEntry(ratiostaterr, "MC uncert. (stat)", "f");
+        ratioleg1->SetFillColor(0);
+        ratioleg1->SetLineColor(0);
+        ratioleg1->SetShadowColor(0);
+        ratioleg1->SetTextFont(62);
+        //ratioleg1->SetTextSize(0.06);
+        ratioleg1->SetTextSize(0.07);
+        ratioleg1->SetBorderSize(1);
 
         // Draw MC signal and background
         std::clog << "MakePlots(): Drawing..." << std::endl;
@@ -1297,18 +1309,17 @@ void MakePlots(const EventsJ12 * ev, TString var_,
         latex->DrawLatex(0.19, 0.84, "#sqrt{s} = 8 TeV, L = 12.3 fb^{-1}");
 #endif
         
-        if (region == "VH")
-            latex->DrawLatex(0.19, 0.79, "Z(#nu#bar{#nu})H(b#bar{b})");
-        else if (region == "ZjLF")
-            latex->DrawLatex(0.19, 0.79, "Z(#nu#bar{#nu})H(b#bar{b}), Z + udscg enriched");
+        latex->DrawLatex(0.19, 0.79, "Z(#nu#bar{#nu})H(b#bar{b})");
+        if (region == "ZjLF")
+            latex->DrawLatex(0.19, 0.74, "Z + udscg enriched");
         else if (region == "ZjHF")
-            latex->DrawLatex(0.19, 0.79, "Z(#nu#bar{#nu})H(b#bar{b}), Z + b#bar{b} enriched");
+            latex->DrawLatex(0.19, 0.74, "Z + b#bar{b} enriched");
         else if (region == "WjLF")
-            latex->DrawLatex(0.19, 0.79, "Z(#nu#bar{#nu})H(b#bar{b}), W + udscg enriched");
+            latex->DrawLatex(0.19, 0.74, "W + udscg enriched");
         else if (region == "WjHF")
-            latex->DrawLatex(0.19, 0.79, "Z(#nu#bar{#nu})H(b#bar{b}), W + b#bar{b} enriched");
+            latex->DrawLatex(0.19, 0.74, "W + b#bar{b} enriched");
         else if (region == "TT")
-            latex->DrawLatex(0.19, 0.79, "Z(#nu#bar{#nu})H(b#bar{b}), t#bar{t} enriched");
+            latex->DrawLatex(0.19, 0.74, "t#bar{t} enriched");
         
         // Under/overflows a la TMVA
         TString uoflow = Form("U/O-flow (Data,MC): (%.1f, %.1f) / (%.1f, %.1f)", hdata_test->GetBinContent(0), hmc_exp->GetBinContent(0), hdata_test->GetBinContent(nbins_plot+1), hmc_exp->GetBinContent(nbins_plot+1));
@@ -1322,13 +1333,14 @@ void MakePlots(const EventsJ12 * ev, TString var_,
         pad2->cd();
         pad2->SetGridy(0);
         ratiostaterr->Draw("e2");
-        ratiosysterr->Draw("e2 same");
+        //ratiosysterr->Draw("e2 same");
         ratiostaterr->Draw("e2 same");
+        ratiounity->Draw();
         ratio->Draw("e1 same");
         
         // Draw ratio legends
         ratioleg1->Draw();
-        ratioleg2->Draw();
+        //ratioleg2->Draw();
 
         // Kolmogorov-Smirnov test and Chi2 test
         //TPaveText * pave = new TPaveText(0.18, 0.86, 0.35, 0.96, "brNDC");
@@ -1372,7 +1384,7 @@ void MakePlots(const EventsJ12 * ev, TString var_,
         delete leg1;
         delete leg2;
         delete ratioleg1;
-        delete ratioleg2;
+        //delete ratioleg2;
         delete latex;
         delete pave;
         delete hs;

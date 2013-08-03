@@ -557,11 +557,10 @@ void MakeWorkspace(const TString& channel, const TString& strategy)
         //h->Add(hZH);
         //TH1F * hWH = (TH1F *) input->Get(channel + "/" + "WH_SM");
         //h->Add(hWH);
-        TH1F * hZbbHinv = (TH1F *) input->Get(channel + "/" + "ZbbHinv");
-        h->Add(hZbbHinv);
-        //delete hZH;
+        TH1F * hZH = (TH1F *) input->Get(channel + "/" + "ZH_BSM");
+        h->Add(hZH);
+        delete hZH;
         //delete hWH;
-        delete hZbbHinv;
         
     } else if (strategy == "toy" || strategy == "toys") {
         h = (TH1F *) input->Get(channel + "/" + "mc_exp");
