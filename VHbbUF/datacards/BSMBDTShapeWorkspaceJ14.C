@@ -444,8 +444,11 @@ void MakeSystPlot(const TString& channel, TFile * input, RooWorkspace * ws, cons
                         pass = true;
                 }
 #ifdef MJJANALYSIS
-                /// Always true for 105-150 GeV
-                if (ibin >= h->FindFixBin(105+1) && ibin <= h->FindFixBin(150-1))
+                /// Always true for Mjj in 105-150 GeV
+                //if (ibin >= h->FindFixBin(105+1) && ibin <= h->FindFixBin(150-1))
+                //    pass = true;
+                /// Always true for mT > 300 GeV
+                if(ibin >= h->FindFixBin(300))
                     pass = true;
 #endif
                 
