@@ -17,13 +17,16 @@
     // -------------------------------------------------------------------------
 
     // ZbbHinv (2013-07-31)
-    
-    double y_observed[n_points]=    {0.141247,0.161316,0.179391,0.199058,0.214818,0.228364,};
+    //double y_observed[n_points]=    {0.141247,0.161316,0.179391,0.199058,0.214818,0.228364,};
     // using --toysFreq
-    double y_vals[n_points]=        {0.141247,0.161316,0.179391,0.199058,0.214818,0.228364,};
+    //double y_vals[n_points]=        {0.141247,0.161316,0.179391,0.199058,0.214818,0.228364,};
     // not using --toyFreq
     //double y_vals[n_points]=        {0.141247,0.161316,0.179391,0.199058,0.214818,0.228364,};
     
+    // ZbbHinv (2013-08-07)
+    double y_observed[n_points]=    {  0.119922, 0.13948, 0.158528, 0.178834, 0.195144, 0.209422 };
+    double y_vals[n_points]=        {  0.119922, 0.13948, 0.158528, 0.178834, 0.195144, 0.209422 };
+
     // -------------------------------------------------------------------------
     
     // Expected
@@ -135,14 +138,14 @@
     latex->SetTextSize(0.032);
     latex->DrawLatex(0.16, 0.97, "CMS Preliminary  #sqrt{s} = 8 TeV, L = 19.0 fb^{-1}");
     latex->SetTextSize(0.045);
-    latex->DrawLatex(0.19, 0.90, "Z(#rightarrow b#bar{b}) + H(#rightarrow E_{T}^{miss})");
+    latex->DrawLatex(0.19, 0.90, "Z(#rightarrow b#bar{b}) H(#rightarrow E_{T}^{miss})");
 
     // righthand y label
     TLatex * latex_y = new TLatex();
     //latex_y->SetNDC();
     latex_y->SetTextAlign(12);
     latex_y->SetTextFont(42);
-    latex_y->SetTextSize(0.04);
+    latex_y->SetTextSize(0.038);
     latex_y->SetTextColor(2);
     latex_y->DrawLatex(x_vals[n_points-1]+2.5,m_one_line->GetY1()  ,"1#sigma");
     latex_y->DrawLatex(x_vals[n_points-1]+2.5,m_two_line->GetY1()  ,"2#sigma");
@@ -151,6 +154,6 @@
     latex_y->DrawLatex(x_vals[n_points-1]+2.5,m_five_line->GetY1() ,"5#sigma");
 
     gPad->RedrawAxis();
-    gPad->Print("pvalue_ZbbHinv_BDT_20130731.pdf");
-    gPad->Print("pvalue_ZbbHinv_BDT_20130731.png");
+    gPad->Print("pvalue_ZbbHinv_BDT_20130807.pdf");
+    gPad->Print("pvalue_ZbbHinv_BDT_20130807.png");
 }

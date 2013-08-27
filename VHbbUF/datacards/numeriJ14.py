@@ -19,8 +19,8 @@ observeprofi = "run_observeprofilelikelihoodJ14_bbb.csh"
 observemaxli = "run_observemaxlikelihoodJ14_bbb.csh"
 injectsignal = "run_injectsignalJ14_bbb.csh"
 
-outdir = "res_20130802/"
-afsdir = "/afs/cern.ch/user/j/jiafulow/public/zhinv_20130802/"
+outdir = "res_20130809/"
+afsdir = "/afs/cern.ch/user/j/jiafulow/public/zhinv_20130809/Zbb/"
 
 #------------------------------------------------------------------------------
 
@@ -106,6 +106,7 @@ def make(var, analysis, data):
         old = "zh1252lmet"
         new = "zh%i2lmet" % massH
         subprocess.call(["sed", "-i", "s@%s@%s@g" % (old, new), newmacro1+".C"])
+        subprocess.call(["sed", "-i", "s@%s@%s@g" % (old, new), newmacro2+".C"])
 
 
     if data == "HCP":

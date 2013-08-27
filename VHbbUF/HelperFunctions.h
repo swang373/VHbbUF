@@ -277,6 +277,69 @@ float apply_pt_slope(float pt, float slope, float start, float initweight=1.0, f
 }
 
 //______________________________________________________________________________
+inline float smear_gen_to_reco(float pt, float genpt, float eta)
+{
+    eta = fabs(eta);
+    /// Values from http://arxiv.org/abs/1301.5023
+    float N    = -5.090;
+    float S    =  0.512;
+    float C    =  0.033;
+    float M    =  0.325;
+    float sgnN = (N>0) ? 1.0 : -1.0;
+
+    /// Values from AN_2010/371 Table 4
+    if (eta <= 0.5) {
+        N    =  3.96859;
+        S    =  0.18348;
+        C    =  0.00000;
+        M    =  0.62627;
+        sgnN = (N>0) ? 1.0 : -1.0;
+    } else if (0.5 < eta && eta <= 1.0) {
+        N    =  3.55226;
+        S    =  0.24026;
+        C    =  0.00000;
+        M    =  0.52571;
+        sgnN = (N>0) ? 1.0 : -1.0;
+    } else if (1.0 < eta && eta <= 1.5) {
+        N    =  4.54826;
+        S    =  0.22652;
+        C    =  0.00000;
+        M    =  0.58963;
+        sgnN = (N>0) ? 1.0 : -1.0;
+    } else if (1.5 < eta && eta <= 2.0) {
+        N    =  4.62622;
+        S    =  0.23664;
+        C    =  0.00000;
+        M    =  0.48738;
+        sgnN = (N>0) ? 1.0 : -1.0;
+    } else if (2.0 < eta && eta <= 2.5) {
+        N    =  2.53324;
+        S    =  0.34306;
+        C    =  0.00000;
+        M    =  0.28662;
+        sgnN = (N>0) ? 1.0 : -1.0;
+    } else if (2.5 < eta && eta <= 3.0) {
+        N    = -3.33814;
+        S    =  0.73360;
+        C    =  0.00000;
+        M    =  0.08264;
+        sgnN = (N>0) ? 1.0 : -1.0;
+    } else {
+        N    =  2.95397;
+        S    =  0.11619;
+        C    =  0.00000;
+        M    =  0.96086;
+        sgnN = (N>0) ? 1.0 : -1.0;
+    }
+    
+    float res = genpt * TMath::Sqrt(sgnN * N*N/genpt/genpt + S*S*TMath::Power(genpt,M)/genpt + C*C);
+    
+    float deltapt = gRandom->Gaus(1.0, res);
+    
+    return TMath::Max(float(0.), genpt - deltapt);
+}
+
+//______________________________________________________________________________
 //For 2012A HLT_DiCentralPFJet30_PFMHT80, valid for pfMET > 100 GeV:
 inline float scaleDiJet30MHT80_2012A(float x)
 {

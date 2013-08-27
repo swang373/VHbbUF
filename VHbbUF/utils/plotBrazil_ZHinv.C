@@ -8,10 +8,14 @@
     setTDRStyle();
     gStyle->SetPadRightMargin(0.05);
     gStyle->SetLineStyleString(11,"16 16");
+    gStyle->SetLineStyleString(12,"24 24");
+    gStyle->SetLineStyleString(13,"32 32");
 
     bool unblind = false;
-    int n_points = 6;
-    double x_vals[n_points] = {105, 115, 125, 135, 145, 150};
+    int n_points = 5;
+    double x_vals[n_points] = {105, 115, 125, 135, 145};
+    //int n_points = 6;
+    //double x_vals[n_points] = {105, 115, 125, 135, 145, 150};
     //int n_points = 9;
     //double x_vals[n_points] = {110, 115, 120, 125, 130, 135, 140, 145, 150};
     //int n_points = 6;
@@ -20,23 +24,16 @@
 
     // -------------------------------------------------------------------------
 
-    // ZbbHinv (2013-07-31)
-    //double y_injected[n_points]=    {  0.1906, 0.1578, 0.1318, 0.1115, 0.0942, 0.0895 };
-    //double y_observed[n_points]=    {  0.1908, 0.1575, 0.1315, 0.1117, 0.0942, 0.0896 };
-    //double y_down_points2[n_points]={  0.1009, 0.0835, 0.0695, 0.059, 0.0499, 0.0472 };
-    //double y_down_points1[n_points]={  0.1356, 0.1116, 0.0931, 0.0793, 0.067, 0.0636 };
-    //double y_vals[n_points]=        {  0.1906, 0.1578, 0.1318, 0.1115, 0.0942, 0.0895 };
-    //double y_up_points1[n_points]=  {  0.2718, 0.2238, 0.187, 0.159, 0.1344, 0.1277 };
-    //double y_up_points2[n_points]=  {  0.3716, 0.3068, 0.2563, 0.2188, 0.1849, 0.1757 };
-
-    // ZbbHinv (2013-08-07)
-    double y_injected[n_points]=    {  0.1762, 0.1457, 0.1225, 0.1042, 0.0879, 0.0839 };
-    double y_observed[n_points]=    {  0.176, 0.1449, 0.1215, 0.1035, 0.0875, 0.0832 };
-    double y_down_points2[n_points]={  0.0922, 0.0762, 0.0639, 0.0544, 0.0459, 0.0435 };
-    double y_down_points1[n_points]={  0.1241, 0.1026, 0.086, 0.073, 0.0619, 0.0588 };
-    double y_vals[n_points]=        {  0.1762, 0.1451, 0.1216, 0.1035, 0.0873, 0.0834 };
-    double y_up_points1[n_points]=  {  0.2514, 0.2081, 0.1744, 0.1485, 0.1253, 0.1196 };
-    double y_up_points2[n_points]=  {  0.348, 0.2873, 0.2407, 0.2049, 0.174, 0.1657 };
+    // ZHinv (2013-08-09)
+    double y_injected[n_points]=    {  0, 0, 0, 0, 0 };
+    double y_observed[n_points]=    {  0.7209, 0.7683, 0.8483, 0.8974, 0.9449 };
+    double y_down_points2[n_points]={  0.3716, 0.3943, 0.4354, 0.463, 0.4836 };
+    double y_down_points1[n_points]={  0.5039, 0.5357, 0.5916, 0.6282, 0.657 };
+    double y_vals[n_points]=        {  0.7207, 0.7676, 0.8477, 0.8945, 0.9414 };
+    double y_up_points1[n_points]=  {  1.0511, 1.1194, 1.2295, 1.2974, 1.3729 };
+    double y_up_points2[n_points]=  {  1.4743, 1.5702, 1.7297, 1.8143, 1.9258 };
+    double y_vals_old[n_points]=    {  0.7441, 0.793, 0.9258, 0.9883, 1.0586 };
+    double y_vals_older[n_points]=  {  1.7266, 1.875, 2.0391, 2.2266, 2.3828 };
 
     // -------------------------------------------------------------------------
 
@@ -58,6 +55,20 @@
     m_y_line_graph->SetLineWidth(2);
     m_y_line_graph->SetLineStyle(11);
     //m_y_line_graph->SetFillColor(kWhite);
+    
+    // Expected, old
+    m_y_lineOld_graph = new TGraph(n_points, x_vals, y_vals_old);
+    m_y_lineOld_graph->SetLineWidth(2);
+    m_y_lineOld_graph->SetLineStyle(12);
+    //m_y_lineOld_graph->SetFillColor(kWhite);
+    m_y_lineOld_graph->SetLineColor(kBlue-1);
+    
+    // Expected, older
+    m_y_lineOlder_graph = new TGraph(n_points, x_vals, y_vals_older);
+    m_y_lineOlder_graph->SetLineWidth(2);
+    m_y_lineOlder_graph->SetLineStyle(13);
+    //m_y_lineOlder_graph->SetFillColor(kWhite);
+    m_y_lineOlder_graph->SetLineColor(kBlue-2);
 
     // Observed
     m_y_lineObs_graph = new TGraph(n_points, x_vals, y_observed);
@@ -94,14 +105,14 @@
     //m_y_band_graph_2sigma->GetXaxis()->SetLimits(103, 152);
     m_y_band_graph_2sigma->GetXaxis()->SetLimits(x_vals[0]-2, x_vals[n_points-1]+2);
     
-    m_y_band_graph_2sigma->GetYaxis()->SetNdivisions(506);
+    m_y_band_graph_2sigma->GetYaxis()->SetNdivisions(505);
     m_y_band_graph_2sigma->GetYaxis()->SetTitleSize(0.048);
     m_y_band_graph_2sigma->GetYaxis()->SetTitleOffset(1.25);
-    //m_y_band_graph_2sigma->GetYaxis()->SetTitle("95% CL limit on #sigma_{ZH} x BR_{inv}/#sigma_{ZH,SM}");
-    m_y_band_graph_2sigma->GetYaxis()->SetTitle("95% CL limit on #sigma_{ZH} x BR_{inv} [pb]");
+    m_y_band_graph_2sigma->GetYaxis()->SetTitle("95% CL limit on #sigma_{ZH} x BR_{inv}/#sigma_{ZH,SM}");
+    //m_y_band_graph_2sigma->GetYaxis()->SetTitle("95% CL limit on #sigma_{ZH} x BR_{inv} [pb]");
     //m_y_band_graph_2sigma->GetYaxis()->SetTitle("Asymptotic 95% CL Limit on #sigma/#sigma_{SM}");
 
-    m_y_band_graph_2sigma->SetMaximum(0.5*1.1);
+    m_y_band_graph_2sigma->SetMaximum(3.5);
     m_y_band_graph_2sigma->SetMinimum(0.0);
 
     // y = 1 line
@@ -128,13 +139,15 @@
         m_legend->AddEntry(m_y_band_graph_2sigma, "Expected #pm 2 #sigma", "f");
         
     } else {
-        m_legend = new TLegend(0.64,0.80,0.96,0.92);
+        m_legend = new TLegend(0.64,0.72,0.925,0.92);
         m_legend->SetTextFont(42);
         m_legend->SetFillStyle(0);
         //m_legend->SetFillColor(0);
         //m_legend->SetLineColor(kBlack);
         m_legend->SetBorderSize(0);
         //m_legend->SetBorderSize(1);
+        m_legend->AddEntry(m_y_lineOlder_graph, "Expected from Z(bb)", "l");
+        m_legend->AddEntry(m_y_lineOld_graph, "Expected from Z(ll)", "l");
         m_legend->AddEntry(m_y_line_graph, "Expected", "l");
         m_legend->AddEntry(m_y_band_graph_1sigma, "Expected #pm 1 #sigma", "f");
         m_legend->AddEntry(m_y_band_graph_2sigma, "Expected #pm 2 #sigma", "f");
@@ -157,13 +170,15 @@
     // Draw
     m_y_band_graph_2sigma->Draw("A3");
     m_y_band_graph_1sigma->Draw("3");
+    m_y_lineOlder_graph->Draw("L");
+    m_y_lineOld_graph->Draw("L");
     m_y_line_graph->Draw("L");
     if (unblind) {
         m_y_lineSI_graph->Draw("L");
         m_y_lineObs_graph->Draw("LP");
     }
     
-    //m_one_line->Draw();
+    m_one_line->Draw();
     m_legend->Draw("0");
 
     // Stamp
@@ -176,11 +191,11 @@
     //latex->SetTextSize(0.04);
     //latex->DrawLatex(0.19, 0.84, "#sqrt{s} = 8 TeV, L = 19.0 fb^{-1}");
     latex->SetTextSize(0.032);
-    latex->DrawLatex(0.16, 0.97, "CMS Preliminary  #sqrt{s} = 8 TeV, L = 19.0 fb^{-1}");
+    latex->DrawLatex(0.16, 0.97, "CMS Preliminary  #sqrt{s} = 8 TeV, L #leq 19.6 fb^{-1}");
     latex->SetTextSize(0.045);
-    latex->DrawLatex(0.19, 0.90, "Z(#rightarrow b#bar{b}) H(#rightarrow E_{T}^{miss})");
+    latex->DrawLatex(0.19, 0.90, "Z(#rightarrow l^{+} l^{-}, b#bar{b}) H(#rightarrow E_{T}^{miss})");
 
     gPad->RedrawAxis();
-    gPad->Print("Limit_XS_ZbbHinv_BDT_20130807.pdf");
-    gPad->Print("Limit_XS_ZbbHinv_BDT_20130807.png");
+    gPad->Print("Limit_ZHinv_BDT_20130809.pdf");
+    gPad->Print("Limit_ZHinv_BDT_20130809.png");
 }

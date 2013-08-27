@@ -201,6 +201,9 @@ void Skim(TString process="ZnnH125")
     } else if (process == "DYJetsPtZ100") {
         fname = dirMC + dijet + "DYJetsToLL_PtZ-100_TuneZ2star_8TeV-madgraph" + suffix;
         chain->Add(fname);
+    } else if (process == "DYJetsZmmToZbb") {
+        fname = "/uscms_data/d2/jiafu/VHbbAnalysis/NtupleV42_FOR_CVS/src/VHbbAnalysis/VHbbDataFormats/bin/TestZmmToZbb_1.root";
+        chain->Add(fname);
     
     // VV
     } else if (process == "WW") {
@@ -381,6 +384,10 @@ void Skim(TString process="ZnnH125")
     }
 
     TCut selection = baseline.c_str();
+    // Different baseline for dimuons
+    if (process == "DYJetsM50" || process == "DYJetsZmmToZbb") {
+        selection = baselineZmm.c_str();
+    }
 
     // MET filters
     selection += metfilter.c_str();
@@ -404,6 +411,7 @@ void Skim(TString process="ZnnH125")
         //selection.Print();
     }
     
+    // Exclude runs in Prompt data that have been reprocessed
     if (process == "Data_P" || process == "Data_METBTag_P" ||
         process == "Data_SingleMu_P" || process == "Data_SingleEl_P") {
         TCut run = "(EVENT.run != 201191)";

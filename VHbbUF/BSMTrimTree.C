@@ -25,7 +25,8 @@
 //#include "TMVA/TXMLEngine.h"
 #endif
 
-#include "HelperTMVA.h"
+#include "HelperBSMTMVA.h"
+//#include "HelperTMVA.h"
 #include "HelperFunctions.h"
 //#include "HelperNtuples.h"
 //#include "HelperVHbbDataFormats.h"
@@ -71,11 +72,8 @@ const char* g_weights[] = {
     "weightsInvRegularVH",
     "weightsInvRegular__sigZHZH",
     "weightsInvRegular__sigZbbHinvZZHF",
-    "weightsInvZZ",
-    "weightsInvZZHF",
-    
-    "weightsInvRegularMET200",
-    "weightsInvRegularMET220",
+    //"weightsInvZZ",
+    //"weightsInvZZHF",
 };
 
 const int g_masses[] = {

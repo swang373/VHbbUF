@@ -1,6 +1,7 @@
 const std::string tagMC        = "Ntuple_Step1V42_Step2Tag_EDMV42_Step2_V6_MC";
 const std::string tagData      = "Ntuple_Step1V42_Step2Tag_EDMV42_Step2_V6_DATA";
 const std::string baseline     = "H.HiggsFlag==1 && (Vtype==4||Vtype==3||Vtype==2) && METtype1corr.et>80 && abs(hJet_eta[0])<2.5 && abs(hJet_eta[1])<2.5 && hJet_id[0]==1 && hJet_id[1]==1 && hJet_puJetIdL[0]>0 && hJet_puJetIdL[1]>0 && hJet_pt[0]>20 && hJet_pt[1]>20 && hJet_csv[0]>0 && hJet_csv[1]>0 && (hJet_csv_nominal[0]>0.244 || hJet_csv_nominal[1]>0.244)";
+const std::string baselineZmm  = "Vtype==0 && METtype1corr.et>20 && abs(vLepton_eta[0])<2.5 && abs(vLepton_eta[1])<2.5 && vLepton_pt[0]>20 && vLepton_pt[1]>20";
 const std::string regression   = "(Vtype==4||Vtype==3||Vtype==2) && METtype1corr.et>80 && abs(hJet_eta[0])<2.5 && abs(hJet_eta[1])<2.5 && hJet_id[0]==1 && hJet_id[1]==1 && hJet_genPt[0]>10 && hJet_genPt[1]>10 && abs(hJet_flavour[0])==5 && hJet_pt[0]>20 && hJet_pt[1]>20 && hJet_csv[0]>0 && hJet_csv[1]>0";
 const std::string fjregression = "(Vtype==4||Vtype==3||Vtype==2) && METtype1corr.et>80 && FatH.FatHiggsFlag==1 && nfathFilterJets>0 && abs(fathFilterJets_eta[0])<2.5 && abs(fathFilterJets_eta[1])<2.5 && fathFilterJets_genPt[0]>10 && fathFilterJets_genPt[1]>10 && abs(fathFilterJets_flavour[0])==5 && fathFilterJets_pt[0]>15 && fathFilterJets_pt[1]>15 && fathFilterJets_csv[0]>0 && fathFilterJets_csv[1]>0";
 const std::string mettrigger   = "EVENT.json && ( (190456<=EVENT.run && EVENT.run<=193752 && (triggerFlags[42]==1 || triggerFlags[49]==1 || triggerFlags[40]==1)) || (193752<=EVENT.run && EVENT.run<=208686 && (triggerFlags[42]==1 || triggerFlags[39]==1 || triggerFlags[41]==1)) )";
@@ -47,6 +48,8 @@ std::map<std::string, float> GetLumis() {
     values["ZJetsHT200"      ] = lumi *      51.240150 /  5054296.5000;
     values["ZJetsHT400"      ] = lumi *       6.856200 /   947465.8125;
     values["ZJetsHW"         ] = lumi *      83.005000 /  4873690.0000;
+    values["DYJetsM50"       ] = lumi *    3503.710000 / 28640004.0000;
+    values["DYJetsZmmToZbb"  ] = lumi *    3503.710000 / 28640004.0000;
     values["WW"              ] = lumi *      56.753200 / 10007584.0000;
     values["WZ"              ] = lumi *      33.850000 / 10008316.0000;
     values["ZZ"              ] = lumi *       8.297000 /  9809065.0000;

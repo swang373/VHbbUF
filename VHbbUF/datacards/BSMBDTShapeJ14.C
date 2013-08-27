@@ -85,8 +85,8 @@
 /// Configuration                                                            ///
 ////////////////////////////////////////////////////////////////////////////////
 
-const TString indir     = "/uscms_data/d3/lpchbb/jiafu/ZnnH_postHCP/Step4_20130404/reload_20130722/";
-//const TString indir     = "/uscms_data/d3/lpchbb/jiafu/ZnnH_postHCP/Step4_20130404/reload_20130620/";
+//const TString indir     = "/uscms_data/d3/lpchbb/jiafu/ZnnH_postHCP/Step4_20130404/reload_20130722/";
+//const TString indir     = "/uscms_data/d3/lpchbb/jiafu/ZnnH_postHCP/Step4_20130404/reload_20130620/";  // should delete?
 //const TString indir     = "/uscms_data/d3/lpchbb/jiafu/ZnnH_postHCP/Step4_20130404/reload_20130401/";
 //const TString indir     = "/uscms_data/d3/lpchbb/jiafu/ZnnH_postHCP/Step4_20130326/reload_20130401/";
 //const TString indir     = "/uscms_data/d3/lpchbb/jiafu/ZnnH_postHCP/Step4_20130326/reload_20130401_VV/";
@@ -96,6 +96,7 @@ const TString indir     = "/uscms_data/d3/lpchbb/jiafu/ZnnH_postHCP/Step4_201304
 //const TString indir     = "/uscms_data/d3/lpchbb/jiafu/ZnnH_postHCP/Step4_20130302/reload_20130302/";
 //const TString indir     = "/uscms_data/d3/lpchbb/jiafu/ZnnH_postHCP/Step4_20130221/reload_20130228/";
 //const TString indir     = "/uscms_data/d3/lpchbb/jiafu/ZnnH_postHCP/Step4_20130214/reload_20130216/";
+const TString indir     = "/uscms_data/d3/lpchbb/jiafu/ZnnH_postHCP/Step4_20130812/stitch/";
 //const TString indir     = "/uscms_data/d3/lpchbb/jiafu/ZnnH_postHCP/Step4_20130404/stitch/";
 //const TString indir     = "/uscms_data/d3/lpchbb/jiafu/ZnnH_postHCP/Step4_20130326/stitch/";
 //const TString indir     = "/uscms_data/d3/lpchbb/jiafu/ZnnH_postHCP/Step4_20130314/stitch/";
@@ -1141,7 +1142,8 @@ void MakePlots(const EventsJ14 * ev, TString var_,
 #endif
         dc << "CMS_vhbb_ST                          lnN    -     -     -     -     -     -     -     -     -     -     1.15  -     -     -     -    " << std::endl;
 #ifndef VVANALYSIS
-        dc << "CMS_vhbb_VV                          lnN    -     -     -     -     -     -     -     -     -     -     -     1.15  1.15  1.15  -    " << std::endl;
+        //dc << "CMS_vhbb_VV                          lnN    -     -     -     -     -     -     -     -     -     -     -     1.15  1.15  1.15  -    " << std::endl;
+        dc << "CMS_vhbb_VV                          lnN    -     -     -     -     -     -     -     -     -     -     -     1.07  1.07  1.08  -    " << std::endl;
 #else
         dc << "CMS_vhbb_VV                          lnN    -     -     -     -     -     -     -     -     -     -     -     1.05  1.05  1.05  -    " << std::endl;
         dc << "CMS_vhbb_VH                          lnN    1.25  1.25  1.25  -     -     -     -     -     -     -     -     -     -     -     -    " << std::endl;
@@ -2203,9 +2205,9 @@ void BSMBDTShapeJ14(int nbins=500, long long newnbins=-100, double rebinerrorf=0
             }
             
             if (ireg!=0) {  // control region
-                MakePlots(ev, Form("BDTregular_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "BDT", nbins, g_xlow, g_xup, newnbins, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
+                MakePlots(ev, Form("BDTinvregular_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "BDT", nbins, g_xlow, g_xup, newnbins, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
 #ifdef VVANALYSIS
-                MakePlots(ev, Form("BDTregular__sigzzhf_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "VV BDT", nbins, g_xlow, g_xup, newnbins, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
+                //MakePlots(ev, Form("BDTregular__sigzzhf_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "VV BDT", nbins, g_xlow, g_xup, newnbins, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
 #endif
             }
             //MakePlots(ev, "HmassReg", cutmc_ctrl*cutmass_ctrl, cutdata_ctrl*cutmass_ctrl, g_systematics[0], g_regions[ireg], "m(jj) [GeV]", 15, 30, 255, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");  // apply mass veto
@@ -2229,9 +2231,9 @@ void BSMBDTShapeJ14(int nbins=500, long long newnbins=-100, double rebinerrorf=0
             MakePlots(ev, "min(mindRHJet_dR,5.653)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "min #DeltaR(jj,aj)", 23, 0, 5.75, 23, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             
             // Bkg specific BDT
-            MakePlots(ev, Form("BDTtt_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "BDTtt", 15, -1, 1, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
-            MakePlots(ev, Form("BDTvjlf_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "BDTvjlf", 15, -1, 1, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
-            MakePlots(ev, Form("BDTzz_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "BDTzz", 15, -1, 1, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
+            //MakePlots(ev, Form("BDTtt_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "BDTtt", 15, -1, 1, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
+            //MakePlots(ev, Form("BDTvjlf_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "BDTvjlf", 15, -1, 1, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
+            //MakePlots(ev, Form("BDTzz_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "BDTzz", 15, -1, 1, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
             //MakePlots(ev, Form("BDTtt__sigzzhf_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "BDTtt", 15, -1, 1, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
             //MakePlots(ev, Form("BDTvjlf__sigzzhf_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "BDTvjlf", 15, -1, 1, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
             //MakePlots(ev, Form("BDTzz__sigzzhf_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "BDTzz", 15, -1, 1, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
@@ -2362,9 +2364,9 @@ void BSMBDTShapeJ14(int nbins=500, long long newnbins=-100, double rebinerrorf=0
             }
             
             if (ireg!=0) {  // control region
-                MakePlots(ev, Form("BDTregular_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "BDT", nbins, g_xlow, g_xup, newnbins, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
+                MakePlots(ev, Form("BDTinvregular_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "BDT", nbins, g_xlow, g_xup, newnbins, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
 #ifdef VVANALYSIS
-                MakePlots(ev, Form("BDTregular__sigzzhf_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "VV BDT", nbins, g_xlow, g_xup, newnbins, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
+                //MakePlots(ev, Form("BDTregular__sigzzhf_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "VV BDT", nbins, g_xlow, g_xup, newnbins, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
 #endif
             }
             //MakePlots(ev, "HmassReg", cutmc_ctrl*cutmass_ctrl, cutdata_ctrl*cutmass_ctrl, g_systematics[0], g_regions[ireg], "m(jj) [GeV]", 15, 30, 255, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");  // apply mass veto
@@ -2386,9 +2388,9 @@ void BSMBDTShapeJ14(int nbins=500, long long newnbins=-100, double rebinerrorf=0
             MakePlots(ev, "min(mindRHJet_dR,5.653)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "min #DeltaR(jj,aj)", 23, 0, 5.75, 23, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             
             // Bkg specific BDT
-            MakePlots(ev, Form("BDTtt_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "BDTtt", 15, -1, 1, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
-            MakePlots(ev, Form("BDTvjlf_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "BDTvjlf", 15, -1, 1, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
-            MakePlots(ev, Form("BDTzz_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "BDTzz", 15, -1, 1, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
+            //MakePlots(ev, Form("BDTtt_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "BDTtt", 15, -1, 1, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
+            //MakePlots(ev, Form("BDTvjlf_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "BDTvjlf", 15, -1, 1, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
+            //MakePlots(ev, Form("BDTzz_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "BDTzz", 15, -1, 1, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
             
             // QCD check
             MakePlots(ev, "METtype1corr.et/sqrt(METtype1corr.sumet)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "Type-1 corr. pfMET/sqrt(sumET) [GeV]", 20, 0, 12, 20, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
@@ -2475,9 +2477,9 @@ void BSMBDTShapeJ14(int nbins=500, long long newnbins=-100, double rebinerrorf=0
             }
             
             if (ireg!=0) {  // control region
-                MakePlots(ev, Form("BDTregular_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "BDT", nbins, g_xlow, g_xup, newnbins, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
+                MakePlots(ev, Form("BDTinvregular_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "BDT", nbins, g_xlow, g_xup, newnbins, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
 #ifdef VVANALYSIS
-                MakePlots(ev, Form("BDTregular__sigzzhf_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "VV BDT", nbins, g_xlow, g_xup, newnbins, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
+                //MakePlots(ev, Form("BDTregular__sigzzhf_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "VV BDT", nbins, g_xlow, g_xup, newnbins, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
 #endif
             }
             //MakePlots(ev, "HmassReg", cutmc_ctrl*cutmass_ctrl, cutdata_ctrl*cutmass_ctrl, g_systematics[0], g_regions[ireg], "m(jj) [GeV]", 15, 30, 255, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");  // apply mass veto
@@ -2499,9 +2501,9 @@ void BSMBDTShapeJ14(int nbins=500, long long newnbins=-100, double rebinerrorf=0
             MakePlots(ev, "min(mindRHJet_dR,5.653)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "min #DeltaR(jj,aj)", 23, 0, 5.75, 23, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             
             // Bkg specific BDT
-            MakePlots(ev, Form("BDTtt_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "BDTtt", 15, -1, 1, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
-            MakePlots(ev, Form("BDTvjlf_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "BDTvjlf", 15, -1, 1, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
-            MakePlots(ev, Form("BDTzz_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "BDTzz", 15, -1, 1, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
+            //MakePlots(ev, Form("BDTtt_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "BDTtt", 15, -1, 1, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
+            //MakePlots(ev, Form("BDTvjlf_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "BDTvjlf", 15, -1, 1, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
+            //MakePlots(ev, Form("BDTzz_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "BDTzz", 15, -1, 1, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
             
             // QCD check
             MakePlots(ev, "METtype1corr.et/sqrt(METtype1corr.sumet)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "Type-1 corr. pfMET/sqrt(sumET) [GeV]", 20, 0, 10, 20, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");

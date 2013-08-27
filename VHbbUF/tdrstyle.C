@@ -24,8 +24,6 @@ void setTDRStyle() {
   tdrStyle->SetCanvasDefX(0);   //POsition on screen
   tdrStyle->SetCanvasDefY(0);
 
-
-
 // For the Pad:
   tdrStyle->SetPadBorderMode(0);
   // tdrStyle->SetPadBorderSize(Width_t size = 1);
@@ -56,7 +54,7 @@ void setTDRStyle() {
 
   tdrStyle->SetEndErrorSize(1);
   //GHM  tdrStyle->SetEndErrorSize(2);
-//  tdrStyle->SetErrorMarker(20);
+  //tdrStyle->SetErrorMarker(20);
   //tdrStyle->SetErrorX(0.);
   
   tdrStyle->SetMarkerStyle(20);
