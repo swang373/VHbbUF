@@ -330,10 +330,12 @@ std::vector<std::vector<std::pair<std::string, std::string> > > GetSystExpressio
     values[10].resize(2); // UEPSDown
     values[10][0] = make_pair("PUweight", "PUweightM");
     values[10][1] = make_pair("efflumi", "efflumi_UEPS_down");
-    values[11].resize(1); // CMS_vhbb_trigger_MET_Znn_8TeVUp
+    values[11].resize(2); // CMS_vhbb_trigger_MET_Znn_8TeVUp
     values[11][0] = make_pair("triggercorr2012ABCD", "triggercorr2012ABCD_MET_up");
-    values[12].resize(1); // CMS_vhbb_trigger_MET_Znn_8TeVDown
+    values[11][1] = make_pair("triggerweight2012ABCD", "triggerweight2012ABCD_up");
+    values[12].resize(2); // CMS_vhbb_trigger_MET_Znn_8TeVDown
     values[12][0] = make_pair("triggercorr2012ABCD", "triggercorr2012ABCD_MET_down");
+    values[12][1] = make_pair("triggerweight2012ABCD", "triggerweight2012ABCD_down");
     values[13].resize(1); // CMS_vhbb_trigger_METCSV_Znn_8TeVUp
     values[13][0] = make_pair("triggercorr2012ABCD", "triggercorr2012ABCD_CSV_up");
     values[14].resize(1); // CMS_vhbb_trigger_METCSV_Znn_8TeVDown

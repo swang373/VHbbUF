@@ -2,6 +2,10 @@
 #include "TMath.h"
 #endif
 
+#ifndef ROOT_TRandom
+#include "TRandom.h"
+#endif
+
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
@@ -331,12 +335,19 @@ inline float smear_gen_to_reco(float pt, float genpt, float eta)
         M    =  0.96086;
         sgnN = (N>0) ? 1.0 : -1.0;
     }
-    
     float res = genpt * TMath::Sqrt(sgnN * N*N/genpt/genpt + S*S*TMath::Power(genpt,M)/genpt + C*C);
-    
     float deltapt = gRandom->Gaus(1.0, res);
     
     return TMath::Max(float(0.), genpt - deltapt);
+}
+
+inline float smear_gen_by_double_gaussian(float genpt, float p0, float p1, float p2, float p3, float p4)
+{
+    bool gaus1_or_gaus2     = (gRandom->Uniform(0,1)) < p4;  // 0: use narrow gaus1, 1: use wide gaus2
+    float jetres            = gaus1_or_gaus2 ? 
+                              gRandom->Gaus(p2, p1 * p3) :  // wide gaus2
+                              gRandom->Gaus(p0, p1);  // narrow gaus1
+    return TMath::Max(float(0.), genpt * jetres);
 }
 
 //______________________________________________________________________________
@@ -489,23 +500,23 @@ inline float triggerweight2012ABC_down(float pfmet)
     return TMath::Min(1.0, weight * (1.0 - 0.03));
 }
 
-// FIXME: update to V6 lumi
-//inline float triggerweight2012ABCD(float pfmet)
-//{
-//    // lumi recorded by HLT_PFMET150_* 
-//    // 2012A        :   809.379300 pb
-//    // 2012A-recover:    82.135672 pb
-//    // 2012B        :  4403.763061 pb
-//    // 2012C-rereco :   495.002899 pb
-//    // 2012C        :  6445.553378 pb
-//    // 2012D        :  7273.704288 pb
-//    // TOTAL        : 19509.538599 pb
-//    float weightPFMET150orDiJetMET_2012A = scalePFMET150orDiJetMET_2012A(pfmet);
-//    float weightPFMET150orDiJetMET_2012B = scalePFMET150orDiJetMET_2012B(pfmet);
-//    float weightPFMET150orDiJetMET_2012C = scalePFMET150orDiJetMET_2012C(pfmet);
-//    float weightPFMET150orDiJetMET_2012D = scalePFMET150orDiJetMET_2012D(pfmet);
-//    return TMath::Max(0., (891.514972*weightPFMET150orDiJetMET_2012A + 4403.763061*weightPFMET150orDiJetMET_2012B + 6940.556277*weightPFMET150orDiJetMET_2012C + 7273.704288*weightPFMET150orDiJetMET_2012D )/19509.538599);
-//}
+inline float triggerweight2012ABCD(float pfmet)
+{
+    double bincontents[40] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.323, 0.331, 0.305, 0.415, 0.535, 0.640, 0.732, 0.795, 0.870, 0.907, 0.942, 0.955, 0.963, 0.969, 0.989, 0.989, 0.991, 0.993, 0.997, 0.997, 0.997, 1, 1, 1, 1, 1};  // already factored in triggercorrMET()
+    if (pfmet>200.) return 1.0;
+    int binid = int(pfmet/5.);
+    return bincontents[binid];
+}
+
+inline float triggerweight2012ABCD_up(float pfmet)
+{
+    return (triggerweight2012ABCD(pfmet) * triggercorrMET_up(pfmet) / triggercorrMET(pfmet));
+}
+
+inline float triggerweight2012ABCD_down(float pfmet)
+{
+    return (triggerweight2012ABCD(pfmet) * triggercorrMET_down(pfmet) / triggercorrMET(pfmet));
+}
 
 //______________________________________________________________________________
 inline float triggercorr2012ABCD(bool mettriggerbit, bool metcsvtriggerbit, float pfmet, float maxcsv)

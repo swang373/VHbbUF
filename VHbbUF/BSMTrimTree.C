@@ -482,7 +482,10 @@ void BSMTrimTree(TString process="ZnnH125", TString mvaMethod="BDT", Long64_t be
         assert(selMjjExpressions.size() == 1);
         
         /// Get the MC event weight
-        const std::string weigExpression = GetWeightExpressions()[channel.Data()];
+        std::string weigExpression = GetWeightExpressions()[channel.Data()];
+        if (process == "DYJetsZmmToZbb") {
+            weigExpression = "efflumi * PUweight * triggerweight2012ABCD(METtype1corr.et)";
+        }
         
         /// Get the trigger
         const std::string trigExpression = GetTriggerExpressions()[channel.Data()];

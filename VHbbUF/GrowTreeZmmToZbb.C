@@ -13,6 +13,7 @@
 #include "TLorentzVector.h"
 #include "TMath.h"
 //#include "TPRegexp.h"
+#include "TRandom3.h"
 #include "TROOT.h"
 #include "TStopwatch.h"
 #include "TSystem.h"
@@ -53,6 +54,8 @@ namespace math {
 
 // FIXME: also patch V.pt
 #define PATCHMETTYPE1CORR
+
+#define ZMMTOZBB
 
 
 // FIXME: change it to output the delta, not met+delta
@@ -271,10 +274,34 @@ void ResetDeleteBranches(TTree* tree)
 }
 
 
+struct twotuple{
+    double v1;
+    double v2;
+    twotuple(double v1_, double v2_)
+          : v1(v1_), v2(v2_) {}
+};
+struct fivetuple{
+    double v1;
+    double v2;
+    double v3;
+    double v4;
+    double v5;
+    fivetuple(double v1_, double v2_, double v3_, double v4_, double v5_)
+          : v1(v1_), v2(v2_), v3(v3_), v4(v4_), v5(v5_) {}
+};
+
+unsigned int findTuple(const std::vector<twotuple>& tuples, double v) {
+    for (unsigned int i = 0; i < tuples.size(); ++i)
+        if (tuples.at(i).v1 <= v && v < tuples.at(i).v2)
+            return i;
+    return tuples.size()-1;
+}
+
+
 ////////////////////////////////////////////////////////////////////////////////
 /// Main                                                                     ///
 ////////////////////////////////////////////////////////////////////////////////
-void GrowTree(TString process, std::string regMethod="BDTG", Long64_t beginEntry=0, Long64_t endEntry=-1)
+void GrowTreeZmmToZbb(TString process, std::string regMethod="BDTG", Long64_t beginEntry=0, Long64_t endEntry=-1)
 {
     gROOT->SetBatch(1);
     TH1::SetDefaultSumw2(1);
@@ -287,8 +314,8 @@ void GrowTree(TString process, std::string regMethod="BDTG", Long64_t beginEntry
         return;
     }
 
-    //const TString indir   = "skim_ZnnH_baseline/";
-    const TString indir   = "dcache:/pnfs/cms/WAX/resilient/jiafu/ZnunuHbb/skim_ZnnH_baseline/";
+    const TString indir   = "skim_ZnnH_baseline/";
+    //const TString indir   = "dcache:/pnfs/cms/WAX/resilient/jiafu/ZnunuHbb/skim_ZnnH_baseline/";
     const TString outdir  = "skim/";
     const TString prefix  = "skim_";
     const TString suffix  = ".root";
@@ -322,6 +349,7 @@ void GrowTree(TString process, std::string regMethod="BDTG", Long64_t beginEntry
     VInfo V;
     METInfo METtype1corr;
     METInfo METtype1diff;
+    genParticleInfo genB, genBbar;
     int Vtype, nPVs;
     int nhJets, naJets;
     float hJet_pt[2], hJet_eta[2], hJet_phi[2], hJet_e[2], hJet_ptRaw[2], 
@@ -344,6 +372,7 @@ void GrowTree(TString process, std::string regMethod="BDTG", Long64_t beginEntry
     float aLepton_mass[MAXL], aLepton_pt[MAXL], aLepton_eta[MAXL], aLepton_phi[MAXL], aLepton_pfCombRelIso[MAXL], aLepton_id95[MAXL], aLepton_vbtf[MAXL];
     int aLepton_type[MAXL];
     float HMETdPhi, deltaPullAngle;
+    float hJet_csv_upBC[2], hJet_csv_downBC[2], hJet_csv_upL[2], hJet_csv_downL[2];
     
     inTree->SetBranchAddress("EVENT", &EVENT);
     inTree->SetBranchAddress("H", &H);
@@ -351,6 +380,8 @@ void GrowTree(TString process, std::string regMethod="BDTG", Long64_t beginEntry
     inTree->SetBranchAddress("V", &V);
     inTree->SetBranchAddress("METtype1corr", &METtype1corr);
     inTree->SetBranchAddress("METtype1diff", &METtype1diff);
+    inTree->SetBranchAddress("genB", &genB);
+    inTree->SetBranchAddress("genBbar", &genBbar);
     inTree->SetBranchAddress("Vtype", &Vtype);
     inTree->SetBranchAddress("nPVs", &nPVs);
     inTree->SetBranchAddress("nhJets", &nhJets);
@@ -421,6 +452,10 @@ void GrowTree(TString process, std::string regMethod="BDTG", Long64_t beginEntry
     inTree->SetBranchAddress("aLepton_type", &aLepton_type);
     inTree->SetBranchAddress("HMETdPhi", &HMETdPhi);
     inTree->SetBranchAddress("deltaPullAngle", &deltaPullAngle);
+    inTree->SetBranchAddress("hJet_csv_upBC", &hJet_csv_upBC);
+    inTree->SetBranchAddress("hJet_csv_downBC", &hJet_csv_downBC);
+    inTree->SetBranchAddress("hJet_csv_upL", &hJet_csv_upL);
+    inTree->SetBranchAddress("hJet_csv_downL", &hJet_csv_downL);
 
     /// Increase reading speed
     //inTree->SetBranchStatus("*", 0);
@@ -664,7 +699,7 @@ void GrowTree(TString process, std::string regMethod="BDTG", Long64_t beginEntry
     }
 #endif
     ttf_lheweight->SetQuickLoad(1);
-
+#ifndef ZMMTOZBB
     ///-- Setup TMVA Reader ----------------------------------------------------
     TMVA::Tools::Instance();  //< This loads the library
     TMVA::Reader * reader = new TMVA::Reader("!Color:!Silent");
@@ -726,7 +761,7 @@ void GrowTree(TString process, std::string regMethod="BDTG", Long64_t beginEntry
     weightdir  = "weights/";
     weightfile = weightdir + "TMVARegressionFJ_" + regMethod + ".testweights.xml";
     readerFJ->BookMVA(regMethod + " method", weightfile);
-
+#endif
 
     if (beginEntry == 0 && endEntry == -1)
         std::cout << "--- Processing: " << inTree->GetEntriesFast() << " events" << std::endl;
@@ -734,7 +769,7 @@ void GrowTree(TString process, std::string regMethod="BDTG", Long64_t beginEntry
         std::cout << "--- Processing: " << beginEntry << " - " << endEntry << " from " << inTree->GetEntriesFast() << " events" << std::endl;
     TStopwatch sw;
     sw.Start();
-
+#ifndef ZMMTOZBB
     /// Create TTreeFormulas
     TTreeFormula *ttf = 0;
     std::vector < TTreeFormula * >::const_iterator formIt, formItEnd;
@@ -762,7 +797,7 @@ void GrowTree(TString process, std::string regMethod="BDTG", Long64_t beginEntry
         ttf->SetQuickLoad(1);
         inputFormulasFJReg2.push_back(ttf);
     }
-
+#endif
 
 #ifdef CSVSYST
     /// Setup b-tagging reshaping
@@ -776,6 +811,103 @@ void GrowTree(TString process, std::string regMethod="BDTG", Long64_t beginEntry
 
 #ifdef JECFWLITE
     JECFWLiteStandalone jec("jec", "AK5PFchs");
+#endif
+
+#ifdef ZMMTOZBB
+    std::vector<twotuple> genzptbins{
+        twotuple(0,1000)
+    };
+    std::vector<twotuple> genptbins{
+        twotuple(0,30), //(20,30),
+        twotuple(30,50),
+        twotuple(50,70),
+        twotuple(70,100),
+        twotuple(100,160),
+        twotuple(160,320),
+        twotuple(320,640),
+    };
+    std::vector<twotuple> ptbins = genptbins;
+    std::vector<twotuple> etabins{
+        twotuple(0.0,0.5),
+        twotuple(0.5,1.0),
+        twotuple(1.0,1.5),
+        twotuple(1.5,5.0), //(1.5,2.5),
+        //twotuple(2.5,5.0),
+    };
+    std::vector<fivetuple> jetresparams{
+        // double gaussian: mu1, sigma1, mu2, sigma2/sigma1, frac2
+        fivetuple(0.904 ,  0.155 ,  1.109 ,  1.407 ,  0.270), 
+        fivetuple(0.950 ,  0.115 ,  0.924 ,  1.877 ,  0.758), 
+        fivetuple(0.982 ,  0.110 ,  0.908 ,  1.906 ,  0.579), 
+        fivetuple(0.986 ,  0.100 ,  0.895 ,  1.924 ,  0.499), 
+        fivetuple(0.986 ,  0.090 ,  0.875 ,  1.985 ,  0.444), 
+        fivetuple(0.995 ,  0.080 ,  0.876 ,  2.290 ,  0.389), 
+        fivetuple(1.004 ,  0.068 ,  0.963 ,  3.198 ,  0.468), 
+        fivetuple(0.904 ,  0.161 ,  1.123 ,  1.396 ,  0.250), 
+        fivetuple(0.971 ,  0.093 ,  0.922 ,  2.210 ,  0.857), 
+        fivetuple(0.981 ,  0.110 ,  0.906 ,  1.867 ,  0.603), 
+        fivetuple(0.984 ,  0.101 ,  0.890 ,  1.892 ,  0.488), 
+        fivetuple(0.984 ,  0.093 ,  0.871 ,  1.922 ,  0.425), 
+        fivetuple(0.991 ,  0.080 ,  0.887 ,  2.200 ,  0.415), 
+        fivetuple(1.004 ,  0.062 ,  0.962 ,  3.353 ,  0.542), 
+        fivetuple(0.893 ,  0.173 ,  1.093 ,  1.292 ,  0.332), 
+        fivetuple(0.968 ,  0.090 ,  0.915 ,  2.392 ,  0.949), 
+        fivetuple(0.984 ,  0.112 ,  0.915 ,  1.817 ,  0.771), 
+        fivetuple(0.985 ,  0.107 ,  0.899 ,  1.801 ,  0.617), 
+        fivetuple(0.985 ,  0.097 ,  0.878 ,  1.834 ,  0.521), 
+        fivetuple(0.990 ,  0.089 ,  0.882 ,  2.045 ,  0.445), 
+        fivetuple(1.010 ,  0.074 ,  0.960 ,  2.655 ,  0.543), 
+        fivetuple(0.897 ,  0.185 ,  1.099 ,  1.283 ,  0.323), 
+        fivetuple(1.001 ,  0.076 ,  0.914 ,  2.848 ,  0.970), 
+        fivetuple(0.993 ,  0.103 ,  0.900 ,  1.955 ,  0.781), 
+        fivetuple(0.985 ,  0.101 ,  0.879 ,  1.853 ,  0.614), 
+        fivetuple(0.982 ,  0.087 ,  0.860 ,  1.980 ,  0.534), 
+        fivetuple(0.987 ,  0.075 ,  0.858 ,  2.333 ,  0.459), 
+        fivetuple(0.988 ,  0.074 ,  0.914 ,  2.973 ,  0.402),
+    };
+    assert(jetresparams.size() == genzptbins.size() * genptbins.size() * etabins.size());
+    
+    std::vector<double> jetresregressions{
+        0.018,
+        -0.050,
+        -0.067,
+        -0.086,
+        -0.090,
+        -0.075,
+        -0.003,
+        0.024,
+        -0.028,
+        -0.065,
+        -0.094,
+        -0.092,
+        -0.070,
+        -0.022,
+        0.066,
+        -0.014,
+        -0.035,
+        -0.071,
+        -0.086,
+        -0.067,
+        -0.000, //0.038,
+        0.057,
+        -0.032,
+        -0.053,
+        -0.067,
+        -0.092,
+        -0.064,
+        -0.000,
+    };
+    assert(jetresregressions.size() == jetresparams.size());
+    
+    TFile *csvshapesfile = TFile::Open("zmmtozbb_csv_20130901.root");
+    std::vector<TH1F *> csvshapes;
+    for (unsigned int i = 0; i < jetresparams.size(); ++i) {  // assume same binning as jetres
+        csvshapes.push_back((TH1F *) csvshapesfile->Get(Form("hh1_%i", i)) );  // FIXME: extremely stupid names
+    }
+    TH1F *pullshape = (TH1F *) csvshapesfile->Get("deltaPullAngleOverPi");
+    
+    TRandom *rand1 = new TRandom3(2012);
+    TRandom *rand2 = new TRandom3(2013);
 #endif
 
     ///-- Loop over events -----------------------------------------------------
@@ -794,7 +926,7 @@ void GrowTree(TString process, std::string regMethod="BDTG", Long64_t beginEntry
 
         if (inTree->GetTreeNumber() != curTree) {
             curTree = inTree->GetTreeNumber();
-
+#ifndef ZMMTOZBB
             for (formIt=inputFormulasReg0.begin(), formItEnd=inputFormulasReg0.end(); formIt!=formItEnd; formIt++)
                 (*formIt)->UpdateFormulaLeaves();  // if using TChain
             for (formIt=inputFormulasReg1.begin(), formItEnd=inputFormulasReg1.end(); formIt!=formItEnd; formIt++)
@@ -805,10 +937,10 @@ void GrowTree(TString process, std::string regMethod="BDTG", Long64_t beginEntry
                 (*formIt)->UpdateFormulaLeaves();  // if using TChain
             for (formIt=inputFormulasFJReg2.begin(), formItEnd=inputFormulasFJReg2.end(); formIt!=formItEnd; formIt++)
                 (*formIt)->UpdateFormulaLeaves();  // if using TChain
-
+#endif
             ttf_lheweight->UpdateFormulaLeaves();
         }
-
+#ifndef ZMMTOZBB
         /// These need to be called when arrays of variable size are used in TTree.
         for (formIt=inputFormulasReg0.begin(), formItEnd=inputFormulasReg0.end(); formIt!=formItEnd; formIt++)
             (*formIt)->GetNdata();
@@ -820,7 +952,7 @@ void GrowTree(TString process, std::string regMethod="BDTG", Long64_t beginEntry
             (*formIt)->GetNdata();
         for (formIt=inputFormulasFJReg2.begin(), formItEnd=inputFormulasFJReg2.end(); formIt!=formItEnd; formIt++)
             (*formIt)->GetNdata();
-
+#endif
         ttf_lheweight->GetNdata();
 
         /// Fill branches
@@ -832,7 +964,7 @@ void GrowTree(TString process, std::string regMethod="BDTG", Long64_t beginEntry
         efflumi_UEPS_up   = efflumi * hcount->GetBinContent(2) / hcount->GetBinContent(3);
         efflumi_UEPS_down = efflumi * hcount->GetBinContent(2) / hcount->GetBinContent(4);
 #endif
-
+#ifndef ZMMTOZBB
         bool verbose = false;
         double rawpt_ = 0., pt_ = 0., e_ = 0.;
         for (Int_t ihj = 0; ihj < 2; ihj++) {
@@ -906,6 +1038,188 @@ void GrowTree(TString process, std::string regMethod="BDTG", Long64_t beginEntry
             hJet_csv_fake_b_down[ihj] = csvShape_fake_b_down->reshape(hJet_eta[ihj], hJet_ptReg[ihj], hJet_csv[ihj], hJet_flavour[ihj]);
 #endif
         }
+#endif
+#ifdef ZMMTOZBB
+        bool verbose = false;
+        // Store the original hJet p4
+        double hJet_pt_before[2];
+        double hJet_eta_before[2];
+        double hJet_phi_before[2];
+        double hJet_e_before[2];
+        for (Int_t ihj = 0; ihj < 2; ihj++) {
+            hJet_pt_before[ihj] = hJet_pt[ihj];
+            hJet_eta_before[ihj] = hJet_eta[ihj];
+            hJet_phi_before[ihj] = hJet_phi[ihj];
+            hJet_e_before[ihj] = hJet_e[ihj];
+        }
+        // Rewrite the vLepton p4 info. They are going to be the parton p4
+        if (process == "ZbbHinvZmmToZbb") {
+            nvlep = 2;
+            int b_or_bbar = (int)(genB.pt < genBbar.pt);  // 0: b first bbar second, 1: bbar first, b second
+            vLepton_pt  [b_or_bbar]   = genB.pt;
+            vLepton_eta [b_or_bbar]   = genB.eta;
+            vLepton_phi [b_or_bbar]   = genB.phi;
+            vLepton_mass[b_or_bbar]   = genB.mass;
+            vLepton_pt  [1-b_or_bbar] = genBbar.pt;
+            vLepton_eta [1-b_or_bbar] = genBbar.eta;
+            vLepton_phi [1-b_or_bbar] = genBbar.phi;
+            vLepton_mass[1-b_or_bbar] = genBbar.mass;
+        } else if (process == "DYJetsZmmToZbb") {
+            efflumi           *= 5.94;  // BR(Znn) / BR(Zmm)
+            efflumi_old       *= 5.94;  // BR(Znn) / BR(Zmm)
+            efflumi_UEPS_up   *= 5.94;  // BR(Znn) / BR(Zmm)
+            efflumi_UEPS_down *= 5.94;  // BR(Znn) / BR(Zmm)
+            nvlep = 2;
+            // use gen pt, eta, phi, mass directly
+            int first_or_second = (int)(vLepton_genPt[0] < vLepton_genPt[1]);  // 0: no swap, 1: swap
+            vLepton_pt  [first_or_second]   = vLepton_genPt[0];
+            vLepton_eta [first_or_second]   = vLepton_genEta[0];
+            vLepton_phi [first_or_second]   = vLepton_genPhi[0];
+            vLepton_mass[first_or_second]   = vLepton_mass[0];
+            vLepton_pt  [1-first_or_second] = vLepton_genPt[1];
+            vLepton_eta [1-first_or_second] = vLepton_genEta[1];
+            vLepton_phi [1-first_or_second] = vLepton_genPhi[1];
+            vLepton_mass[1-first_or_second] = vLepton_mass[1];
+        }
+        if (vLepton_pt[0]<5 || fabs(vLepton_eta[0])>5 ||
+            vLepton_pt[1]<5 || fabs(vLepton_eta[1])>5)
+            continue;  // skip nonsense results
+        
+        TVector2 MET_patched_ZmmToZbb(0,0);
+        double MET_patched_ZmmToZbb_sumet = 0;
+        for (Int_t ihj = 0; ihj < 2; ihj++) {
+            TLorentzVector vLepton_p4(0,0,0,0);
+            vLepton_p4.SetPtEtaPhiM(vLepton_pt[ihj], vLepton_eta[ihj], vLepton_phi[ihj], vLepton_mass[ihj]);
+            
+            unsigned int genzptbin  = findTuple(genzptbins, 500);  // N.B. not used
+            unsigned int genptbin   = findTuple(genptbins, vLepton_p4.Pt());
+            unsigned int etabin     = findTuple(etabins, fabs(vLepton_p4.Eta()));
+            unsigned int ibin       = etabin * genptbins.size() + genptbin;
+            
+            fivetuple jetresparam   = jetresparams.at(ibin);
+            double jetresregression = jetresregressions.at(ibin);
+            
+            bool gaus1_or_gaus2     = (rand1->Uniform(0,1)) < jetresparam.v5;  // 0: use narrow gaus1, 1: use wide gaus2
+            double jetres           = gaus1_or_gaus2 ? 
+                                      rand1->Gaus(jetresparam.v3, jetresparam.v2 * jetresparam.v4) :  // wide gaus2
+                                      rand1->Gaus(jetresparam.v1, jetresparam.v2);  // narrow gaus1
+            double jetresReg        = jetres > 1 ?
+                                      jetres + (jetres * jetresregression) :
+                                      jetres - (jetres * jetresregression);
+            hJet_genPt[ihj]         = vLepton_p4.Pt();
+            hJet_genEta[ihj]        = vLepton_p4.Eta();
+            hJet_genPhi[ihj]        = vLepton_p4.Phi();
+            
+            TLorentzVector hJet_p4(0,0,0,0);
+            double smearpt          = vLepton_p4.Pt()  * TMath::Max(double(0.1), jetres);  // cannot go to zero
+            double smearptReg       = vLepton_p4.Pt()  * TMath::Max(double(0.1), jetresReg);  // cannot go to zero
+            double smeareta         = vLepton_p4.Eta() * TMath::Max(double(0.), rand2->Gaus(1.0, 0.030));  // 3.0% resolution
+            double smearphi         = vLepton_p4.Phi() * TMath::Max(double(0.), rand2->Gaus(1.0, 0.015));  // 1.5% resolution
+            double smearmass        = vLepton_p4.Pt()  * 0.5 * 0.2 * TMath::Max(double(0.), rand2->Gaus(1.0, 0.020));  // <M^2> ~ C * pt**2 * R**2, use C = 0.2**2 here
+            hJet_p4.SetPtEtaPhiM(smearpt, smeareta, smearphi, smearmass);
+            
+            hJet_pt[ihj]            = hJet_p4.Pt();
+            hJet_ptReg[ihj]         = smearptReg;
+            hJet_eta[ihj]           = hJet_p4.Eta();
+            hJet_phi[ihj]           = hJet_p4.Phi();
+            hJet_e[ihj]             = hJet_p4.E();
+            
+            unsigned int ptbin      = findTuple(ptbins, hJet_pt[ihj]);
+                         ibin       = etabin * ptbins.size() + ptbin;  // now use reco pt
+            TH1F * csvshape         = csvshapes.at(ibin);
+            hJet_csv_nominal[ihj]   = csvshape->GetRandom();
+            hJet_csv_upL[ihj]       = TMath::Min(double(1.0), hJet_csv_nominal[ihj] + 0.002);
+            hJet_csv_downL[ihj]     = TMath::Max(double(0.0), hJet_csv_nominal[ihj] - 0.002);
+            if (hJet_csv_nominal[ihj] < 0.5) {
+                hJet_csv_upBC[ihj]       = TMath::Min(double(1.0), hJet_csv_nominal[ihj] + 0.011);
+                hJet_csv_downBC[ihj]     = TMath::Max(double(0.0), hJet_csv_nominal[ihj] - 0.011);
+            } else if (hJet_csv_nominal[ihj] < 0.7) {
+                hJet_csv_upBC[ihj]       = TMath::Min(double(1.0), hJet_csv_nominal[ihj] + 0.013);
+                hJet_csv_downBC[ihj]     = TMath::Max(double(0.0), hJet_csv_nominal[ihj] - 0.013);
+            } else if (hJet_csv_nominal[ihj] < 0.85) {
+                hJet_csv_upBC[ihj]       = TMath::Min(double(1.0), hJet_csv_nominal[ihj] + 0.015);
+                hJet_csv_downBC[ihj]     = TMath::Max(double(0.0), hJet_csv_nominal[ihj] - 0.015);
+            } else if (hJet_csv_nominal[ihj] < 0.95) {
+                hJet_csv_upBC[ihj]       = TMath::Min(double(1.0), hJet_csv_nominal[ihj] + 0.013);
+                hJet_csv_downBC[ihj]     = TMath::Max(double(0.0), hJet_csv_nominal[ihj] - 0.013);
+            } else {
+                hJet_csv_upBC[ihj]       = TMath::Min(double(1.0), hJet_csv_nominal[ihj] + 0.009);
+                hJet_csv_downBC[ihj]     = TMath::Max(double(0.0), hJet_csv_nominal[ihj] - 0.009);
+            }
+            
+            hJet_ptReg_res_j_up[ihj]     = smear_pt_resErr(hJet_ptReg[ihj], hJet_genPt[ihj], hJet_eta[ihj], true);
+            hJet_ptReg_res_j_down[ihj]   = smear_pt_resErr(hJet_ptReg[ihj], hJet_genPt[ihj], hJet_eta[ihj], false);
+            hJet_ptReg_scale_j_up[ihj]   = smear_pt_scaleErr(hJet_ptReg[ihj], hJet_JECUnc[ihj], true);
+            hJet_ptReg_scale_j_down[ihj] = smear_pt_scaleErr(hJet_ptReg[ihj], hJet_JECUnc[ihj], false);
+            
+            // For MET patching
+            if (hJet_pt_before[ihj]>0) {  // if it's not -99, use hJet
+                // FIXME: doing this causes double smearing
+                //TVector2 MET_patched_ZmmToZbb_before(0,0);
+                //MET_patched_ZmmToZbb_before.SetMagPhi(hJet_pt_before[ihj], hJet_phi_before[ihj]);
+                //MET_patched_ZmmToZbb += MET_patched_ZmmToZbb_before;
+                //MET_patched_ZmmToZbb_sumet -= hJet_pt_before[ihj];
+                //TVector2 MET_patched_ZmmToZbb_after(0,0);
+                //MET_patched_ZmmToZbb_after.SetMagPhi(hJet_pt[ihj], hJet_phi[ihj]);  // without regression
+                //MET_patched_ZmmToZbb -= MET_patched_ZmmToZbb_after;  // MET is the negative of jet pt
+                //MET_patched_ZmmToZbb_sumet += hJet_pt[ihj];
+            } else {  // if it's -99, use vLepton
+                TVector2 MET_patched_ZmmToZbb_before(0,0);
+                MET_patched_ZmmToZbb_before.SetMagPhi(vLepton_pt[ihj], vLepton_phi[ihj]);
+                MET_patched_ZmmToZbb += MET_patched_ZmmToZbb_before;
+                MET_patched_ZmmToZbb_sumet -= vLepton_pt[ihj];
+                TVector2 MET_patched_ZmmToZbb_after(0,0);
+                MET_patched_ZmmToZbb_after.SetMagPhi(hJet_pt[ihj], hJet_phi[ihj]);  // without regression
+                MET_patched_ZmmToZbb -= MET_patched_ZmmToZbb_after;  // MET is the negative of jet pt
+                MET_patched_ZmmToZbb_sumet += hJet_pt[ihj];
+            }
+        }
+        // Update METtype1diff.et, METtype1diff.phi
+        TVector2 MET_patched_ZmmToZbb_diff(0,0);
+        MET_patched_ZmmToZbb_diff.SetMagPhi(METtype1diff.et, METtype1diff.phi);
+        MET_patched_ZmmToZbb_diff = MET_patched_ZmmToZbb_diff + MET_patched_ZmmToZbb;
+        METtype1diff.et           = MET_patched_ZmmToZbb_diff.Mod();
+        METtype1diff.phi          = MET_patched_ZmmToZbb_diff.Phi();
+        METtype1diff.sumet        = METtype1diff.sumet + MET_patched_ZmmToZbb_sumet;
+        
+        // Update H properties
+        TLorentzVector hJet1_p4_ZmmToZbb, hJet2_p4_ZmmToZbb;
+        hJet1_p4_ZmmToZbb.SetPtEtaPhiE(hJet_pt[0], hJet_eta[0], hJet_phi[0], hJet_e[0]);  // without regression
+        hJet2_p4_ZmmToZbb.SetPtEtaPhiE(hJet_pt[1], hJet_eta[1], hJet_phi[1], hJet_e[1]);  // without regression
+        const TLorentzVector H_p4_ZmmToZbb = hJet1_p4_ZmmToZbb + hJet2_p4_ZmmToZbb;
+        TLorentzVector hJet1_p4_ZmmToZbb_before, hJet2_p4_ZmmToZbb_before;
+        hJet1_p4_ZmmToZbb_before.SetPtEtaPhiE(hJet_pt_before[0], hJet_eta_before[0], hJet_phi_before[0], hJet_e_before[0]);  // for debugging
+        hJet2_p4_ZmmToZbb_before.SetPtEtaPhiE(hJet_pt_before[1], hJet_eta_before[1], hJet_phi_before[1], hJet_e_before[1]);  // for debugging
+        const TLorentzVector H_p4_ZmmToZbb_before = hJet1_p4_ZmmToZbb_before + hJet2_p4_ZmmToZbb_before;  // for debugging
+        H.HiggsFlag = true;
+        H.pt = H_p4_ZmmToZbb.Pt();
+        H.dEta = fabs(hJet1_p4_ZmmToZbb.Eta() - hJet2_p4_ZmmToZbb.Eta());
+        H.dPhi = deltaPhi(hJet1_p4_ZmmToZbb.Phi(), hJet2_p4_ZmmToZbb.Phi());
+        H.dR = deltaR(hJet1_p4_ZmmToZbb.Eta(), hJet1_p4_ZmmToZbb.Phi(), hJet2_p4_ZmmToZbb.Eta(), hJet2_p4_ZmmToZbb.Phi());
+        H.eta = H_p4_ZmmToZbb.Eta();
+        H.phi = H_p4_ZmmToZbb.Phi();
+        H.mass = H_p4_ZmmToZbb.M();
+        deltaPullAngle = pullshape->GetRandom() * TMath::Pi();
+        
+        if (H.mass < 0 || fabs(hJet1_p4_ZmmToZbb.Eta()) > 10 || fabs(hJet2_p4_ZmmToZbb.Eta()) > 10) {
+        //if (verbose && H.mass < 0) {
+            std::cout << "jet 1 (gen,reco,smear,reg): " << hJet_genPt[0] << " " << hJet_pt_before[0] << " " << hJet_pt[0] << " " << hJet_ptReg[0] << std::endl;
+            std::cout << "jet 2 (gen,reco,smear,reg): " << hJet_genPt[1] << " " << hJet_pt_before[1] << " " << hJet_pt[1] << " " << hJet_ptReg[1] << std::endl;
+            std::cout << "jet 1 (reco p4) : " << hJet1_p4_ZmmToZbb_before.Pt() << " " << hJet1_p4_ZmmToZbb_before.Eta() << " "  << hJet1_p4_ZmmToZbb_before.Phi() << " " << hJet1_p4_ZmmToZbb_before.E() << std::endl;
+            std::cout << "      (pxpypzm) : " << hJet1_p4_ZmmToZbb_before.Px() << " " << hJet1_p4_ZmmToZbb_before.Py() << " "  << hJet1_p4_ZmmToZbb_before.Pz() << " " << hJet1_p4_ZmmToZbb_before.M() << std::endl;
+            std::cout << "jet 2 (reco p4) : " << hJet2_p4_ZmmToZbb_before.Pt() << " " << hJet2_p4_ZmmToZbb_before.Eta() << " "  << hJet2_p4_ZmmToZbb_before.Phi() << " " << hJet2_p4_ZmmToZbb_before.E() << std::endl;
+            std::cout << "      (pxpypzm) : " << hJet2_p4_ZmmToZbb_before.Px() << " " << hJet2_p4_ZmmToZbb_before.Py() << " "  << hJet2_p4_ZmmToZbb_before.Pz() << " " << hJet2_p4_ZmmToZbb_before.M() << std::endl;
+            std::cout << "dijet (reco p4) : " << H_p4_ZmmToZbb_before.Pt() << " " << H_p4_ZmmToZbb_before.Eta() << " "  << H_p4_ZmmToZbb_before.Phi() << " " << H_p4_ZmmToZbb_before.E() << std::endl;
+            std::cout << "      (pxpypzm) : " << H_p4_ZmmToZbb_before.Px() << " " << H_p4_ZmmToZbb_before.Py() << " "  << H_p4_ZmmToZbb_before.Pz() << " " << H_p4_ZmmToZbb_before.M() << std::endl;
+            std::cout << "jet 1 (smear p4): " << hJet1_p4_ZmmToZbb.Pt() << " " << hJet1_p4_ZmmToZbb.Eta() << " "  << hJet1_p4_ZmmToZbb.Phi() << " " << hJet1_p4_ZmmToZbb.E() << std::endl;
+            std::cout << "      (pxpypzm) : " << hJet1_p4_ZmmToZbb.Px() << " " << hJet1_p4_ZmmToZbb.Py() << " "  << hJet1_p4_ZmmToZbb.Pz() << " " << hJet1_p4_ZmmToZbb.M() << std::endl;
+            std::cout << "jet 2 (smear p4): " << hJet2_p4_ZmmToZbb.Pt() << " " << hJet2_p4_ZmmToZbb.Eta() << " "  << hJet2_p4_ZmmToZbb.Phi() << " " << hJet2_p4_ZmmToZbb.E() << std::endl;
+            std::cout << "      (pxpypzm) : " << hJet2_p4_ZmmToZbb.Px() << " " << hJet2_p4_ZmmToZbb.Py() << " "  << hJet2_p4_ZmmToZbb.Pz() << " " << hJet2_p4_ZmmToZbb.M() << std::endl;
+            std::cout << "dijet (smear p4): " << H_p4_ZmmToZbb.Pt() << " " << H_p4_ZmmToZbb.Eta() << " "  << H_p4_ZmmToZbb.Phi() << " " << H_p4_ZmmToZbb.E() << std::endl;
+            std::cout << "      (pxpypzm) : " << H_p4_ZmmToZbb.Px() << " " << H_p4_ZmmToZbb.Py() << " "  << H_p4_ZmmToZbb.Pz() << " " << H_p4_ZmmToZbb.M() << std::endl;
+            std::cout << std::endl;
+        }
+#endif
 
         const TLorentzVector p4Zero                     = TLorentzVector(0., 0., 0., 0.);
 
@@ -954,7 +1268,7 @@ void GrowTree(TString process, std::string regMethod="BDTG", Long64_t beginEntry
             aJet_pt_scale_j_down[iaj] = smear_pt_scaleErr(aJet_pt[iaj], aJet_JECUnc[iaj], false);
         }
 
-
+#ifndef ZMMTOZBB
         for (Int_t ihj = 0; ihj < nfathFilterJets; ihj++) {
 
 #ifdef JECFWLite
@@ -1097,8 +1411,7 @@ void GrowTree(TString process, std::string regMethod="BDTG", Long64_t beginEntry
             FatHmassReg_scale_j_up      = -99.;
             FatHmassReg_scale_j_down    = -99.;
         }
-
-
+#endif
         MET_res_j_up          = metUnc_et[4];
         MET_res_j_down        = metUnc_et[5];
         MET_scale_j_up        = metUnc_et[2];
@@ -1380,6 +1693,7 @@ void GrowTree(TString process, std::string regMethod="BDTG", Long64_t beginEntry
 
         nalep_Znn = 0;
         nalep_pt5_Znn = 0;
+#ifndef ZMMTOZBB
         /// Loop on V leptons
         for (Int_t ivl = 0; ivl < nvlep; ivl++) {
             if (vLepton_pt[ivl] > 15. && vLepton_pfCombRelIso[ivl] < 0.15 && (vLepton_id95[ivl]==7 || vLepton_vbtf[ivl]==1)) {
@@ -1716,6 +2030,7 @@ void GrowTree(TString process, std::string regMethod="BDTG", Long64_t beginEntry
                 //if (FatTopHad_j3Pt > 10000.) std::cout << FatTopHad_j3Pt << " " << fathFilterJets_pt[0] << " " << fathFilterJets_pt[1] << " " << fathFilterJets_pt[2] << " " << aJetFat_pt[mindRaJetFat_id] << " " << hJet_pt[0] << " " << mindRaJetFat << std::endl;
             }
         }
+#endif
 
         outTree->Fill();  // fill it!
     }  // end loop over TTree entries
@@ -1729,7 +2044,11 @@ void GrowTree(TString process, std::string regMethod="BDTG", Long64_t beginEntry
     outTree->Write();
     output->Close();
     input->Close();
-
+#ifdef ZMMTOZBB
+    delete csvshapesfile;
+    delete rand1;
+    delete rand2;
+#else
     delete input;
     delete output;
     delete reader;
@@ -1745,7 +2064,7 @@ void GrowTree(TString process, std::string regMethod="BDTG", Long64_t beginEntry
         delete *formIt;
     for (formIt=inputFormulasFJReg2.begin(), formItEnd=inputFormulasFJReg2.end(); formIt!=formItEnd; formIt++)
         delete *formIt;
-
+#endif
     delete ttf_lheweight;
 
 #ifdef CSVSYST

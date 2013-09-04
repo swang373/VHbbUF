@@ -202,7 +202,7 @@ void Skim(TString process="ZnnH125")
         fname = dirMC + dijet + "DYJetsToLL_PtZ-100_TuneZ2star_8TeV-madgraph" + suffix;
         chain->Add(fname);
     } else if (process == "DYJetsZmmToZbb") {
-        fname = "/uscms_data/d2/jiafu/VHbbAnalysis/NtupleV42_FOR_CVS/src/VHbbAnalysis/VHbbDataFormats/bin/TestZmmToZbb_1.root";
+        fname = "/uscms_data/d2/jiafu/VHbbAnalysis/NtupleV42_FOR_CVS/src/VHbbAnalysis/VHbbDataFormats/bin/TestZmmToZbb.root";
         chain->Add(fname);
     
     // VV
@@ -385,8 +385,8 @@ void Skim(TString process="ZnnH125")
 
     TCut selection = baseline.c_str();
     // Different baseline for dimuons
-    if (process == "DYJetsM50" || process == "DYJetsZmmToZbb") {
-        selection = baselineZmm.c_str();
+    if (process == "DYJetsZmmToZbb") {
+        selection = baselineZmmToZbb.c_str();
     }
 
     // MET filters
