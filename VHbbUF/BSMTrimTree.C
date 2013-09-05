@@ -45,8 +45,8 @@
 /// Configuration                                                            ///
 ////////////////////////////////////////////////////////////////////////////////
 
-const TString indir       = "dcache:/pnfs/cms/WAX/resilient/jiafu//ZnunuHbb/Step3_20130314/";
-//const TString indir       = "/uscms_data/d3/lpchbb/jiafu/ZnnH_postHCP/Step3_20130221/";
+//const TString indir       = "dcache:/pnfs/cms/WAX/resilient/jiafu//ZnunuHbb/Step3_20130314/";
+const TString indir       = "/uscms_data/d3/lpchbb/jiafu/ZnnH_postHCP/Step3_20130314/";
 const TString outdir      = "skim/";
 const TString prefix      = "Step3_";
 const TString suffix      = ".root";
@@ -625,6 +625,9 @@ void BSMTrimTree(TString process="ZnnH125", TString mvaMethod="BDT", Long64_t be
             if (process.BeginsWith("QCD")) {
                 expr.ReplaceAll("mindPhiMETJet_dPhi>0.5 && ", "");
                 expr.ReplaceAll("mindPhiMETJet_dPhi>0.7 && ", "");
+                expr.ReplaceAll("abs(deltaPhi(METtype1corr.phi,METnoPUCh.phi))<0.5 && ", "");  // FIXME: don't remove this?
+                expr.ReplaceAll("METtype1corr.et/sqrt(METtype1corr.sumet)>3 && ", "");
+            } else if (process == "DYJetsZmmToZbb") {
                 expr.ReplaceAll("abs(deltaPhi(METtype1corr.phi,METnoPUCh.phi))<0.5 && ", "");  // FIXME: don't remove this?
                 expr.ReplaceAll("METtype1corr.et/sqrt(METtype1corr.sumet)>3 && ", "");
             }

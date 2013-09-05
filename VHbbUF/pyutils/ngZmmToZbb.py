@@ -22,7 +22,7 @@ infilenames_step3 = [
 outfilename = "zmmtozbb_jetres.root"
 outfilename_csv = "zmmtozbb_csv.root"
 
-doCSV = True
+doCSV = False
 useGenJet = False
 useParton = not useGenJet
 useStep3 = False  # should only be used for regressed pt
@@ -188,7 +188,7 @@ for infilename in infilenames:
                     
                     #latex.DrawLatex(0.19, 0.90, "%.0f<p_{T}^{Z}<%.0f, %.0f<p_{T}^{j}<%.0f, %.1f<|#eta^{j}|<%.1f" % (genzptbin[0], genzptbin[1], genptbin[0], genptbin[1], etabin[0], etabin[1]))
                     #latex.DrawLatex(0.19, 0.85, "#color[4]{FullSim #mu=%.3f, #sigma=%.3f}" % (h1.GetMean(), h1.GetRMS()))
-                    #latex.DrawLatex(0.19, 0.80, "#color[2]{NGS param. #mu=%.3f, #sigma=%.3f}" % (h2.GetMean(), h2.GetRMS()))
+                    #latex.DrawLatex(0.19, 0.80, "#color[2]{NSC param. #mu=%.3f, #sigma=%.3f}" % (h2.GetMean(), h2.GetRMS()))
                     #gPad.Print("plots/zmmtozbb_%s.png" % h1.GetName())
                     
                     histos1.append(h1)
@@ -283,7 +283,7 @@ if not doCSV:
         hl = hlabels[i]
         latex.DrawLatex(0.19, 0.90, "%.0f<p_{T}^{Z}<%.0f, %.0f<p_{T}^{j}<%.0f, %.1f<|#eta^{j}|<%.1f" % tuple([hl.GetBinContent(l) for l in xrange(1,7)]))
         latex.DrawLatex(0.19, 0.85, "#color[1]{FullSim}")
-        latex.DrawLatex(0.19, 0.80, "#color[4]{NGS gaussian}")
+        latex.DrawLatex(0.19, 0.80, "#color[4]{NSC gaussian}")
         latex.DrawLatex(0.42, 0.85, "#color[1]{#mu=%.3f, #sigma=%.3f}" % (hh1.GetMean(), hh1.GetRMS()))
         latex.DrawLatex(0.42, 0.80, "#color[4]{#mu=%.3f, #sigma=%.3f}" % (hh2.GetMean(), hh2.GetRMS()))
         gPad.Print("plots/zmmtozbb_%s.png" % hh1.GetName())

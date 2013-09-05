@@ -322,7 +322,7 @@ void GrowTree(TString process, std::string regMethod="BDTG", Long64_t beginEntry
     VInfo V;
     METInfo METtype1corr;
     METInfo METtype1diff;
-    int Vtype, nPVs;
+    int Vtype, VtypeWithTau, nPVs;
     int nhJets, naJets;
     float hJet_pt[2], hJet_eta[2], hJet_phi[2], hJet_e[2], hJet_ptRaw[2], 
         hJet_csv[2], hJet_csv_nominal[2], hJet_genPt[2], hJet_genEta[2], hJet_genPhi[2], hJet_flavour[2], hJet_JECUnc[2], hJet_puJetIdL[2];
@@ -352,6 +352,7 @@ void GrowTree(TString process, std::string regMethod="BDTG", Long64_t beginEntry
     inTree->SetBranchAddress("METtype1corr", &METtype1corr);
     inTree->SetBranchAddress("METtype1diff", &METtype1diff);
     inTree->SetBranchAddress("Vtype", &Vtype);
+    inTree->SetBranchAddress("VtypeWithTau", &VtypeWithTau);
     inTree->SetBranchAddress("nPVs", &nPVs);
     inTree->SetBranchAddress("nhJets", &nhJets);
     inTree->SetBranchAddress("naJets", &naJets);

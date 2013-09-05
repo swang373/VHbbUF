@@ -53,7 +53,7 @@ inline float deltaPhiMETjets(float metphi, float jetphi, float jetpt, float jete
     if(jetpt <= minpt || TMath::Abs(jeteta) >= maxeta)
         return 999.;
     else
-        return deltaPhi(metphi, jetphi);
+        return fabs(deltaPhi(metphi, jetphi));
 }
 
 inline float projectionMETOntoJet(float met, float metphi, float jet, float jetphi, bool onlyPositive=true, float threshold=M_PI/4.0)

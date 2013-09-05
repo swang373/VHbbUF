@@ -1,13 +1,15 @@
 from ROOT import TFile, TH1F, TH1, TLatex, gPad, gROOT, gStyle
 import copy
 
-file1 = "Step4_20130812/Step4_ZbbHinv125.root"
-file2 = "skim/Step4_ZbbHinvZmmToZbb.root"
+file1 = "Step4_20130812/stitch/Step4_QCD.root"
+#file2 = "skim/Step4_ZbbHinvZmmToZbb.root"
+file2 = "skim/Step4_DYJetsZmmToZbb.root"
 wait = True
 #gROOT.SetBatch(1)
 
 varexp = "BDTinvregular_125[0]"
 selection = "selectFlags[0][0]"
+selection2 = "selectFlags[0][2]"
 
 #_______________________________________________________________________________
 gROOT.LoadMacro("HelperFunctions.h")
@@ -30,7 +32,7 @@ hname = "BDT"
 etc = ("; BDT; (normalized)", 100, -1, 0.4)
 
 #_______________________________________________________________________________
-for ih in xrange(3):
+for ih in xrange(2,3):
     h1 = TH1F("h1_%i" % ih, etc[0], etc[1], etc[2], etc[3])
     h2 = TH1F("h2_%i" % ih, etc[0], etc[1], etc[2], etc[3])
     h3 = TH1F("h3_%i" % ih, etc[0], etc[1], etc[2], etc[3])
@@ -52,7 +54,7 @@ for ih in xrange(3):
         t2 = tfile2.tree_ZnunuLowPt_train
     
     t1.Project("h1_%i" % ih, varexp, selection)
-    t2.Project("h2_%i" % ih, varexp, selection)
+    t2.Project("h2_%i" % ih, varexp, selection2)
     
     if ih == 0:
         t1 = tfile1.tree_ZnunuHighPt_test
@@ -65,23 +67,31 @@ for ih in xrange(3):
         t2 = tfile2.tree_ZnunuLowPt_test
     
     t1.Project("+h1_%i" % ih, varexp, selection)
-    t2.Project("+h2_%i" % ih, varexp, selection)
+    t2.Project("+h2_%i" % ih, varexp, selection2)
 
-    h1.Scale(1.0/h1.Integral())
-    h2.Scale(1.0/h2.Integral())
-    h1.SetMaximum(h1.GetMaximum()*1.4)
+    if h1.Integral()>0:  h1.Scale(1.0/h1.Integral())
+    #if h2.Integral()>0:  h2.Scale(1.0/h2.Integral())
+    if h2.Integral()>0:  h2.Scale(0.13/h2.Integral())
+    if h1.Integral()>0:
+        h1.SetMaximum(max(h1.GetMaximum(),h2.GetMaximum())*1.3)
+    else:
+        h1.SetMaximum(h2.GetMaximum()*1.3)
     h1.Draw("hist")
     h2.Draw("samehist")
     #h3.Draw("samehist")
     
     latex.DrawLatex(0.19, 0.90, "Full BDT selection")
-    latex.DrawLatex(0.19, 0.85, "#color[1]{FullSim}")
-    latex.DrawLatex(0.19, 0.80, "#color[4]{Smear/Histo}")
-    latex.DrawLatex(0.42, 0.85, "#color[1]{#mu=%.3f, #sigma=%.3f}" % (h1.GetMean(), h1.GetRMS()))
-    latex.DrawLatex(0.42, 0.80, "#color[4]{#mu=%.3f, #sigma=%.3f}" % (h2.GetMean(), h2.GetRMS()))
+    #latex.DrawLatex(0.19, 0.85, "#color[1]{FullSim}")
+    #latex.DrawLatex(0.19, 0.80, "#color[4]{Smear/Histo}")
+    latex.DrawLatex(0.19, 0.85, "#color[1]{FullSim QCD}")
+    latex.DrawLatex(0.19, 0.80, "#color[4]{Smear/Histo DYJets}")
+    latex.DrawLatex(0.50, 0.85, "#color[1]{#mu=%.3f, #sigma=%.3f}" % (h1.GetMean(), h1.GetRMS()))
+    latex.DrawLatex(0.50, 0.80, "#color[4]{#mu=%.3f, #sigma=%.3f}" % (h2.GetMean(), h2.GetRMS()))
     kolprob = h1.KolmogorovTest(h2)
     latex.DrawLatex(0.19, 0.75, "#color[2]{K_{s} = %.3f}" % kolprob)
-    gPad.Print("plots_zmmtozbb/zmmtozbb_compare_ZbbHinv_%s_%i.png" % (hname, ih))
-    gPad.Print("plots_zmmtozbb/zmmtozbb_compare_ZbbHinv_%s_%i.pdf" % (hname, ih))
+    #gPad.Print("plots_zmmtozbb/zmmtozbb_compare_ZbbHinv_%s_%i.png" % (hname, ih))
+    #gPad.Print("plots_zmmtozbb/zmmtozbb_compare_ZbbHinv_%s_%i.pdf" % (hname, ih))
+    gPad.Print("plots_zmmtozbb/zmmtozbb_compare_DYJets_%s_%i.png" % (hname, ih))
+    gPad.Print("plots_zmmtozbb/zmmtozbb_compare_DYJets_%s_%i.pdf" % (hname, ih))
     
     if wait:  raw_input("Press Enter to continue...")

@@ -350,7 +350,7 @@ void GrowTreeZmmToZbb(TString process, std::string regMethod="BDTG", Long64_t be
     METInfo METtype1corr;
     METInfo METtype1diff;
     genParticleInfo genB, genBbar;
-    int Vtype, nPVs;
+    int Vtype, VtypeWithTau, nPVs;
     int nhJets, naJets;
     float hJet_pt[2], hJet_eta[2], hJet_phi[2], hJet_e[2], hJet_ptRaw[2], 
         hJet_csv[2], hJet_csv_nominal[2], hJet_genPt[2], hJet_genEta[2], hJet_genPhi[2], hJet_flavour[2], hJet_JECUnc[2], hJet_puJetIdL[2];
@@ -383,6 +383,7 @@ void GrowTreeZmmToZbb(TString process, std::string regMethod="BDTG", Long64_t be
     inTree->SetBranchAddress("genB", &genB);
     inTree->SetBranchAddress("genBbar", &genBbar);
     inTree->SetBranchAddress("Vtype", &Vtype);
+    inTree->SetBranchAddress("VtypeWithTau", &VtypeWithTau);
     inTree->SetBranchAddress("nPVs", &nPVs);
     inTree->SetBranchAddress("nhJets", &nhJets);
     inTree->SetBranchAddress("naJets", &naJets);
@@ -1090,6 +1091,7 @@ void GrowTreeZmmToZbb(TString process, std::string regMethod="BDTG", Long64_t be
         for (Int_t ihj = 0; ihj < 2; ihj++) {
             TLorentzVector vLepton_p4(0,0,0,0);
             vLepton_p4.SetPtEtaPhiM(vLepton_pt[ihj], vLepton_eta[ihj], vLepton_phi[ihj], vLepton_mass[ihj]);
+            assert(vLepton_p4.M() > 0.);
             
             unsigned int genzptbin  = findTuple(genzptbins, 500);  // N.B. not used
             unsigned int genptbin   = findTuple(genptbins, vLepton_p4.Pt());
@@ -1117,6 +1119,7 @@ void GrowTreeZmmToZbb(TString process, std::string regMethod="BDTG", Long64_t be
             double smearphi         = vLepton_p4.Phi() * TMath::Max(double(0.), rand2->Gaus(1.0, 0.015));  // 1.5% resolution
             double smearmass        = vLepton_p4.Pt()  * 0.5 * 0.2 * TMath::Max(double(0.), rand2->Gaus(1.0, 0.020));  // <M^2> ~ C * pt**2 * R**2, use C = 0.2**2 here
             hJet_p4.SetPtEtaPhiM(smearpt, smeareta, smearphi, smearmass);
+            assert(hJet_p4.M() > 0.);
             
             hJet_pt[ihj]            = hJet_p4.Pt();
             hJet_ptReg[ihj]         = smearptReg;
@@ -1151,6 +1154,9 @@ void GrowTreeZmmToZbb(TString process, std::string regMethod="BDTG", Long64_t be
             hJet_ptReg_res_j_down[ihj]   = smear_pt_resErr(hJet_ptReg[ihj], hJet_genPt[ihj], hJet_eta[ihj], false);
             hJet_ptReg_scale_j_up[ihj]   = smear_pt_scaleErr(hJet_ptReg[ihj], hJet_JECUnc[ihj], true);
             hJet_ptReg_scale_j_down[ihj] = smear_pt_scaleErr(hJet_ptReg[ihj], hJet_JECUnc[ihj], false);
+            
+            hJet_puJetIdL[ihj] = 1;
+            hJet_id[ihj] = true;
             
             // For MET patching
             if (hJet_pt_before[ihj]>0) {  // if it's not -99, use hJet
@@ -1191,6 +1197,9 @@ void GrowTreeZmmToZbb(TString process, std::string regMethod="BDTG", Long64_t be
         hJet1_p4_ZmmToZbb_before.SetPtEtaPhiE(hJet_pt_before[0], hJet_eta_before[0], hJet_phi_before[0], hJet_e_before[0]);  // for debugging
         hJet2_p4_ZmmToZbb_before.SetPtEtaPhiE(hJet_pt_before[1], hJet_eta_before[1], hJet_phi_before[1], hJet_e_before[1]);  // for debugging
         const TLorentzVector H_p4_ZmmToZbb_before = hJet1_p4_ZmmToZbb_before + hJet2_p4_ZmmToZbb_before;  // for debugging
+        
+        Vtype = 4;
+        VtypeWithTau = 4;
         H.HiggsFlag = true;
         H.pt = H_p4_ZmmToZbb.Pt();
         H.dEta = fabs(hJet1_p4_ZmmToZbb.Eta() - hJet2_p4_ZmmToZbb.Eta());
