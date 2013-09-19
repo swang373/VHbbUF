@@ -1,20 +1,20 @@
 echo "*** ZnunuHighPt ***" >! M1.log
-combine -M MaxLikelihoodFit -m 125 --robustFit=1 --stepSize=0.05 --rMin=-5 --rMax=5 --saveNorm vhbb_Znn_J14_bbb_ZnunuHighPt_8TeV.txt >> M1.log
+combine -M MaxLikelihoodFit -m 125 --robustFit=1 --stepSize=0.05 --rMin=-5 --rMax=5 --saveNorm zhinv_Zbb_J14_bbb_ZnunuHighPt_8TeV.txt >> M1.log
 cp mlfit.root mlfit_ZnunuHighPt.root
 echo "*** ZnunuMedPt  ***" >! M2.log
-combine -M MaxLikelihoodFit -m 125 --robustFit=1 --stepSize=0.05 --rMin=-5 --rMax=5 --saveNorm vhbb_Znn_J14_bbb_ZnunuMedPt_8TeV.txt >> M2.log
+combine -M MaxLikelihoodFit -m 125 --robustFit=1 --stepSize=0.05 --rMin=-5 --rMax=5 --saveNorm zhinv_Zbb_J14_bbb_ZnunuMedPt_8TeV.txt >> M2.log
 cp mlfit.root mlfit_ZnunuMedPt.root
 echo "*** ZnunuLowPt  ***" >! M3.log
-combine -M MaxLikelihoodFit -m 125 --robustFit=1 --stepSize=0.05 --rMin=-5 --rMax=5 --saveNorm vhbb_Znn_J14_bbb_ZnunuLowPt_8TeV.txt >> M3.log
+combine -M MaxLikelihoodFit -m 125 --robustFit=1 --stepSize=0.05 --rMin=-5 --rMax=5 --saveNorm zhinv_Zbb_J14_bbb_ZnunuLowPt_8TeV.txt >> M3.log
 cp mlfit.root mlfit_ZnunuLowPt.root
 #echo "*** ZnunuLowCSV ***" >! M4.log
-#combine -M MaxLikelihoodFit -m 125 --robustFit=1 --stepSize=0.05 --rMin=-5 --rMax=5 --saveNorm vhbb_Znn_J14_bbb_ZnunuLowCSV_8TeV.txt >> M4.log
+#combine -M MaxLikelihoodFit -m 125 --robustFit=1 --stepSize=0.05 --rMin=-5 --rMax=5 --saveNorm zhinv_Zbb_J14_bbb_ZnunuLowCSV_8TeV.txt >> M4.log
 #cp mlfit.root mlfit_ZnunuLowCSV.root
 echo "*** combo       ***" >! M5.log
-combine -M MaxLikelihoodFit -m 125 --robustFit=1 --stepSize=0.05 --rMin=-5 --rMax=5 --saveNorm vhbb_Znn_J14_bbb_combo_8TeV.txt >> M5.log
+combine -M MaxLikelihoodFit -m 125 --robustFit=1 --stepSize=0.05 --rMin=-5 --rMax=5 --saveNorm zhinv_Zbb_J14_bbb_combo_8TeV.txt >> M5.log
 cp mlfit.root mlfit_combo.root
 echo "*** combo2      ***" >! M6.log
-combine -M MaxLikelihoodFit -m 125 --robustFit=1 --stepSize=0.05 --rMin=-5 --rMax=5 --saveNorm vhbb_Znn_J14_bbb_combo2_8TeV.txt >> M6.log
+combine -M MaxLikelihoodFit -m 125 --robustFit=1 --stepSize=0.05 --rMin=-5 --rMax=5 --saveNorm zhinv_Zbb_J14_bbb_combo2_8TeV.txt >> M6.log
 cp mlfit.root mlfit_combo2.root
 
 cat M1.log M2.log M3.log M5.log M6.log

@@ -19,8 +19,8 @@ observeprofi = "run_observeprofilelikelihoodJ14_bbb.csh"
 observemaxli = "run_observemaxlikelihoodJ14_bbb.csh"
 injectsignal = "run_injectsignalJ14_bbb.csh"
 
-outdir = "res_20130809/"
-afsdir = "/afs/cern.ch/user/j/jiafulow/public/zhinv_20130809/Zbb/"
+outdir = "res_20130906/"
+afsdir = "/afs/cern.ch/user/j/jiafulow/public/zhinv_20130906/Zbb/"
 
 #------------------------------------------------------------------------------
 
@@ -57,9 +57,9 @@ def make(var, analysis, data):
         new = "#define MJJANALYSIS"
         subprocess.call(["sed", "-i", "s@%s@%s@" % (old, new), newmacro1+".C"])
         subprocess.call(["sed", "-i", "s@%s@%s@" % (old, new), newmacro2+".C"])        
-        old = "Step4_20130404/reload_20130722/"  # check this
-        new = "Step4_20130404/stitch/"
-        subprocess.call(["sed", "-i", "s@%s@%s@" % (old, new), newmacro1+".C"])
+        #old = "Step4_20130404/reload_20130722/"  # check this
+        #new = "Step4_20130404/stitch/"
+        #subprocess.call(["sed", "-i", "s@%s@%s@" % (old, new), newmacro1+".C"])
     
     elif var == "mBDT":
         arg = "500,100"
@@ -103,6 +103,11 @@ def make(var, analysis, data):
         new = "ZbbHinv%i" % massH
         subprocess.call(["sed", "-i", "s@%s@%s@g" % (old, new), newmacro1+".C"])
         
+        old = "//#define HZZ2L2VNAMES"
+        new = "#define HZZ2L2VNAMES"
+        subprocess.call(["sed", "-i", "s@%s@%s@g" % (old, new), newmacro1+".C"])
+        subprocess.call(["sed", "-i", "s@%s@%s@g" % (old, new), newmacro2+".C"])
+
         old = "zh1252lmet"
         new = "zh%i2lmet" % massH
         subprocess.call(["sed", "-i", "s@%s@%s@g" % (old, new), newmacro1+".C"])
@@ -123,13 +128,13 @@ def make(var, analysis, data):
     p2 = subprocess.Popen(["root", "-b", "-l", "-q", "%s+(%s)" % (newmacro2+".C", "\"injectsignal\"")], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     output = p2.communicate()
     #print output[1]
-    subprocess.call("cp vhbb_Znn_SI_J14_bbb_Znunu*Pt_8TeV.txt vhbb_Znn_SI_J14_8TeV.root " + outsubdir, shell=True)  # use shell for wildcard expansion
+    subprocess.call("cp zhinv_Zbb_SI_J14_bbb_Znunu*Pt_8TeV.txt zhinv_Zbb_SI_J14_8TeV.root " + outsubdir, shell=True)  # use shell for wildcard expansion
     
     # Default
     p3 = subprocess.Popen(["root", "-b", "-l", "-q", "%s+(%s)" % (newmacro2+".C", "")], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     output = p3.communicate()
     #print output[1]
-    subprocess.call("cp vhbb_Znn_J14_bbb_Znunu*Pt_8TeV.txt vhbb_Znn_J14_8TeV.root vhbb_Znn_J14_Znunu*Pt_TH1.* diffNuisances.py " + outsubdir, shell=True)  # use shell for wildcard expansion
+    subprocess.call("cp zhinv_Zbb_J14_bbb_Znunu*Pt_8TeV.txt zhinv_Zbb_J14_8TeV.root zhinv_Zbb_J14_Znunu*Pt_TH1.* diffNuisances.py " + outsubdir, shell=True)  # use shell for wildcard expansion
     subprocess.call(("cp %s " + outsubdir) % (" ".join([combinecards, combineasymp, combineprofi, combinemaxli, observeasymp, observeprofi, observemaxli, injectsignal])), shell=True)
 
     # Keep .pdf files
@@ -172,16 +177,17 @@ def numeri(var, analysis, data):
     #print output[0]
     
     # Make copies
-    subprocess.call("cp vhbb_Znn_J14_bbb_combo_8TeV.txt vhbb_Znn_J14_combo_8TeV.txt", shell=True)
-    subprocess.call("cp vhbb_Znn_SI_J14_bbb_combo_8TeV.txt vhbb_Znn_SI_J14_combo_8TeV.txt", shell=True)
+    subprocess.call("cp zhinv_Zbb_J14_bbb_combo_8TeV.txt zhinv_Zbb_J14_combo_8TeV.txt", shell=True)
+    subprocess.call("cp zhinv_Zbb_SI_J14_bbb_combo_8TeV.txt zhinv_Zbb_SI_J14_combo_8TeV.txt", shell=True)
     # Unblinded
-    #subprocess.call("cp A5.log asymp.log", shell=True)
-    #subprocess.call("cat P5.log p5.log > profi.log", shell=True)
-    #subprocess.call("cp M5.log maxli.log", shell=True)
+    subprocess.call("cp A5.log asymp.log", shell=True)
+    subprocess.call("cat P5.log p5.log > profi.log", shell=True)
+    subprocess.call("cp M5.log maxli.log", shell=True)
     # Blinded
-    subprocess.call("cp a5.log asymp.log", shell=True)
-    subprocess.call("cp p5.log profi.log", shell=True)
-    subprocess.call("cp m5.log maxli.log", shell=True)
+    #subprocess.call("cp a5.log asymp.log", shell=True)
+    #subprocess.call("cp p5.log profi.log", shell=True)
+    #subprocess.call("cp m5.log maxli.log", shell=True)
+
     subprocess.call("cp N1.html nuisances_ZnunuHighPt.html", shell=True)
     subprocess.call("cp N6.html nuisances_combo2.html", shell=True)
     subprocess.call("cp N5.html nuisances_combo.html", shell=True)
@@ -247,8 +253,8 @@ def transfer(outdir, afsdir):
             if path1.count('/') != 2:  continue
             writeme_.append("mkdir -p " + path2)
             writeme_.append("cd " + path1)
-            writeme_.append("cp vhbb_Znn_J14_bbb_Znunu*Pt_8TeV.txt vhbb_Znn_J14_bbb_combo_8TeV.txt vhbb_Znn_J14_8TeV.root vhbb_Znn_J14_Znunu*Pt_TH1.* vhbb_Znn_J14_combo_8TeV.txt asymp.log profi.log maxli.log nuisances*.html " + path2)
-            writeme_.append("cp vhbb_Znn_SI_J14_* " + path2)
+            writeme_.append("cp zhinv_Zbb_J14_bbb_Znunu*Pt_8TeV.txt zhinv_Zbb_J14_bbb_combo_8TeV.txt zhinv_Zbb_J14_8TeV.root zhinv_Zbb_J14_Znunu*Pt_TH1.* zhinv_Zbb_J14_combo_8TeV.txt asymp.log profi.log maxli.log nuisances*.html " + path2)
+            writeme_.append("cp zhinv_Zbb_SI_J14_* " + path2)
             writeme_.append("cd -")
     writeme = "\n".join(writeme_)
     with open("afstransfer_"+outdir.strip("/")+".csh", "w") as f:

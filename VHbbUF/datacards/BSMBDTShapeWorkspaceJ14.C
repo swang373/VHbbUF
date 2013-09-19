@@ -39,7 +39,7 @@ const int    g_downcol      = TColor::GetColor("#0033FF");
 #ifndef MJJANALYSIS
 const double g_xlow         = -1.;
 const double g_xup          =  1.;
-const TString g_realvarname = "CMS_vhbb_BDT_$CHANNEL_8TeV";  // $CHANNEL is replaced in MakeWorkSpace()
+const TString g_realvarname = "zhinv_Zbb_BDT_$CHANNEL_8TeV";  // $CHANNEL is replaced in MakeWorkSpace()
 #else
 //const double g_xlow         =   0.;
 //const double g_xup          = 255.;
@@ -49,14 +49,14 @@ const double g_xlow         = 200.;
 const double g_xup          = 600.;
 //const double g_xlow         = 260.;
 //const double g_xup          = 860.;
-const TString g_realvarname = "CMS_vhbb_MJJ_$CHANNEL_8TeV";  // $CHANNEL is replaced in MakeWorkSpace()
+const TString g_realvarname = "zhinv_Zbb_MJJ_$CHANNEL_8TeV";  // $CHANNEL is replaced in MakeWorkSpace()
 #endif
-const TString g_wsname      = "vhbb_Znn_J14_8TeV.root";
-//const TString g_wsname      = "vhbb_Znn_J14_$CHANNEL_8TeV.root";
-const TString g_dcname      = "vhbb_Znn_J14_$CHANNEL_8TeV.txt";
-const TString g_dcbbbname   = "vhbb_Znn_J14_bbb_$CHANNEL_8TeV.txt";
-const TString g_rootname    = "vhbb_Znn_J14_$CHANNEL_TH1.root";
-const TString g_pdfname     = "vhbb_Znn_J14_$CHANNEL_TH1.pdf";
+const TString g_wsname      = "zhinv_Zbb_8TeV.root";
+//const TString g_wsname      = "zhinv_Zbb_$CHANNEL_8TeV.root";
+const TString g_dcname      = "zhinv_Zbb_J14_$CHANNEL_8TeV.txt";
+const TString g_dcbbbname   = "zhinv_Zbb_J14_bbb_$CHANNEL_8TeV.txt";
+const TString g_rootname    = "zhinv_Zbb_J14_$CHANNEL_TH1.root";
+const TString g_pdfname     = "zhinv_Zbb_J14_$CHANNEL_TH1.pdf";
 
 const int jmax              = 14;  // as in datacard
 const int nsyst             = 1 + 2 * 7 + 2 * 6;  // plus stat, WJModel, ZJModel, TTModel, WJSlope, ZJSlope
@@ -112,7 +112,6 @@ const TString g_systematics[nsyst] = {
 ////////////////////////////////////////////////////////////////////////////////
 
 using namespace RooFit;
-
 
 void MakeSystPlot(const TString& channel, TFile * input, RooWorkspace * ws, const RooArgList * obs, 
                   const Int_t p, const Int_t up, const Int_t down)
@@ -320,7 +319,7 @@ void MakeSystPlot(const TString& channel, TFile * input, RooWorkspace * ws, cons
     }
     
     /// Empty systUp and systDown bins when a norminal bin has zero content
-    bool treatEmptyBins = true;
+    bool treatEmptyBins = false;
     if (treatEmptyBins) {
         UInt_t nbins = h->GetNbinsX();
         for (UInt_t ibin=1; ibin<nbins+1; ibin++) {
@@ -335,8 +334,7 @@ void MakeSystPlot(const TString& channel, TFile * input, RooWorkspace * ws, cons
                 hDown->SetBinContent(ibin, h->GetBinContent(ibin));
             }
         }
-    }
-
+    }    
 
     /// Name changes
     // Decorrelate eff_b and eff_b_SIG
@@ -401,8 +399,9 @@ void MakeSystPlot(const TString& channel, TFile * input, RooWorkspace * ws, cons
         TH1F * h_statUp(0);
         TH1F * h_statDown(0);
         UInt_t nbins = h->GetNbinsX();
-        double errorf = 0.35;
-        UInt_t nedgebins = TMath::Min(0.25 * nbins, 7.);  // decide who are the edge bins
+        //double errorf = 0.26;
+        double errorf = 0.30;
+        UInt_t nedgebins = TMath::Min(0.4 * nbins, 8.);  // decide who are the edge bins
         for (UInt_t ibin=1; ibin<nbins+1; ibin++) {
 
 #ifndef MJJANALYSIS
@@ -434,8 +433,7 @@ void MakeSystPlot(const TString& channel, TFile * input, RooWorkspace * ws, cons
                 if (process == "QCD") {
                     if (binerror/bincontent > errorf)  // error is already inflated
                         pass = true;
-                } else if (process == "Wj0b" || process == "Zj0b" || process == "VVLF" || 
-                           process == "Wj1b" || process == "Zj1b" ||
+                } else if (process == "Wj0b" || process == "Zj0b" || 
                            process == "s_Top") {  // include less from processes that don't contribute to the last bin
                     if (binerror/bincontent > errorf * 2)
                         pass = true;
@@ -447,9 +445,8 @@ void MakeSystPlot(const TString& channel, TFile * input, RooWorkspace * ws, cons
                 /// Always true for Mjj in 105-150 GeV
                 //if (ibin >= h->FindFixBin(105+1) && ibin <= h->FindFixBin(150-1))
                 //    pass = true;
-                /// Always true for mT > 300 GeV
-                if(ibin >= h->FindFixBin(300))
-                    pass = true;
+                /// Always true for mT
+                pass = true;
 #endif
                 
                 if (pass) {
@@ -588,6 +585,7 @@ void MakeWorkspace(const TString& channel, const TString& strategy)
 
     // Import data_obs
     RooDataHist * dh = new RooDataHist("data_obs", "", *obs, h);
+    realvar->setBins(h->GetNbinsX());
     ws->import(*dh);
 
     // Put the data_obs integral into the datacard
@@ -596,7 +594,7 @@ void MakeWorkspace(const TString& channel, const TString& strategy)
     delete dh;
     delete h;
 
-    // no systematics
+    // nominal
     for (Int_t p=0; p < jmax+1; p++) {
         const TString& process = g_processes[p];
         h = (TH1F *) input->Get(channel + "/" + process);
@@ -612,7 +610,7 @@ void MakeWorkspace(const TString& channel, const TString& strategy)
     c1->Print(pdfname+"[");
     for (Int_t p=0; p < jmax+1; p++) {
         for (Int_t s=1; s < nsyst; s+=2) {
-            MakeSystPlot(channel, input, ws, obs, p, s, s+1);
+            MakeSystPlot(channel, input, ws, obs, p, s, s+1);  // up and down at the same time
         }
     }
     c1->Print(pdfname+"]");
@@ -632,7 +630,7 @@ void MakeWorkspace(const TString& channel, const TString& strategy)
 ////////////////////////////////////////////////////////////////////////////////
 /// Main                                                                     ///
 ////////////////////////////////////////////////////////////////////////////////
-void BSMBDTShapeWorkspaceJ14(TString strategy="blind", int randomseed=0)  /// strategy: either one of "obs", "blind", "injectsignal", "toy"
+void BSMBDTShapeWorkspaceJ14(TString strategy="obs", int randomseed=0)  /// strategy: either one of "obs", "blind", "injectsignal", "toy"
 {
     gROOT->LoadMacro("tdrstyle.C");
     gROOT->ProcessLine("setTDRStyle()");
@@ -664,7 +662,7 @@ void BSMBDTShapeWorkspaceJ14(TString strategy="blind", int randomseed=0)  /// st
     if (strategy == "injectsignal") {
         TString wsname       = g_wsname;
         TString wsnameSI     = wsname;
-        wsnameSI    .ReplaceAll("vhbb_Znn_", "vhbb_Znn_SI_");
+        wsnameSI    .ReplaceAll("zhinv_Zbb_", "zhinv_Zbb_SI_");
         gSystem->Exec("cp " + wsname + " " + wsnameSI);
         
         for (UInt_t ichan = 0; ichan < channels.size(); ichan++) {
@@ -672,7 +670,7 @@ void BSMBDTShapeWorkspaceJ14(TString strategy="blind", int randomseed=0)  /// st
             TString dcname       = g_dcname;
             dcname      .ReplaceAll("$CHANNEL", channel);
             TString dcnameSI     = dcname;
-            dcnameSI    .ReplaceAll("vhbb_Znn_", "vhbb_Znn_SI_");
+            dcnameSI    .ReplaceAll("zhinv_Zbb_", "zhinv_Zbb_SI_");
             gSystem->Exec("cp " + dcname + " " + dcnameSI);
             gSystem->Exec(Form("sed -i 's/%s/%s/' %s ", wsname.Data(), wsnameSI.Data(), dcnameSI.Data()));
             
@@ -680,7 +678,7 @@ void BSMBDTShapeWorkspaceJ14(TString strategy="blind", int randomseed=0)  /// st
             TString dcbbbname    = g_dcbbbname;
             dcbbbname   .ReplaceAll("$CHANNEL", channel);
             TString dcbbbnameSI  = dcbbbname;
-            dcbbbnameSI .ReplaceAll("vhbb_Znn_", "vhbb_Znn_SI_");
+            dcbbbnameSI .ReplaceAll("zhinv_Zbb_", "zhinv_Zbb_SI_");
             gSystem->Exec("cp " + dcbbbname + " " + dcbbbnameSI);
             gSystem->Exec(Form("sed -i 's/%s/%s/' %s ", wsname.Data(), wsnameSI.Data(), dcbbbnameSI.Data()));
 #endif  // STATBINBYBIN

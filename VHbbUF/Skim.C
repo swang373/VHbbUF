@@ -38,28 +38,22 @@ void Skim(TString process="ZnnH125")
 
     // ZbbHinv
     if (process == "ZbbHinv105") {
-        //fname = "dcache:/pnfs/cms/WAX/11/store/user/lpchbb/degrutto/ZH_ZToBB_HToInv_M-105_8TeV_pythia6/Summer12_DR53X-PU_S10_START53_V7C-v1/degrutto/ZH_ZToBB_HToInv_M-105_8TeV_pythia6/ZH_ZToBB_HToInv_M-105_8TeV_pythia6_Summer12_DR53X-PU_S10_START53_V7C-v1.root";
-        fname = "/uscms_data/d3/degrutto/CMSSW_5_3_3_patch2/src/VHbbAnalysis/VHbbDataFormats/bin/ZH_ZToBB_HToInv_M-105_8TeV_pythia6_Summer12_DR53X-PU_S10_START53_V7C-v1.root";
+        fname = dirMC + dijet + "ZH_ZToBB_HToInv_M-105_8TeV_pythia6" + suffix;
         chain->Add(fname);
     } else if (process == "ZbbHinv115") {
-        //fname = "dcache:/pnfs/cms/WAX/11/store/user/lpchbb/degrutto/ZH_ZToBB_HToInv_M-115_8TeV_pythia6/Summer12_DR53X-PU_S10_START53_V7C-v1/degrutto/ZH_ZToBB_HToInv_M-115_8TeV_pythia6/ZH_ZToBB_HToInv_M-115_8TeV_pythia6_Summer12_DR53X-PU_S10_START53_V7C-v1.root";
-        fname = "/uscms_data/d3/degrutto/CMSSW_5_3_3_patch2/src/VHbbAnalysis/VHbbDataFormats/bin/ZH_ZToBB_HToInv_M-115_8TeV_pythia6_Summer12_DR53X-PU_S10_START53_V7C-v1.root";
+        fname = dirMC + dijet + "ZH_ZToBB_HToInv_M-115_8TeV_pythia6" + suffix;
         chain->Add(fname);
     } else if (process == "ZbbHinv125") {
-        //fname = "dcache:/pnfs/cms/WAX/11/store/user/lpchbb/degrutto/ZH_ZToBB_HToInv_M-125_8TeV_pythia6/Summer12_DR53X-PU_S10_START53_V7C-v1/degrutto/ZH_ZToBB_HToInv_M-125_8TeV_pythia6/ZH_ZToBB_HToInv_M-125_8TeV_pythia6_Summer12_DR53X-PU_S10_START53_V7C-v1.root";
-        fname = "/uscms_data/d3/degrutto/CMSSW_5_3_3_patch2/src/VHbbAnalysis/VHbbDataFormats/bin/ZH_ZToBB_HToInv_M-125_8TeV_pythia6_Summer12_DR53X-PU_S10_START53_V7C-v1.root";
+        fname = dirMC + dijet + "ZH_ZToBB_HToInv_M-125_8TeV_pythia6" + suffix;
         chain->Add(fname);
     } else if (process == "ZbbHinv135") {
-        //fname = "dcache:/pnfs/cms/WAX/11/store/user/lpchbb/degrutto/ZH_ZToBB_HToInv_M-135_8TeV_pythia6/Summer12_DR53X-PU_S10_START53_V7C-v1/degrutto/ZH_ZToBB_HToInv_M-135_8TeV_pythia6/ZH_ZToBB_HToInv_M-135_8TeV_pythia6_Summer12_DR53X-PU_S10_START53_V7C-v1.root";
-        fname = "/uscms_data/d3/degrutto/CMSSW_5_3_3_patch2/src/VHbbAnalysis/VHbbDataFormats/bin/ZH_ZToBB_HToInv_M-135_8TeV_pythia6_Summer12_DR53X-PU_S10_START53_V7C-v1.root";
+        fname = dirMC + dijet + "ZH_ZToBB_HToInv_M-135_8TeV_pythia6" + suffix;
         chain->Add(fname);
     } else if (process == "ZbbHinv145") {
-        //fname = "dcache:/pnfs/cms/WAX/11/store/user/lpchbb/degrutto/ZH_ZToBB_HToInv_M-145_8TeV_pythia6/Summer12_DR53X-PU_S10_START53_V7C-v1/degrutto/ZH_ZToBB_HToInv_M-145_8TeV_pythia6/ZH_ZToBB_HToInv_M-145_8TeV_pythia6_Summer12_DR53X-PU_S10_START53_V7C-v1.root";
-        fname = "/uscms_data/d3/degrutto/CMSSW_5_3_3_patch2/src/VHbbAnalysis/VHbbDataFormats/bin/ZH_ZToBB_HToInv_M-145_8TeV_pythia6_Summer12_DR53X-PU_S10_START53_V7C-v1.root";
+        fname = dirMC + dijet + "ZH_ZToBB_HToInv_M-145_8TeV_pythia6" + suffix;
         chain->Add(fname);
     } else if (process == "ZbbHinv150") {
-        //fname = "dcache:/pnfs/cms/WAX/11/store/user/lpchbb/degrutto/ZH_ZToBB_HToInv_M-150_8TeV_pythia6/Summer12_DR53X-PU_S10_START53_V7C-v1/degrutto/ZH_ZToBB_HToInv_M-150_8TeV_pythia6/ZH_ZToBB_HToInv_M-150_8TeV_pythia6_Summer12_DR53X-PU_S10_START53_V7C-v1.root";
-        fname = "/uscms_data/d3/degrutto/CMSSW_5_3_3_patch2/src/VHbbAnalysis/VHbbDataFormats/bin/ZH_ZToBB_HToInv_M-150_8TeV_pythia6_Summer12_DR53X-PU_S10_START53_V7C-v1.root";
+        fname = dirMC + dijet + "ZH_ZToBB_HToInv_M-150_8TeV_pythia6" + suffix;
         chain->Add(fname);
 
     // ZnnH

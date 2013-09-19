@@ -9,7 +9,7 @@ from math import sqrt
 # import ROOT without screwing up argv (http://mike-is-a-geek.blogspot.com/2011/03/python-pyroot-optparse.html)
 tmpargv = sys.argv[:]  # [:] for a copy, not reference
 sys.argv = []
-from ROOT import TFile, TH1, TH1F, TColor, TCanvas, TPad, TLegend, THStack, TLatex, TPaveText, RooFit, RooAbsData, gROOT, gPad
+from ROOT import TFile, TH1, TH1F, TColor, TCanvas, TPad, TLegend, THStack, TLatex, TPaveText, TLine, RooFit, RooAbsData, gROOT, gPad
 sys.argv = tmpargv
 
 gROOT.ProcessLine(".L tdrstyle.C")
@@ -241,7 +241,7 @@ def read_mlfit(nuisances, options):
 
 # Order to add histogram to THStack
 orders_b = ["ZmmHighPt_8TeV", "ZmmLowPt_8TeV", "ZeeHighPt_8TeV", "ZeeLowPt_8TeV", "WmnHighPt_8TeV", "WmnLowPt_8TeV", "WenHighPt_8TeV", "WenLowPt_8TeV", "ZnunuHighPt_8TeV", "ZnunuMedPt_8TeV", "ZnunuLowPt_8TeV"]
-orders_p = ["ZH", "WH", "Wj0b", "Wj1b", "Wj2b", "WjLF", "WjHF", "Zj0b", "Zj1b", "Zj2b", "ZjLF", "ZjHF", "TT", "s_Top", "VVLF", "VVHF", "QCD"]
+orders_p = ["ZH", "WH", "ZH_SM", "WH_SM", "ZbbHinv", "Wj0b", "Wj1b", "Wj2b", "WjLF", "WjHF", "Zj0b", "Zj1b", "Zj2b", "ZjLF", "ZjHF", "TT", "s_Top", "VVLF", "VVHF", "WZHF", "ZZHF", "WZ", "ZZ", "QCD"]
 
 def get_postfit(nuisances, options):
     TH1.SetDefaultSumw2(1)
@@ -379,13 +379,15 @@ def MakePlots(varname, whatfit, options):
     kRed     = 632
     kYellow  = 400
     kBlue    = 600
+    kGray    = 920
     
     if options.doMJJ:
         plotLog = False
     
     tfile = TFile.Open(options.outname, "READ")
-    hZH        = tfile.Get(varname+"_"+"ZH"+"_%s" % whatfit)
-    hWH        = tfile.Get(varname+"_"+"WH"+"_%s" % whatfit)
+    hZH        = tfile.Get(varname+"_"+"ZH_SM"+"_%s" % whatfit)
+    hWH        = tfile.Get(varname+"_"+"WH_SM"+"_%s" % whatfit)
+    hZbbHinv   = tfile.Get(varname+"_"+"ZH"+"_%s" % whatfit)
     hWj0b      = tfile.Get(varname+"_"+"Wj0b"+"_%s" % whatfit)
     hWj1b      = tfile.Get(varname+"_"+"Wj1b"+"_%s" % whatfit)
     hWj2b      = tfile.Get(varname+"_"+"Wj2b"+"_%s" % whatfit)
@@ -395,12 +397,14 @@ def MakePlots(varname, whatfit, options):
     hTT        = tfile.Get(varname+"_"+"TT"+"_%s" % whatfit)
     hs_Top     = tfile.Get(varname+"_"+"s_Top"+"_%s" % whatfit)
     hVVLF      = tfile.Get(varname+"_"+"VVLF"+"_%s" % whatfit)
-    hVVHF      = tfile.Get(varname+"_"+"VVHF"+"_%s" % whatfit)
+    hWZHF      = tfile.Get(varname+"_"+"WZ"+"_%s" % whatfit)
+    hZZHF      = tfile.Get(varname+"_"+"ZZ"+"_%s" % whatfit)
     hQCD       = tfile.Get(varname+"_"+"QCD"+"_%s" % whatfit)
     hdata_obs  = tfile.Get(varname+"_"+"data_obs")
     
-    eZH        = tfile.Get(varname+"_"+"ZH"+"_err%s" % whatfit)
-    eWH        = tfile.Get(varname+"_"+"WH"+"_err%s" % whatfit)
+    eZH        = tfile.Get(varname+"_"+"ZH_SM"+"_err%s" % whatfit)
+    eWH        = tfile.Get(varname+"_"+"WH_SM"+"_err%s" % whatfit)
+    eZbbHinv   = tfile.Get(varname+"_"+"ZbbHinv"+"_err%s" % whatfit)
     eWj0b      = tfile.Get(varname+"_"+"Wj0b"+"_err%s" % whatfit)
     eWj1b      = tfile.Get(varname+"_"+"Wj1b"+"_err%s" % whatfit)
     eWj2b      = tfile.Get(varname+"_"+"Wj2b"+"_err%s" % whatfit)
@@ -410,22 +414,40 @@ def MakePlots(varname, whatfit, options):
     eTT        = tfile.Get(varname+"_"+"TT"+"_err%s" % whatfit)
     es_Top     = tfile.Get(varname+"_"+"s_Top"+"_err%s" % whatfit)
     eVVLF      = tfile.Get(varname+"_"+"VVLF"+"_err%s" % whatfit)
-    eVVHF      = tfile.Get(varname+"_"+"VVHF"+"_err%s" % whatfit)
+    eWZHF      = tfile.Get(varname+"_"+"WZ"+"_err%s" % whatfit)
+    eZZHF      = tfile.Get(varname+"_"+"ZZ"+"_err%s" % whatfit)
     eQCD       = tfile.Get(varname+"_"+"QCD"+"_err%s" % whatfit)
     
-    xtitle = hdata_obs.GetXaxis().GetTitle()
+    varname = hdata_obs.GetXaxis().GetTitle()
+    xtitle = "BDT"
+    if options.doMJJ:  xtitle = "m_{T} [GeV]"
     nbins = hdata_obs.GetNbinsX()
     xlow = hdata_obs.GetXaxis().GetXmin()
     xup = hdata_obs.GetXaxis().GetXmax()
     hVH        = TH1F("VH"       , "", nbins, xlow, xup)
+    hVVHF      = TH1F("VVHF"     , "", nbins, xlow, xup)
     hVV        = TH1F("VV"       , "", nbins, xlow, xup)
     hmc_exp    = TH1F("mc_exp"   , "", nbins, xlow, xup)
     
+    eVH        = TH1F("VH_err"   , "", nbins, xlow, xup)
+    eVVHF      = TH1F("VVHF_err" , "", nbins, xlow, xup)
+    eVV        = TH1F("VV_err"   , "", nbins, xlow, xup)
+    
+    # Make sum of histograms
     hVH.Add(hZH)
     hVH.Add(hWH)
+    eVH.Add(eZH)
+    eVH.Add(eWH)
+
+    hVVHF.Add(hWZHF)
+    hVVHF.Add(hZZHF)
+    eVVHF.Add(eWZHF)
+    eVVHF.Add(eZZHF)
 
     hVV.Add(hVVLF)
     hVV.Add(hVVHF)
+    eVV.Add(eVVLF)
+    eVV.Add(eVVHF)
 
     hmc_exp.Add(hWj0b)
     hmc_exp.Add(hWj1b)
@@ -436,10 +458,12 @@ def MakePlots(varname, whatfit, options):
     hmc_exp.Add(hTT)
     hmc_exp.Add(hs_Top)
     if not options.doVV:
-        hmc_exp.Add(hVV)
+        hmc_exp.Add(hVVLF)
+        hmc_exp.Add(hVVHF)
+        hmc_exp.Add(hVH)  # VH is counted as background
     else:
         hmc_exp.Add(hVVLF)
-        #hmc_exp.Add(hVH)
+        hmc_exp.Add(hVH)  # VH is counted as background
     hmc_exp.Add(hQCD)
     
     if True:
@@ -463,6 +487,7 @@ def MakePlots(varname, whatfit, options):
         setHisto(hVH, "VH")
         setHisto(hZH, "VH")
         setHisto(hWH, "VH")
+        setHisto(hZbbHinv, "VH_1")
         setHisto(hWj0b, "WjLF")
         setHisto(hWj1b, "WjHFc")
         setHisto(hWj2b, "WjHFb")
@@ -491,8 +516,9 @@ def MakePlots(varname, whatfit, options):
                     hmc_test.SetBinError(i, 0.)
             
             else:
-                for i in xrange(hdata_test.FindFixBin(105+1), hdata_test.FindFixBin(150-1)+1):
+                #for i in xrange(hdata_test.FindFixBin(105+1), hdata_test.FindFixBin(150-1)+1):
                 #for i in xrange(hdata_test.FindFixBin(105+1)-2, hdata_test.FindFixBin(150-1)+1):  # hide VV as well
+                for i in xrange(1, hdata_test.GetNbinsX()+1):  # all bins
                     hdata_test.SetBinContent(i, 0.)
                     hdata_test.SetBinError(i, 0.)
                     hmc_test.SetBinContent(i, 0.)
@@ -521,18 +547,21 @@ def MakePlots(varname, whatfit, options):
         hs.Add(hZj2b)
         if not options.doVV and not options.doMJJ:
             if plotSig:  hs.Add(hVH)
+            if plotSig:  hs.Add(hZbbHinv)
         elif not options.doMJJ:
             hs.Add(hVVHF)
             if plotSig:  hs.Add(hVH)
+            if plotSig:  hs.Add(hZbbHinv)
 
         if options.doMJJ:
             hs.Add(hVVLF)
             hs.Add(hVVHF)
             if plotSig:  hs.Add(hVH)
+            if plotSig:  hs.Add(hZbbHinv)
 
 
         ymax = max(hdata_test.GetMaximum(), hs.GetMaximum())
-        hs.SetMaximum(ymax + ymax / 2.0 + (sqrt(ymax) if ymax>1 else 0))
+        hs.SetMaximum(ymax * 1.7 + (sqrt(ymax) if ymax>1 else 0))
         if plotLog:
             hs.SetMaximum(ymax * 200 + (sqrt(ymax) if ymax>1 else 0))
         hs.SetMinimum(0.01)
@@ -541,7 +570,8 @@ def MakePlots(varname, whatfit, options):
         print "MakePlots(): Setting up auxiliary histograms..."
         staterr = hmc_exp.Clone("staterr")
         staterr.Sumw2()
-        staterr.SetFillColor(kRed)
+        #staterr.SetFillColor(kRed)
+        staterr.SetFillColor(kGray+3)
         staterr.SetMarkerSize(0)
         staterr.SetFillStyle(3013)
         
@@ -555,15 +585,17 @@ def MakePlots(varname, whatfit, options):
         ratiostaterr.Sumw2()
         ratiostaterr.SetStats(0)
         ratiostaterr.SetTitle("")
-        ratiostaterr.GetXaxis().SetTitle(xtitle)
+        #ratiostaterr.GetXaxis().SetTitle(xtitle)
+        ratiostaterr.SetTitle(";"+xtitle)
         ratiostaterr.GetYaxis().SetTitle("Data/MC")
         ratiostaterr.SetMaximum(2.2)
         ratiostaterr.SetMinimum(0)
         ratiostaterr.SetMarkerSize(0)
-        ratiostaterr.SetFillColor(kRed)
+        #ratiostaterr.SetFillColor(kRed)
+        ratiostaterr.SetFillColor(kGray+3)
         ratiostaterr.SetFillStyle(3013)
         #ratiostaterr.SetFillStyle(3001)
-        ratiostaterr.GetXaxis().CenterTitle()
+        #ratiostaterr.GetXaxis().CenterTitle()
         ratiostaterr.GetXaxis().SetLabelSize(0.12)
         ratiostaterr.GetXaxis().SetTitleSize(0.14)
         ratiostaterr.GetXaxis().SetTitleOffset(1.10)
@@ -573,6 +605,9 @@ def MakePlots(varname, whatfit, options):
         #ratiostaterr.GetYaxis().SetTitleSize(0.10)
         ratiostaterr.GetYaxis().SetTitleOffset(0.6)
         ratiostaterr.GetYaxis().SetNdivisions(505)
+        
+        ratiounity = TLine(xlow,1,xup,1)
+        ratiounity.SetLineStyle(2)
         
         for i in xrange(0, hmc_exp.GetNbinsX()+2):
             ratiostaterr.SetBinContent(i, 1.0)
@@ -611,8 +646,10 @@ def MakePlots(varname, whatfit, options):
                 if not options.doVV:
                     binerror2 += pow(eVVLF.GetBinContent(i), 2)
                     binerror2 += pow(eVVHF.GetBinContent(i), 2)
+                    binerror2 += pow(eVH.GetBinContent(i), 2)
                 else:
                     binerror2 += pow(eVVLF.GetBinContent(i), 2)
+                    binerror2 += pow(eVH.GetBinContent(i), 2)
 
                 binerror = sqrt(binerror2)
                 ratiosysterr.SetBinError(i, binerror / hmc_exp.GetBinContent(i))
@@ -626,32 +663,69 @@ def MakePlots(varname, whatfit, options):
 
         # Setup legends
         print "MakePlots(): Setting up legends..."
-        leg = TLegend(0.74, 0.56, 0.92, 0.92)
-        leg.SetFillColor(0)
-        leg.SetLineColor(0)
-        leg.SetShadowColor(0)
-        leg.SetTextFont(62)
-        leg.SetTextSize(0.03)
-        leg.AddEntry(hdata_test, "Data", "p")
-        if plotSig:  leg.AddEntry(hVH, "VH(%i)" % massH, "l")
-        if options.doVV:
-            leg.AddEntry(hVVHF, "VV(b#bar{b})", "l")
-        
-        leg.AddEntry(hZj2b, "Z + b#bar{b}", "f")
-        leg.AddEntry(hZj1b, "Z + b", "f")
-        leg.AddEntry(hZj0b, "Z + udscg", "f")
-        leg.AddEntry(hWj2b, "W + b#bar{b}", "f")
-        leg.AddEntry(hWj1b, "W + b", "f")
-        leg.AddEntry(hWj0b, "W + udscg", "f")
-        leg.AddEntry(hTT, "t#bar{t}", "f")
-        leg.AddEntry(hs_Top, "single top", "f")
-        leg.AddEntry(hQCD, "QCD", "f")
-        leg.AddEntry(hVVLF, "VV(udscg)", "f")
-        if not options.doVV:
-            leg.AddEntry(hVVHF, "VV(b#bar{b})", "f")
-        leg.AddEntry(staterr, "MC uncert. (stat)", "fl")
+#        leg = TLegend(0.74, 0.56, 0.92, 0.92)
+#        leg.SetFillColor(0)
+#        leg.SetLineColor(0)
+#        leg.SetShadowColor(0)
+#        leg.SetTextFont(62)
+#        leg.SetTextSize(0.03)
+#        leg.AddEntry(hdata_test, "Data", "p")
+#        if plotSig:  leg.AddEntry(hVH, "VH(%i)" % massH, "l")
+#        if plotSig:  leg.AddEntry(hZbbHinv, "ZH(inv)", "l")
+#        if options.doVV:
+#            leg.AddEntry(hVVHF, "VV(b#bar{b})", "l")
+#        
+#        leg.AddEntry(hZj2b, "Z + b#bar{b}", "f")
+#        leg.AddEntry(hZj1b, "Z + b", "f")
+#        leg.AddEntry(hZj0b, "Z + udscg", "f")
+#        leg.AddEntry(hWj2b, "W + b#bar{b}", "f")
+#        leg.AddEntry(hWj1b, "W + b", "f")
+#        leg.AddEntry(hWj0b, "W + udscg", "f")
+#        leg.AddEntry(hTT, "t#bar{t}", "f")
+#        leg.AddEntry(hs_Top, "single top", "f")
+#        leg.AddEntry(hQCD, "QCD", "f")
+#        leg.AddEntry(hVVLF, "VV(udscg)", "f")
+#        if not options.doVV:
+#            leg.AddEntry(hVVHF, "VV(b#bar{b})", "f")
+#
+#        leg.AddEntry(staterr, "MC uncert. (stat)", "fl")
 
-        ratioleg1 = TLegend(0.54, 0.86, 0.72, 0.96)
+        #leg1 = TLegend(0.58, 0.68, 0.76, 0.92)
+        leg1 = TLegend(0.50, 0.60, 0.72, 0.92)
+        leg1.SetFillColor(0)
+        leg1.SetLineColor(0)
+        leg1.SetShadowColor(0)
+        leg1.SetTextFont(62)
+        leg1.SetTextSize(0.03)
+        leg1.AddEntry(hdata_test, "Data", "p")
+        if plotSig:  leg1.AddEntry(hVH, "VH(%i)" % massH, "l")
+        if plotSig:  leg1.AddEntry(hZbbHinv, "ZH(inv)", "l")
+        if options.doVV:
+            leg1.AddEntry(hVVHF, "VV(b#bar{b})", "l")
+        
+        leg1.AddEntry(hTT, "t#bar{t}", "f")
+        leg1.AddEntry(hs_Top, "single top", "f")
+        leg1.AddEntry(hQCD, "QCD", "f")
+        leg1.AddEntry(hVVLF, "VV(udscg)", "f")
+        if not options.doVV:
+            leg1.AddEntry(hVVHF, "VZ(b#bar{b})", "f")
+
+        #leg2 = TLegend(0.72, 0.60, 0.94, 0.92)
+        leg2 = TLegend(0.72, 0.60, 0.94, 0.88)
+        leg2.SetFillColor(0)
+        leg2.SetLineColor(0)
+        leg2.SetShadowColor(0)
+        leg2.SetTextFont(62)
+        leg2.SetTextSize(0.03)
+        leg2.AddEntry(hWj2b, "W + b#bar{b}", "f")
+        leg2.AddEntry(hWj1b, "W + b", "f")
+        leg2.AddEntry(hWj0b, "W + udscg", "f")
+        leg2.AddEntry(hZj2b, "Z + b#bar{b}", "f")
+        leg2.AddEntry(hZj1b, "Z + b", "f")
+        leg2.AddEntry(hZj0b, "Z + udscg", "f")
+        leg2.AddEntry(staterr, "MC uncert. (stat)", "f")
+
+        ratioleg1 = TLegend(0.54, 0.88, 0.72, 0.96)
         #ratioleg1 = TLegend(0.50, 0.86, 0.69, 0.96)
         ratioleg1.AddEntry(ratiostaterr, "MC uncert. (stat)", "f")
         ratioleg1.SetFillColor(0)
@@ -661,7 +735,7 @@ def MakePlots(varname, whatfit, options):
         ratioleg1.SetTextSize(0.06)
         ratioleg1.SetBorderSize(1)
         
-        ratioleg2 = TLegend(0.72, 0.86, 0.95, 0.96)
+        ratioleg2 = TLegend(0.72, 0.88, 0.95, 0.96)
         #ratioleg2 = TLegend(0.69, 0.86, 0.9, 0.96)
         ratioleg2.AddEntry(ratiosysterr, "MC uncert. (stat+syst)", "f")
         ratioleg2.SetFillColor(0)
@@ -670,6 +744,17 @@ def MakePlots(varname, whatfit, options):
         ratioleg2.SetTextFont(62)
         ratioleg2.SetTextSize(0.06)
         ratioleg2.SetBorderSize(1)
+        
+#        ratioleg1 = TLegend(0.72, 0.88, 0.94, 0.96)
+#        #ratioleg1 = TLegend(0.50, 0.86, 0.69, 0.96)
+#        ratioleg1.AddEntry(ratiostaterr, "MC uncert. (stat)", "f")
+#        ratioleg1.SetFillColor(0)
+#        ratioleg1.SetLineColor(0)
+#        ratioleg1.SetShadowColor(0)
+#        ratioleg1.SetTextFont(62)
+#        #ratioleg1.SetTextSize(0.06)
+#        ratioleg1.SetTextSize(0.07)
+#        ratioleg1.SetBorderSize(1)
 
         # Draw MC signal and background
         print "MakePlots(): Drawing..."
@@ -680,16 +765,23 @@ def MakePlots(varname, whatfit, options):
         binwidth = (xup - xlow) / nbins_plot
         ytitle = "Events / %.3f" % binwidth
         hs.GetYaxis().SetTitle(ytitle)
+        if " ; " in xtitle:
+            hs.SetTitle(";"+xtitle)
         
         staterr.Draw("e2 same")
         if plotSig:
             hVH.SetLineWidth(3)
             hVH.SetFillColor(0)
             hVH.Draw("hist same")
-        
+
+        if plotSig:
+            hZbbHinv.SetLineWidth(3)
+            hZbbHinv.SetFillColor(0)
+            hZbbHinv.Draw("hist same")
+
         if options.doVV:
             hVVHF.SetLineWidth(3)
-            hVVHF.SetLineColor(920 + 2)  # kGray + 2
+            hVVHF.SetLineColor(kGray + 2)
             hVVHF.SetFillColor(0)
             hVVHF.Draw("hist same")
 
@@ -698,7 +790,9 @@ def MakePlots(varname, whatfit, options):
         hdata_test.Draw("e1 same")
         
         # Draw legends
-        leg.Draw()
+        #leg.Draw()
+        leg1.Draw()
+        leg2.Draw()
         latex = TLatex()
         latex.SetNDC()
         latex.SetTextAlign(12)
@@ -706,16 +800,17 @@ def MakePlots(varname, whatfit, options):
         latex.SetTextSize(0.052)
         latex.DrawLatex(0.19, 0.89, "CMS Preliminary")
         latex.SetTextSize(0.04)
-        latex.DrawLatex(0.19, 0.84, "#sqrt{s} = 8 TeV, L = 19.0 fb^{-1}")
-        latex.DrawLatex(0.19, 0.79, "Z(#nu#bar{#nu})H(b#bar{b})")
+        latex.DrawLatex(0.19, 0.84, "#sqrt{s} = 8 TeV, L = 18.9 fb^{-1}")
+        #latex.DrawLatex(0.19, 0.79, "Z(#nu#bar{#nu})H(b#bar{b})")
+        latex.DrawLatex(0.19, 0.79, "Z(b#bar{b})H(inv)")
         
         # Under/overflows a la TMVA
-        uoflow = "U/O-flow (Data,MC): (%.1f, %.1f) / (%.1f, %.1f)" % (hdata_test.GetBinContent(0), hmc_exp.GetBinContent(0), hdata_test.GetBinContent(nbins_plot+1), hmc_exp.GetBinContent(nbins_plot+1))
-        latex2 = TLatex(0.99, 0.1, uoflow)
-        latex2.SetNDC()
-        latex2.SetTextSize(0.02)
-        latex2.SetTextAngle(90)
-        latex2.AppendPad()
+        #uoflow = "U/O-flow (Data,MC): (%.1f, %.1f) / (%.1f, %.1f)" % (hdata_test.GetBinContent(0), hmc_exp.GetBinContent(0), hdata_test.GetBinContent(nbins_plot+1), hmc_exp.GetBinContent(nbins_plot+1))
+        #latex2 = TLatex(0.99, 0.1, uoflow)
+        #latex2.SetNDC()
+        #latex2.SetTextSize(0.02)
+        #latex2.SetTextAngle(90)
+        #latex2.AppendPad()
         
         # Draw ratio
         pad2.cd()
@@ -723,6 +818,7 @@ def MakePlots(varname, whatfit, options):
         ratiostaterr.Draw("e2")
         ratiosysterr.Draw("e2 same")
         ratiostaterr.Draw("e2 same")
+        ratiounity.Draw()
         ratio.Draw("e1 same")
         
         # Draw ratio legends
@@ -730,7 +826,8 @@ def MakePlots(varname, whatfit, options):
         ratioleg2.Draw()
 
         # Kolmogorov-Smirnov test and Chi2 test
-        pave = TPaveText(0.18, 0.85, 0.35, 0.96, "brNDC")
+        pave = TPaveText(0.18, 0.86, 0.35, 0.96, "brNDC")
+        #pave = TPaveText(0.18, 0.86, 0.28, 0.96, "brNDC")
         pave.SetTextAlign(12)
         pave.SetLineColor(0)
         pave.SetFillColor(0)
@@ -739,8 +836,10 @@ def MakePlots(varname, whatfit, options):
         nchisq = hdata_test.Chi2Test(hmc_test, "UWCHI2/NDF")  # MC uncert. (stat)
         kolprob = hdata_test.KolmogorovTest(hmc_test)  # MC uncert. (stat)
         text = pave.AddText("#chi_{#nu}^{2} = %.3f, K_{s} = %.3f" % (nchisq, kolprob))
+        #text = pave.AddText("#chi_{#nu}^{2} = %.3f" % (nchisq)
         text.SetTextFont(62)
         text.SetTextSize(0.06)
+        #text.SetTextSize(0.07)
         pave.Draw()
 
         print "MakePlots(): Printing..."
@@ -757,8 +856,9 @@ def MakePlots(varname, whatfit, options):
         #FormatFileName(plotname)
         #gPad.Print(plotdir+plotname.Data()+".png")
         #gPad.Print(plotdir+plotname.Data()+".pdf")
-        gPad.Print(xtitle+"_%s.png" % whatfit)
-        gPad.Print(xtitle+"_%s.pdf" % whatfit)
+        gPad.Print(varname+"_%s.png" % whatfit)
+        gPad.Print(varname+"_%s.pdf" % whatfit)
+
         
     return 0
 
@@ -854,5 +954,6 @@ if __name__ == "__main__":
     MakePlots("ZnunuLowPt_8TeV", "prefit", options)
     MakePlots("ZnunuLowPt_8TeV", "postfit", options)
 
-#python dcplotter.py vhbb_Znn_J12_ZnunuHighPt_8TeV.txt -i mlfit.root
-
+#python bsmdcplotter.py vhbb_Znn_J14_bbb_combo_8TeV.txt -i mlfit_combo.root
+#python bsmdcplotter.py vhbb_dcplotter_BDT.txt -i vhbb_dcplotter_mlfit_BDT.root
+#python bsmdcplotter.py zhinv_dcplotter_BDT.txt -i zhinv_dcplotter_mlfit_BDT.root

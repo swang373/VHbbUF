@@ -36,8 +36,28 @@ void SkimRegression(TString process="ZnnH125", Long64_t skimentries=1000000000)
     TString prefix  = "skim_";
     TString suffix  = ".root";
 
+    // ZbbHinv
+    if (process == "ZbbHinv105") {
+        fname = dirMC + dijet + "ZH_ZToBB_HToInv_M-105_8TeV_pythia6" + suffix;
+        chain->Add(fname);
+    } else if (process == "ZbbHinv115") {
+        fname = dirMC + dijet + "ZH_ZToBB_HToInv_M-115_8TeV_pythia6" + suffix;
+        chain->Add(fname);
+    } else if (process == "ZbbHinv125") {
+        fname = dirMC + dijet + "ZH_ZToBB_HToInv_M-125_8TeV_pythia6" + suffix;
+        chain->Add(fname);
+    } else if (process == "ZbbHinv135") {
+        fname = dirMC + dijet + "ZH_ZToBB_HToInv_M-135_8TeV_pythia6" + suffix;
+        chain->Add(fname);
+    } else if (process == "ZbbHinv145") {
+        fname = dirMC + dijet + "ZH_ZToBB_HToInv_M-145_8TeV_pythia6" + suffix;
+        chain->Add(fname);
+    } else if (process == "ZbbHinv150") {
+        fname = dirMC + dijet + "ZH_ZToBB_HToInv_M-150_8TeV_pythia6" + suffix;
+        chain->Add(fname);
+
     // ZnnH
-    if (process        == "ZnnH110") {
+    } else if (process == "ZnnH110") {
         fname = dirMC + dijet + "ZH_ZToNuNu_HToBB_M-110_8TeV-powheg-herwigpp" + suffix;
         chain->Add(fname);
     } else if (process == "ZnnH115") {

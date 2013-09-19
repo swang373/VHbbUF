@@ -320,10 +320,10 @@ public:
 #elif defined(REBINFIRSTTHREE)
                 /// Group bins from the left
                 UInt_t firstN2 = 1;  // starts with 1 bin
-                findFirstN(firstN2, begin + firstN, bkg, errorffirst*0.99);
+                findFirstN(firstN2, begin + firstN, bkg, errorffirst*1.08);
                 
                 UInt_t firstN3 = 1;  // starts with 1 bin
-                findFirstN(firstN3, begin + firstN + firstN2, bkg, errorffirst*0.99*0.99);
+                findFirstN(firstN3, begin + firstN + firstN2, bkg, errorffirst*1.08*1.05);
                 
                 /// Reset when errorffirst == errorflast
                 if(TMath::AreEqualRel(errorffirst, errorflast,1.E-7)) {
