@@ -429,9 +429,9 @@ def MakePlots(varname, whatfit, options):
     hVV        = TH1F("VV"       , "", nbins, xlow, xup)
     hmc_exp    = TH1F("mc_exp"   , "", nbins, xlow, xup)
     
-    eVH        = TH1F("VH_err"   , "", nbins, xlow, xup)
-    eVVHF      = TH1F("VVHF_err" , "", nbins, xlow, xup)
-    eVV        = TH1F("VV_err"   , "", nbins, xlow, xup)
+    eVH        = TH1F("VH"+"_err"   , "", nbins, xlow, xup)
+    eVVHF      = TH1F("VVHF"+"_err" , "", nbins, xlow, xup)
+    eVV        = TH1F("VV"+"_err"   , "", nbins, xlow, xup)
     
     # Make sum of histograms
     hVH.Add(hZH)
@@ -523,7 +523,7 @@ def MakePlots(varname, whatfit, options):
                     hdata_test.SetBinError(i, 0.)
                     hmc_test.SetBinContent(i, 0.)
                     hmc_test.SetBinError(i, 0.)
-            
+        
         
         
         setHisto(hdata_test, "data_obs")
@@ -620,8 +620,8 @@ def MakePlots(varname, whatfit, options):
             
             #if (!(hdata_test.GetBinContent(i) > 1e-6)):
             #    ratiostaterr.SetBinError(i, 0.)
-           
-       
+        
+        
         
         ratiosysterr = ratiostaterr.Clone("ratiosysterr")
         ratiosysterr.Sumw2()
@@ -663,32 +663,32 @@ def MakePlots(varname, whatfit, options):
 
         # Setup legends
         print "MakePlots(): Setting up legends..."
-#        leg = TLegend(0.74, 0.56, 0.92, 0.92)
-#        leg.SetFillColor(0)
-#        leg.SetLineColor(0)
-#        leg.SetShadowColor(0)
-#        leg.SetTextFont(62)
-#        leg.SetTextSize(0.03)
-#        leg.AddEntry(hdata_test, "Data", "p")
-#        if plotSig:  leg.AddEntry(hVH, "VH(%i)" % massH, "l")
-#        if plotSig:  leg.AddEntry(hZbbHinv, "ZH(inv)", "l")
-#        if options.doVV:
-#            leg.AddEntry(hVVHF, "VV(b#bar{b})", "l")
-#        
-#        leg.AddEntry(hZj2b, "Z + b#bar{b}", "f")
-#        leg.AddEntry(hZj1b, "Z + b", "f")
-#        leg.AddEntry(hZj0b, "Z + udscg", "f")
-#        leg.AddEntry(hWj2b, "W + b#bar{b}", "f")
-#        leg.AddEntry(hWj1b, "W + b", "f")
-#        leg.AddEntry(hWj0b, "W + udscg", "f")
-#        leg.AddEntry(hTT, "t#bar{t}", "f")
-#        leg.AddEntry(hs_Top, "single top", "f")
-#        leg.AddEntry(hQCD, "QCD", "f")
-#        leg.AddEntry(hVVLF, "VV(udscg)", "f")
-#        if not options.doVV:
-#            leg.AddEntry(hVVHF, "VV(b#bar{b})", "f")
-#
-#        leg.AddEntry(staterr, "MC uncert. (stat)", "fl")
+        #leg = TLegend(0.74, 0.56, 0.92, 0.92)
+        #leg.SetFillColor(0)
+        #leg.SetLineColor(0)
+        #leg.SetShadowColor(0)
+        #leg.SetTextFont(62)
+        #leg.SetTextSize(0.03)
+        #leg.AddEntry(hdata_test, "Data", "p")
+        #if plotSig:  leg.AddEntry(hVH, "VH(%i)" % massH, "l")
+        #if plotSig:  leg.AddEntry(hZbbHinv, "ZH(inv)", "l")
+        #if options.doVV:
+        #    leg.AddEntry(hVVHF, "VV(b#bar{b})", "l")
+        #
+        #leg.AddEntry(hZj2b, "Z + b#bar{b}", "f")
+        #leg.AddEntry(hZj1b, "Z + b", "f")
+        #leg.AddEntry(hZj0b, "Z + udscg", "f")
+        #leg.AddEntry(hWj2b, "W + b#bar{b}", "f")
+        #leg.AddEntry(hWj1b, "W + b", "f")
+        #leg.AddEntry(hWj0b, "W + udscg", "f")
+        #leg.AddEntry(hTT, "t#bar{t}", "f")
+        #leg.AddEntry(hs_Top, "single top", "f")
+        #leg.AddEntry(hQCD, "QCD", "f")
+        #leg.AddEntry(hVVLF, "VV(udscg)", "f")
+        #if not options.doVV:
+        #    leg.AddEntry(hVVHF, "VV(b#bar{b})", "f")
+        #
+        #leg.AddEntry(staterr, "MC uncert. (stat)", "fl")
 
         #leg1 = TLegend(0.58, 0.68, 0.76, 0.92)
         leg1 = TLegend(0.50, 0.60, 0.72, 0.92)
@@ -709,6 +709,7 @@ def MakePlots(varname, whatfit, options):
         leg1.AddEntry(hVVLF, "VV(udscg)", "f")
         if not options.doVV:
             leg1.AddEntry(hVVHF, "VZ(b#bar{b})", "f")
+
 
         #leg2 = TLegend(0.72, 0.60, 0.94, 0.92)
         leg2 = TLegend(0.72, 0.60, 0.94, 0.88)
@@ -745,16 +746,16 @@ def MakePlots(varname, whatfit, options):
         ratioleg2.SetTextSize(0.06)
         ratioleg2.SetBorderSize(1)
         
-#        ratioleg1 = TLegend(0.72, 0.88, 0.94, 0.96)
-#        #ratioleg1 = TLegend(0.50, 0.86, 0.69, 0.96)
-#        ratioleg1.AddEntry(ratiostaterr, "MC uncert. (stat)", "f")
-#        ratioleg1.SetFillColor(0)
-#        ratioleg1.SetLineColor(0)
-#        ratioleg1.SetShadowColor(0)
-#        ratioleg1.SetTextFont(62)
-#        #ratioleg1.SetTextSize(0.06)
-#        ratioleg1.SetTextSize(0.07)
-#        ratioleg1.SetBorderSize(1)
+        #ratioleg1 = TLegend(0.72, 0.88, 0.94, 0.96)
+        ##ratioleg1 = TLegend(0.50, 0.86, 0.69, 0.96)
+        #ratioleg1.AddEntry(ratiostaterr, "MC uncert. (stat)", "f")
+        #ratioleg1.SetFillColor(0)
+        #ratioleg1.SetLineColor(0)
+        #ratioleg1.SetShadowColor(0)
+        #ratioleg1.SetTextFont(62)
+        ##ratioleg1.SetTextSize(0.06)
+        #ratioleg1.SetTextSize(0.07)
+        #ratioleg1.SetBorderSize(1)
 
         # Draw MC signal and background
         print "MakePlots(): Drawing..."
@@ -800,7 +801,12 @@ def MakePlots(varname, whatfit, options):
         latex.SetTextSize(0.052)
         latex.DrawLatex(0.19, 0.89, "CMS Preliminary")
         latex.SetTextSize(0.04)
+
         latex.DrawLatex(0.19, 0.84, "#sqrt{s} = 8 TeV, L = 18.9 fb^{-1}")
+
+
+
+
         #latex.DrawLatex(0.19, 0.79, "Z(#nu#bar{#nu})H(b#bar{b})")
         latex.DrawLatex(0.19, 0.79, "Z(b#bar{b})H(inv)")
         
@@ -836,7 +842,7 @@ def MakePlots(varname, whatfit, options):
         nchisq = hdata_test.Chi2Test(hmc_test, "UWCHI2/NDF")  # MC uncert. (stat)
         kolprob = hdata_test.KolmogorovTest(hmc_test)  # MC uncert. (stat)
         text = pave.AddText("#chi_{#nu}^{2} = %.3f, K_{s} = %.3f" % (nchisq, kolprob))
-        #text = pave.AddText("#chi_{#nu}^{2} = %.3f" % (nchisq)
+        #text = pave.AddText("#chi_{#nu}^{2} = %.3f" % (nchisq))
         text.SetTextFont(62)
         text.SetTextSize(0.06)
         #text.SetTextSize(0.07)

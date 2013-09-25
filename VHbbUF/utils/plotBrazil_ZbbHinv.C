@@ -9,7 +9,8 @@
     gStyle->SetPadRightMargin(0.05);
     gStyle->SetLineStyleString(11,"16 16");
 
-    bool unblind = false;
+    bool unblind = true;
+    bool isMJJ = true;
     int n_points = 6;
     double x_vals[n_points] = {105, 115, 125, 135, 145, 150};
     //int n_points = 9;
@@ -30,13 +31,49 @@
     //double y_up_points2[n_points]=  {  3.6408, 3.965, 4.2992, 4.707, 5.0443, 5.3816 };
 
     // ZbbHinv (2013-08-07)
-    double y_injected[n_points]=    {  1.7266, 1.8828, 2.0547, 2.2422, 2.3984, 2.5703 };
-    double y_observed[n_points]=    {  1.7241, 1.8727, 2.0377, 2.2258, 2.3873, 2.5483 };
-    double y_down_points2[n_points]={  0.9037, 0.9851, 1.0713, 1.1698, 1.2519, 1.3322 };
-    double y_down_points1[n_points]={  1.2155, 1.3258, 1.4418, 1.5702, 1.6892, 1.8002 };
-    double y_vals[n_points]=        {  1.7266, 1.875, 2.0391, 2.2266, 2.3828, 2.5547 };
-    double y_up_points1[n_points]=  {  2.463, 2.6896, 2.925, 3.194, 3.4181, 3.6646 };
-    double y_up_points2[n_points]=  {  3.4102, 3.7132, 4.0381, 4.4095, 4.7488, 5.0753 };
+    //double y_injected[n_points]=    {  1.7266, 1.8828, 2.0547, 2.2422, 2.3984, 2.5703 };
+    //double y_observed[n_points]=    {  1.7241, 1.8727, 2.0377, 2.2258, 2.3873, 2.5483 };
+    //double y_down_points2[n_points]={  0.9037, 0.9851, 1.0713, 1.1698, 1.2519, 1.3322 };
+    //double y_down_points1[n_points]={  1.2155, 1.3258, 1.4418, 1.5702, 1.6892, 1.8002 };
+    //double y_vals[n_points]=        {  1.7266, 1.875, 2.0391, 2.2266, 2.3828, 2.5547 };
+    //double y_up_points1[n_points]=  {  2.463, 2.6896, 2.925, 3.194, 3.4181, 3.6646 };
+    //double y_up_points2[n_points]=  {  3.4102, 3.7132, 4.0381, 4.4095, 4.7488, 5.0753 };
+
+    // ZbbHinv (2013-09-06)
+    //double y_injected[n_points]=    {  1.6641, 1.8203, 1.9609, 2.1328, 2.2578, 2.4141 };
+    //double y_observed[n_points]=    {  1.4109, 1.5401, 1.728, 1.828, 2.0541, 2.2494 };
+    //double y_down_points2[n_points]={  0.8497, 0.9317, 0.9974, 1.0795, 1.1452, 1.2191 };
+    //double y_down_points1[n_points]={  1.1465, 1.2507, 1.3459, 1.4566, 1.5452, 1.6406 };
+    //double y_vals[n_points]=        {  1.6172, 1.7734, 1.8984, 2.0547, 2.1797, 2.3203 };
+    //double y_up_points1[n_points]=  {  2.3069, 2.5298, 2.7081, 2.9474, 3.1267, 3.3284 };
+    //double y_up_points2[n_points]=  {  3.1738, 3.458, 3.7257, 4.0433, 4.3166, 4.5951 };
+
+    // ZbbHinv (2013-09-06 mT)
+    //double y_injected[n_points]=    {  2.1953, 2.3516, 2.5078, 2.7422, 2.9453, 3.1406 };
+    //double y_observed[n_points]=    {  1.5053, 1.5684, 1.7188, 1.8894, 2.0629, 2.2055 };
+    //double y_down_points2[n_points]={  1.1616, 1.2437, 1.334, 1.4489, 1.5604, 1.6665 };
+    //double y_down_points1[n_points]={  1.5633, 1.6782, 1.8, 1.9551, 2.1085, 2.2486 };
+    //double y_vals[n_points]=        {  2.2109, 2.3672, 2.5391, 2.7578, 2.9922, 3.1719 };
+    //double y_up_points1[n_points]=  {  3.1539, 3.3957, 3.6625, 3.956, 4.2922, 4.5753 };
+    //double y_up_points2[n_points]=  {  4.3669, 4.688, 5.0734, 5.4616, 5.9257, 6.3379 };
+
+    // ZbbHinv (2013-09-24)
+    //double y_injected[n_points]=    {  1.7266, 1.8984, 2.0703, 2.2578, 2.3984, 2.5703 };
+    //double y_observed[n_points]=    {  1.4711, 1.615, 1.823, 1.9387, 2.1964, 2.4127 };
+    //double y_down_points2[n_points]={  0.8825, 0.9728, 1.0506, 1.1452, 1.2227, 1.3012 };
+    //double y_down_points1[n_points]={  1.1908, 1.3126, 1.4147, 1.5452, 1.6445, 1.7557 };
+    //double y_vals[n_points]=        {  1.6797, 1.8516, 1.9922, 2.1797, 2.3359, 2.4766 };
+    //double y_up_points1[n_points]=  {  2.4095, 2.6413, 2.8578, 3.1267, 3.3322, 3.5526 };
+    //double y_up_points2[n_points]=  {  3.3054, 3.6337, 3.9203, 4.2893, 4.5843, 4.9046 };
+
+    // ZbbHinv (2013-09-24 mT)
+    double y_injected[n_points]=    {  2.2891, 2.4609, 2.6328, 2.9141, 3.1406, 3.3594 };
+    double y_observed[n_points]=    {  1.5679, 1.6444, 1.8137, 2.003, 2.203, 2.3635 };
+    double y_down_points2[n_points]={  1.2109, 1.3012, 1.4079, 1.5392, 1.6665, 1.7814 };
+    double y_down_points1[n_points]={  1.6253, 1.7557, 1.8898, 2.0661, 2.2486, 2.4037 };
+    double y_vals[n_points]=        {  2.3047, 2.4766, 2.6797, 2.9297, 3.1719, 3.3906 };
+    double y_up_points1[n_points]=  {  3.2877, 3.5526, 3.844, 4.2026, 4.5753, 4.8908 };
+    double y_up_points2[n_points]=  {  4.5375, 4.9046, 5.3405, 5.8019, 6.3379, 6.775 };
 
     // -------------------------------------------------------------------------
 
@@ -122,7 +159,7 @@
         m_legend->SetBorderSize(0);
         //m_legend->SetBorderSize(1);
         m_legend->AddEntry(m_y_lineObs_graph, "Observed", "lp");
-        m_legend->AddEntry(m_y_lineSI_graph, "Signal injected", "l");
+        //m_legend->AddEntry(m_y_lineSI_graph, "Signal injected", "l");
         m_legend->AddEntry(m_y_line_graph, "Expected", "l");
         m_legend->AddEntry(m_y_band_graph_1sigma, "Expected #pm 1 #sigma", "f");
         m_legend->AddEntry(m_y_band_graph_2sigma, "Expected #pm 2 #sigma", "f");
@@ -159,7 +196,7 @@
     m_y_band_graph_1sigma->Draw("3");
     m_y_line_graph->Draw("L");
     if (unblind) {
-        m_y_lineSI_graph->Draw("L");
+        //m_y_lineSI_graph->Draw("L");
         m_y_lineObs_graph->Draw("LP");
     }
     
@@ -176,11 +213,21 @@
     //latex->SetTextSize(0.04);
     //latex->DrawLatex(0.19, 0.84, "#sqrt{s} = 8 TeV, L = 19.0 fb^{-1}");
     latex->SetTextSize(0.032);
-    latex->DrawLatex(0.16, 0.97, "CMS Preliminary  #sqrt{s} = 8 TeV, L = 19.0 fb^{-1}");
+    latex->DrawLatex(0.16, 0.97, "CMS Preliminary  #sqrt{s} = 8 TeV, L = 18.9 fb^{-1}");
     latex->SetTextSize(0.045);
     latex->DrawLatex(0.19, 0.90, "Z(#rightarrow b#bar{b}) H(#rightarrow E_{T}^{miss})");
+    if (isMJJ) {
+        latex->DrawLatex(0.19, 0.84, "#color[4]{m_{T} analysis}");
+    }
 
     gPad->RedrawAxis();
-    gPad->Print("Limit_ZbbHinv_BDT_20130807.pdf");
-    gPad->Print("Limit_ZbbHinv_BDT_20130807.png");
+    TString postfix = "_20130924";
+    if (!isMJJ) {
+        gPad->Print("Limit_ZbbHinv_BDT"+postfix+".pdf");
+        gPad->Print("Limit_ZbbHinv_BDT"+postfix+".png");
+    } else {
+        gPad->Print("Limit_ZbbHinv_MJJ"+postfix+".pdf");
+        gPad->Print("Limit_ZbbHinv_MJJ"+postfix+".png");
+    }
 }
+

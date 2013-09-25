@@ -19,8 +19,8 @@ observeprofi = "run_observeprofilelikelihoodJ14_bbb.csh"
 observemaxli = "run_observemaxlikelihoodJ14_bbb.csh"
 injectsignal = "run_injectsignalJ14_bbb.csh"
 
-outdir = "res_20130906/"
-afsdir = "/afs/cern.ch/user/j/jiafulow/public/zhinv_20130906/Zbb/"
+outdir = "res_20130924/"
+afsdir = "/afs/cern.ch/user/j/jiafulow/public/zhinv_20130924/Zbb/"
 
 #------------------------------------------------------------------------------
 
@@ -113,6 +113,14 @@ def make(var, analysis, data):
         subprocess.call(["sed", "-i", "s@%s@%s@g" % (old, new), newmacro1+".C"])
         subprocess.call(["sed", "-i", "s@%s@%s@g" % (old, new), newmacro2+".C"])
 
+        old = "scaleZHfromYR3toYR2(massH)"
+        new = "scaleZHfromYR3toYR2(%i)" % massH
+        subprocess.call(["sed", "-i", "s@%s@%s@g" % (old, new), newmacro1+".C"])
+
+        old = "scaleWHfromYR3toYR2(massH)"
+        new = "scaleWHfromYR3toYR2(%i)" % massH
+        subprocess.call(["sed", "-i", "s@%s@%s@g" % (old, new), newmacro1+".C"])
+
 
     if data == "HCP":
         old = "//#define HCPANALYSIS"
@@ -128,13 +136,13 @@ def make(var, analysis, data):
     p2 = subprocess.Popen(["root", "-b", "-l", "-q", "%s+(%s)" % (newmacro2+".C", "\"injectsignal\"")], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     output = p2.communicate()
     #print output[1]
-    subprocess.call("cp zhinv_Zbb_SI_J14_bbb_Znunu*Pt_8TeV.txt zhinv_Zbb_SI_J14_8TeV.root " + outsubdir, shell=True)  # use shell for wildcard expansion
+    subprocess.call("cp zhinv_Zbb_SI_J14_bbb_Znunu*Pt_8TeV.txt zhinv_Zbb_SI_8TeV.root " + outsubdir, shell=True)  # use shell for wildcard expansion
     
     # Default
     p3 = subprocess.Popen(["root", "-b", "-l", "-q", "%s+(%s)" % (newmacro2+".C", "")], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     output = p3.communicate()
     #print output[1]
-    subprocess.call("cp zhinv_Zbb_J14_bbb_Znunu*Pt_8TeV.txt zhinv_Zbb_J14_8TeV.root zhinv_Zbb_J14_Znunu*Pt_TH1.* diffNuisances.py " + outsubdir, shell=True)  # use shell for wildcard expansion
+    subprocess.call("cp zhinv_Zbb_J14_bbb_Znunu*Pt_8TeV.txt zhinv_Zbb_8TeV.root zhinv_Zbb_J14_Znunu*Pt_TH1.* diffNuisances.py " + outsubdir, shell=True)  # use shell for wildcard expansion
     subprocess.call(("cp %s " + outsubdir) % (" ".join([combinecards, combineasymp, combineprofi, combinemaxli, observeasymp, observeprofi, observemaxli, injectsignal])), shell=True)
 
     # Keep .pdf files
@@ -253,7 +261,7 @@ def transfer(outdir, afsdir):
             if path1.count('/') != 2:  continue
             writeme_.append("mkdir -p " + path2)
             writeme_.append("cd " + path1)
-            writeme_.append("cp zhinv_Zbb_J14_bbb_Znunu*Pt_8TeV.txt zhinv_Zbb_J14_bbb_combo_8TeV.txt zhinv_Zbb_J14_8TeV.root zhinv_Zbb_J14_Znunu*Pt_TH1.* zhinv_Zbb_J14_combo_8TeV.txt asymp.log profi.log maxli.log nuisances*.html " + path2)
+            writeme_.append("cp zhinv_Zbb_J14_bbb_Znunu*Pt_8TeV.txt zhinv_Zbb_J14_bbb_combo_8TeV.txt zhinv_Zbb_8TeV.root zhinv_Zbb_J14_Znunu*Pt_TH1.* zhinv_Zbb_J14_combo_8TeV.txt asymp.log profi.log maxli.log nuisances*.html " + path2)
             writeme_.append("cp zhinv_Zbb_SI_J14_* " + path2)
             writeme_.append("cd -")
     writeme = "\n".join(writeme_)
@@ -264,10 +272,10 @@ def transfer(outdir, afsdir):
 
 if __name__ == "__main__":
     
-    var = "BDT"
+    #var = "BDT"
     #var = "mBDT"
     #var = "nBDT"
-    #var = "MJJ"
+    var = "MJJ"
     data = "LHCP"
     #data = "HCP"
     #for analysis in [125]:

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-DIR=Step4_20130404
+DIR=Step4_20130919_noMjjVeto
 mkdir -p $DIR/stitch
 cd $DIR/stitch
 

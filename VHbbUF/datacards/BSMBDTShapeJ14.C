@@ -256,7 +256,7 @@ public:
         Zj1b_syst(0),
         Zj2b_syst(0),
         TT_syst(0),
-        ZH_BSM(0),
+        ZH_BSM(0),  //! for signal injection
         WH_BSM(0),  //! this is equal to ZH_BSM for now
         data_obs(0),
         sf_Wj0b(1.), sf_Wj1b(1.), sf_Wj2b(1.), sf_Zj0b(1.), sf_Zj1b(1.), sf_Zj2b(1.), sf_TT(1.) {}
@@ -438,7 +438,7 @@ float hpythia_naJets(float naJets, const TH1* hist=hpythia2) {
 }
 
 ///_____________________________________________________________________________
-void KillSpikes(TH1* h1, double divide, double spike, double shoulder) {
+void killspikes(TH1* h1, double divide, double spike, double shoulder) {
     UInt_t nbins = h1->GetNbinsX();
     for (UInt_t ibin=1; ibin<nbins+1; ibin++) {
         if (h1->GetBinContent(ibin) > spike && 
@@ -451,6 +451,60 @@ void KillSpikes(TH1* h1, double divide, double spike, double shoulder) {
         }
     }
 }
+
+///_____________________________________________________________________________
+double scaleZHfromYR3toYR2(int mass) {
+    double scale = 1.0;
+    if (mass == 105) {
+        scale = 0.6750 / 0.7022;
+    } else if (mass == 110) {
+        scale = 0.5869 / 0.6125;
+    } else if (mass == 115) {
+        scale = 0.5117 / 0.5358;
+    } else if (mass == 120) {
+        scale = 0.4483 / 0.4710;
+    } else if (mass == 125) {
+        scale = 0.3943 / 0.4153;
+    } else if (mass == 130) {
+        scale = 0.3473 / 0.3671;
+    } else if (mass == 135) {
+        scale = 0.3074 / 0.3259;
+    } else if (mass == 140) {
+        scale = 0.2728 / 0.2898;
+    } else if (mass == 145) {
+        scale = 0.2424 / 0.2583;
+    } else if (mass == 150) {
+        scale = 0.2159 / 0.2308;
+    }
+    return scale;
+}
+
+double scaleWHfromYR3toYR2(int mass) {
+    double scale = 1.0;
+    if (mass == 105) {
+        scale = 1.0 / 1.0;
+    } else if (mass == 110) {
+        scale = 1.0600 / 1.0710;
+    } else if (mass == 115) {
+        scale = 0.9165 / 0.9266;
+    } else if (mass == 120) {
+        scale = 0.7966 / 0.8052;
+    } else if (mass == 125) {
+        scale = 0.6966 / 0.7046;
+    } else if (mass == 130) {
+        scale = 0.6095 / 0.6169;
+    } else if (mass == 135) {
+        scale = 0.5351 / 0.5416;
+    } else if (mass == 140) {
+        scale = 0.4713 / 0.4768;
+    } else if (mass == 145) {
+        scale = 0.4164 / 0.4216;
+    } else if (mass == 150) {
+        scale = 0.3681 / 0.3728;
+    }
+    return scale;
+}
+
 
 ///_____________________________________________________________________________
 /// The core function that makes plots, prints stats, and writes the datacard.
@@ -801,33 +855,41 @@ void MakePlots(const EventsJ14 * ev, TString var_,
     for (UInt_t ih = 0; ih < histos_0.size(); ih++)
         histos_0.at(ih)->Sumw2();
 
-    TCut cutvhewk = "weightSignalEWKNew";
-    TCut cutvhqcd = "weightSignalQCD";
+    TCut cutzhewk = Form("weightSignalEWKNew * %.3f", scaleZHfromYR3toYR2(massH) );
+    TCut cutwhewk = Form("weightSignalEWKNew * %.3f", scaleWHfromYR3toYR2(massH) );
+    TCut cutzhqcd = "weightSignalQCD";
+    TCut cutwhqcd = "weightSignalQCD";
+    //TCut cutzhewk = "weightSignalEWKNew";
+    //TCut cutwhewk = "weightSignalEWKNew";
+    //TCut cutzhqcd = "weightSignalQCD";
+    //TCut cutwhqcd = "weightSignalQCD";
 #if !defined(VHEWKCORRECTION) && !defined(ZEROVHBB)
     ev->ZH->Project("ZH_0", var, cutmc);
     std::clog << "... DONE: project ZH_0." << std::endl;
     ev->WH->Project("WH_0", var, cutmc);
     std::clog << "... DONE: project WH_0." << std::endl;
 #elif !defined(VHQCDCORRECTION) && !defined(ZEROVHBB)
-    ev->ZH->Project("ZH_0", var, cutmc * cutvhewk);
+    ev->ZH->Project("ZH_0", var, cutmc * cutzhewk);
     std::clog << "... DONE: project ZH_0." << std::endl;
-    ev->WH->Project("WH_0", var, cutmc * cutvhewk);
+    ev->WH->Project("WH_0", var, cutmc * cutwhewk);
     std::clog << "... DONE: project WH_0." << std::endl;
 #elif !defined(ZEROVHBB)
-    ev->ZH->Project("ZH_0", var, cutmc * cutvhewk * cutvhqcd);
+    ev->ZH->Project("ZH_0", var, cutmc * cutzhewk * cutzhqcd);
     std::clog << "... DONE: project ZH_0." << std::endl;
-    ev->WH->Project("WH_0", var, cutmc * cutvhewk * cutvhqcd);
+    ev->WH->Project("WH_0", var, cutmc * cutwhewk * cutwhqcd);
     std::clog << "... DONE: project WH_0." << std::endl;
 #endif
 
-    TCut cutvhewk_pythia = "weightSignalEWK * 176432/160481";
-    TCut cutvhqcd_pythia = "weightSignalQCD * hpythia_naJets(min(Sum$(aJet_genPt>20 && abs(aJet_eta)<2.5),4))";
-    ev->ZbbHinv->Project("ZbbHinv_0", var, cutmc * cutvhewk_pythia * cutvhqcd_pythia);
+    TCut cutzhewk_pythia = Form("weightSignalEWK * 176432/160481 * %.3f", scaleZHfromYR3toYR2(massH) );
+    TCut cutzhqcd_pythia = "weightSignalQCD * hpythia_naJets(min(Sum$(aJet_genPt>20 && abs(aJet_eta)<2.5),4))";
+    //TCut cutzhewk_pythia = "weightSignalEWK * 176432/160481";
+    //TCut cutzhqcd_pythia = "weightSignalQCD * hpythia_naJets(min(Sum$(aJet_genPt>20 && abs(aJet_eta)<2.5),4))";
+    ev->ZbbHinv->Project("ZbbHinv_0", var, cutmc * cutzhewk_pythia * cutzhqcd_pythia);
     std::clog << "... DONE: project ZbbHinv_0." << std::endl;
     
-    ev->ZH_BSM->Project("ZH_BSM_0", var, cutmc * cutvhewk_pythia * cutvhqcd_pythia);
+    ev->ZH_BSM->Project("ZH_BSM_0", var, cutmc * cutzhewk_pythia * cutzhqcd_pythia);
     std::clog << "... DONE: project ZH_BSM_0." << std::endl;
-    ev->WH_BSM->Project("WH_BSM_0", var, cutmc * cutvhewk_pythia * cutvhqcd_pythia);
+    ev->WH_BSM->Project("WH_BSM_0", var, cutmc * cutzhewk_pythia * cutzhqcd_pythia);
     std::clog << "... DONE: project WH_BSM_0." << std::endl;
 
     // Apply slope
@@ -984,7 +1046,7 @@ void MakePlots(const EventsJ14 * ev, TString var_,
     
     // Add QCD after rebinning
     if (channel == "ZnunuMedPt") {
-        KillSpikes(hQCD, 10, 10, 1);
+        killspikes(hQCD, 10, 10, 1);  // FIXME: check this
     }
     hmc_exp->Add(hQCD);
 
@@ -1496,25 +1558,25 @@ void MakePlots(const EventsJ14 * ev, TString var_,
         leg2->AddEntry(hZj0b, "Z + udscg", "f");
         leg2->AddEntry(staterr, "MC uncert. (stat)", "f");
         
-//        TLegend * ratioleg1 = new TLegend(0.54, 0.88, 0.72, 0.96);
-//        //TLegend * ratioleg1 = new TLegend(0.50, 0.86, 0.69, 0.96);
-//        ratioleg1->AddEntry(ratiostaterr, "MC uncert. (stat)", "f");
-//        ratioleg1->SetFillColor(0);
-//        ratioleg1->SetLineColor(0);
-//        ratioleg1->SetShadowColor(0);
-//        ratioleg1->SetTextFont(62);
-//        ratioleg1->SetTextSize(0.06);
-//        ratioleg1->SetBorderSize(1);
-//        
-//        TLegend * ratioleg2 = new TLegend(0.72, 0.88, 0.95, 0.96);
-//        //TLegend * ratioleg2 = new TLegend(0.69, 0.86, 0.9, 0.96);
-//        ratioleg2->AddEntry(ratiosysterr, "MC uncert. (stat+syst)", "f");
-//        ratioleg2->SetFillColor(0);
-//        ratioleg2->SetLineColor(0);
-//        ratioleg2->SetShadowColor(0);
-//        ratioleg2->SetTextFont(62);
-//        ratioleg2->SetTextSize(0.06);
-//        ratioleg2->SetBorderSize(1);
+        //TLegend * ratioleg1 = new TLegend(0.54, 0.88, 0.72, 0.96);
+        ////TLegend * ratioleg1 = new TLegend(0.50, 0.86, 0.69, 0.96);
+        //ratioleg1->AddEntry(ratiostaterr, "MC uncert. (stat)", "f");
+        //ratioleg1->SetFillColor(0);
+        //ratioleg1->SetLineColor(0);
+        //ratioleg1->SetShadowColor(0);
+        //ratioleg1->SetTextFont(62);
+        //ratioleg1->SetTextSize(0.06);
+        //ratioleg1->SetBorderSize(1);
+        //
+        //TLegend * ratioleg2 = new TLegend(0.72, 0.88, 0.95, 0.96);
+        ////TLegend * ratioleg2 = new TLegend(0.69, 0.86, 0.9, 0.96);
+        //ratioleg2->AddEntry(ratiosysterr, "MC uncert. (stat+syst)", "f");
+        //ratioleg2->SetFillColor(0);
+        //ratioleg2->SetLineColor(0);
+        //ratioleg2->SetShadowColor(0);
+        //ratioleg2->SetTextFont(62);
+        //ratioleg2->SetTextSize(0.06);
+        //ratioleg2->SetBorderSize(1);
 
         TLegend * ratioleg1 = new TLegend(0.72, 0.88, 0.94, 0.96);
         //TLegend * ratioleg1 = new TLegend(0.50, 0.86, 0.69, 0.96);

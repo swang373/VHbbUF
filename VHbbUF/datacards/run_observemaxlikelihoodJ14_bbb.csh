@@ -33,3 +33,6 @@ python diffNuisances.py mlfit_combo.root -f html >> N5.html
 echo "*** combo2 ***" >! N6.html
 python diffNuisances.py mlfit_combo2.root -f html >> N6.html
 
+# To save post-fit shapes
+#combine -M MaxLikelihoodFit -m 125 --robustFit=1 --stepSize=0.05 --rMin=-5 --rMax=5 --saveShapes --saveWithUncertainties zhinv_Zbb_J14_bbb_combo_8TeV.txt
+
