@@ -19,8 +19,8 @@ observeprofi = "run_observeprofilelikelihoodJ14_bbb.csh"
 observemaxli = "run_observemaxlikelihoodJ14_bbb.csh"
 injectsignal = "run_injectsignalJ14_bbb.csh"
 
-outdir = "res_20130924/"
-afsdir = "/afs/cern.ch/user/j/jiafulow/public/zhinv_20130924/Zbb/"
+outdir = "res_20131111/"
+afsdir = "/afs/cern.ch/user/j/jiafulow/public/zhinv_20131111/Zbb/"
 
 #------------------------------------------------------------------------------
 
@@ -272,10 +272,10 @@ def transfer(outdir, afsdir):
 
 if __name__ == "__main__":
     
-    #var = "BDT"
+    var = "BDT"
     #var = "mBDT"
     #var = "nBDT"
-    var = "MJJ"
+    #var = "MJJ"
     data = "LHCP"
     #data = "HCP"
     #for analysis in [125]:

@@ -10,7 +10,7 @@
     gStyle->SetLineStyleString(11,"16 16");
 
     bool unblind = true;
-    bool isMJJ = true;
+    bool isMJJ = false;
     int n_points = 6;
     double x_vals[n_points] = {105, 115, 125, 135, 145, 150};
     //int n_points = 9;
@@ -31,13 +31,13 @@
     //double y_up_points2[n_points]=  {  0.3716, 0.3068, 0.2563, 0.2188, 0.1849, 0.1757 };
 
     // ZbbHinv (2013-08-07)
-    double y_injected[n_points]=    {  0.1762, 0.1457, 0.1225, 0.1042, 0.0879, 0.0839 };
-    double y_observed[n_points]=    {  0.176, 0.1449, 0.1215, 0.1035, 0.0875, 0.0832 };
-    double y_down_points2[n_points]={  0.0922, 0.0762, 0.0639, 0.0544, 0.0459, 0.0435 };
-    double y_down_points1[n_points]={  0.1241, 0.1026, 0.086, 0.073, 0.0619, 0.0588 };
-    double y_vals[n_points]=        {  0.1762, 0.1451, 0.1216, 0.1035, 0.0873, 0.0834 };
-    double y_up_points1[n_points]=  {  0.2514, 0.2081, 0.1744, 0.1485, 0.1253, 0.1196 };
-    double y_up_points2[n_points]=  {  0.348, 0.2873, 0.2407, 0.2049, 0.174, 0.1657 };
+    //double y_injected[n_points]=    {  0.1762, 0.1457, 0.1225, 0.1042, 0.0879, 0.0839 };
+    //double y_observed[n_points]=    {  0.176, 0.1449, 0.1215, 0.1035, 0.0875, 0.0832 };
+    //double y_down_points2[n_points]={  0.0922, 0.0762, 0.0639, 0.0544, 0.0459, 0.0435 };
+    //double y_down_points1[n_points]={  0.1241, 0.1026, 0.086, 0.073, 0.0619, 0.0588 };
+    //double y_vals[n_points]=        {  0.1762, 0.1451, 0.1216, 0.1035, 0.0873, 0.0834 };
+    //double y_up_points1[n_points]=  {  0.2514, 0.2081, 0.1744, 0.1485, 0.1253, 0.1196 };
+    //double y_up_points2[n_points]=  {  0.348, 0.2873, 0.2407, 0.2049, 0.174, 0.1657 };
 
     // ZbbHinv (2013-09-06)
     //double y_injected[n_points]=    {  0.1767, 0.1475, 0.1231, 0.1051, 0.0882, 0.0842 };
@@ -65,15 +65,43 @@
     //double y_vals[n_points]=        {  0.1714, 0.1433, 0.1188, 0.1013, 0.0856, 0.0808 };
     //double y_up_points1[n_points]=  {  0.2459, 0.2044, 0.1704, 0.1453, 0.1221, 0.116 };
     //double y_up_points2[n_points]=  {  0.3373, 0.2811, 0.2337, 0.1994, 0.168, 0.1601 };
+    
+    // ZbbHinv (2013-09-24 no XS uncert)
+    //double y_injected[n_points]=    {  0.1698, 0.1408, 0.1178, 0.0999, 0.0845, 0.0798 };
+    //double y_observed[n_points]=    {  0.1481, 0.1235, 0.1072, 0.0889, 0.0794, 0.0776 };
+    //double y_down_points2[n_points]={  0.0892, 0.0745, 0.0619, 0.0529, 0.0444, 0.0423 };
+    //double y_down_points1[n_points]={  0.1204, 0.1002, 0.0835, 0.071, 0.0599, 0.0568 };
+    //double y_vals[n_points]=        {  0.1698, 0.1408, 0.1178, 0.0999, 0.0845, 0.0798 };
+    //double y_up_points1[n_points]=  {  0.2409, 0.1998, 0.1672, 0.1424, 0.1198, 0.1139 };
+    //double y_up_points2[n_points]=  {  0.3281, 0.2739, 0.2276, 0.1947, 0.1643, 0.1557 };
 
     // ZbbHinv (2013-09-24 mT)
-    double y_injected[n_points]=    {  0.2336, 0.1904, 0.157, 0.1354, 0.1151, 0.1097 };
-    double y_observed[n_points]=    {  0.16, 0.1272, 0.1081, 0.0931, 0.0807, 0.0772 };
-    double y_down_points2[n_points]={  0.1236, 0.1007, 0.0839, 0.0715, 0.0611, 0.0582 };
-    double y_down_points1[n_points]={  0.1659, 0.1358, 0.1127, 0.096, 0.0824, 0.0785 };
-    double y_vals[n_points]=        {  0.2352, 0.1916, 0.1598, 0.1362, 0.1163, 0.1107 };
-    double y_up_points1[n_points]=  {  0.3355, 0.2749, 0.2292, 0.1953, 0.1677, 0.1597 };
-    double y_up_points2[n_points]=  {  0.4631, 0.3795, 0.3184, 0.2697, 0.2323, 0.2212 };
+    //double y_injected[n_points]=    {  0.2336, 0.1904, 0.157, 0.1354, 0.1151, 0.1097 };
+    //double y_observed[n_points]=    {  0.16, 0.1272, 0.1081, 0.0931, 0.0807, 0.0772 };
+    //double y_down_points2[n_points]={  0.1236, 0.1007, 0.0839, 0.0715, 0.0611, 0.0582 };
+    //double y_down_points1[n_points]={  0.1659, 0.1358, 0.1127, 0.096, 0.0824, 0.0785 };
+    //double y_vals[n_points]=        {  0.2352, 0.1916, 0.1598, 0.1362, 0.1163, 0.1107 };
+    //double y_up_points1[n_points]=  {  0.3355, 0.2749, 0.2292, 0.1953, 0.1677, 0.1597 };
+    //double y_up_points2[n_points]=  {  0.4631, 0.3795, 0.3184, 0.2697, 0.2323, 0.2212 };
+
+    // ZbbHinv (2013-09-24 mT, no XS uncert)
+    double y_injected[n_points]=    {  0.2304, 0.1892, 0.1579, 0.134, 0.1151, 0.1097 };
+    double y_observed[n_points]=    {  0.1582, 0.1258, 0.1069, 0.0921, 0.0798, 0.0763 };
+    double y_down_points2[n_points]={  0.122, 0.1001, 0.083, 0.0709, 0.0605, 0.0576 };
+    double y_down_points1[n_points]={  0.1639, 0.1342, 0.1113, 0.0953, 0.0816, 0.0773 };
+    double y_vals[n_points]=        {  0.2304, 0.1892, 0.1579, 0.134, 0.1151, 0.1097 };
+    double y_up_points1[n_points]=  {  0.3287, 0.2699, 0.2252, 0.1911, 0.1642, 0.1564 };
+    double y_up_points2[n_points]=  {  0.4522, 0.3713, 0.3099, 0.263, 0.2259, 0.2152 };
+
+    // ZbbHinv (2013-11-11)
+    double y_injected[n_points]=    {  0.1667, 0.1399, 0.1163, 0.0989, 0.0833, 0.0791 };
+    double y_observed[n_points]=    {  0.1558, 0.1298, 0.1129, 0.0934, 0.0835, 0.0814 };
+    double y_down_points2[n_points]={  0.0883, 0.074, 0.0615, 0.0522, 0.0439, 0.0415 };
+    double y_down_points1[n_points]={  0.1186, 0.0995, 0.0827, 0.0703, 0.0592, 0.0561 };
+    double y_vals[n_points]=        {  0.1667, 0.1399, 0.1163, 0.0989, 0.0833, 0.0791 };
+    double y_up_points1[n_points]=  {  0.2378, 0.1984, 0.1649, 0.1411, 0.1188, 0.1128 };
+    double y_up_points2[n_points]=  {  0.3251, 0.2702, 0.2261, 0.1929, 0.1624, 0.1542 };
+
 
     // -------------------------------------------------------------------------
 
@@ -215,13 +243,13 @@
     latex->SetTextSize(0.032);
     latex->DrawLatex(0.16, 0.97, "CMS Preliminary  #sqrt{s} = 8 TeV, L = 18.9 fb^{-1}");
     latex->SetTextSize(0.045);
-    latex->DrawLatex(0.19, 0.90, "Z(#rightarrow b#bar{b}) H(#rightarrow E_{T}^{miss})");
+    latex->DrawLatex(0.19, 0.90, "Z(#rightarrow b#bar{b}) H(#rightarrow inv)");
     if (isMJJ) {
         latex->DrawLatex(0.19, 0.84, "#color[4]{m_{T} analysis}");
     }
 
     gPad->RedrawAxis();
-    TString postfix = "_20130924";
+    TString postfix = "_20131111";
     if (!isMJJ) {
         gPad->Print("Limit_XS_ZbbHinv_BDT"+postfix+".pdf");
         gPad->Print("Limit_XS_ZbbHinv_BDT"+postfix+".png");
