@@ -56,7 +56,7 @@ Analysis
     python run_TrainRegression.py
     cp weights/TMVARegression_BDTG.weights.xml weights/TMVARegression_BDTG.testweights.xml
     cp TMVAReg.root testTMVAReg.root
-    
+
     # now run the BDT regression for FJ
     python run_TrainRegressionFJ.py
     cp weights/TMVARegressionFJ_BDTG.weights.xml weights/TMVARegressionFJ_BDTG.testweights.xml
@@ -123,15 +123,22 @@ Analysis
 10. Use `BDTShapeJ12.C` and `BDTShapeWorkspaceJ12.C` to get final limit and significance.
 
 .. code:: bash
-    
+
     # set the variable indir in the scripts, adjust binning, then run
     root -l -b -q BDTShapeJ12.C++O
     root -l -b -q BDTShapeWorkspaceJ12.C++O
 
-    # calculate final limit and significance (blinded)
+    # calculate expected limit and significance
     combine -M Asymptotic -t -1 vhbb_Znn_J11_ZnunuHighPt_8TeV.txt
     combine -M ProfileLikelihood -m 125 --signif --pvalue -t -1 --toysFreq --expectSignal=1 vhbb_Znn_J11_ZnunuHighPt_8TeV.txt
+    combine -M MaxLikelihoodFit -m 125 --robustFit=1 --stepSize=0.05 --rMin=-5 --rMax=5 --saveNorm -t -1 --toysFreq --expectSignal=1 vhbb_Znn_J11_ZnunuHighPt_8TeV.txt
+    python diffNuisances.py -f html mlfit.root
 
+    # calculate observed limit and significance
+    combine -M Asymptotic vhbb_Znn_J11_ZnunuHighPt_8TeV.txt
+    combine -M ProfileLikelihood -m 125 --signif --pvalue vhbb_Znn_J11_ZnunuHighPt_8TeV.txt
+    combine -M MaxLikelihoodFit -m 125 --robustFit=1 --stepSize=0.05 --rMin=-5 --rMax=5 --saveNorm vhbb_Znn_J11_ZnunuHighPt_8TeV.txt
+    python diffNuisances.py -f html mlfit.root
 
 
 
@@ -183,8 +190,14 @@ Tuning
     root [0] fomtree->Scan("NTrees:nEventsMin:MaxDepth:COMB_limit:COMB_signif:TMVA_kolS:TMVA_kolB:USER_psig","COMB_limit<3.6 && COMB_signif>0.68")
 
 
-99. BDT binning optimization instructions pending...
+98. BDT binning optimization instructions pending...
+
+99. Find yield uncertainties (only for ZbbHinv cards).
+
+.. code:: bash
+
+    # edit nuisances, processes, soverb if necessary
+    python systematica_ZbbHinv.py
 
 
 .. HTML generation command: rst2html.py --no-toc-backlinks --stylesheet=style.css < steps.txt > steps.html
-

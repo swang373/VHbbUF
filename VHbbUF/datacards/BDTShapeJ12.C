@@ -125,7 +125,7 @@ const TString g_plotdir     = "plotsJ12/";
 const TString g_var         = Form("BDTregular_%i[ISYST]", massH);  // ISYST is replaced in the main function.
 //const TString g_var         = Form("BDTregular_fj_%i[ISYST]", massH);  // ISYST is replaced in the main function.
 const TString g_varslice    = Form("slice(BDTregular_%i[ISYST], (BDTtt_%i[ISYST]>-0.5), (BDTvjlf_%i[ISYST]>-0.5), (BDTzz_%i[ISYST]>-0.3))", massH, massH, massH, massH);  // BDTzz > -0.35?
-//const TString g_varslice    = Form("slice(BDTregular_fj_%i[ISYST], (BDTtt_%i[ISYST]>-0.6), (BDTvjlf_%i[ISYST]>-0.5), (BDTzz_%i[ISYST]>-0.3))", massH, massH, massH, massH);
+//const TString g_varslice    = Form("slice(BDTregular_fj_%i[ISYST], (BDTtt_%i[ISYST]>-0.5), (BDTvjlf_%i[ISYST]>-0.5), (BDTzz_%i[ISYST]>-0.3))", massH, massH, massH, massH);
 //const TString g_varslice    = Form("hybridslice(BDTregularhybrid_%i[ISYST], BDTregularhybrid_fj_%i[ISYST], (nfathFilterJets>0 && FatH.FatHiggsFlag==1))", massH, massH);
 //const TString g_varslice    = Form("slice(BDTttbar_%i[ISYST], BDTvjl_%i[ISYST], BDTzz_%i[ISYST], BDTregular_%i[ISYST], -0.5, -0.4, -0.4)", massH, massH, massH, massH);
 #else
@@ -139,30 +139,30 @@ TString channel = "ZnunuHighPt";
 
 /// Systematics
 const TString g_systematics[nsyst] = {
-    "NONE", 
-    "CMS_vhbb_Znn_res_jUp", 
-    "CMS_vhbb_Znn_res_jDown", 
-    "CMS_vhbb_Znn_scale_jUp", 
-    "CMS_vhbb_Znn_scale_jDown", 
-    "CMS_vhbb_eff_bUp", 
-    "CMS_vhbb_eff_bDown", 
-    "CMS_vhbb_fake_b_8TeVUp", 
-    "CMS_vhbb_fake_b_8TeVDown", 
-    "UEPSUp", 
-    "UEPSDown", 
-    "CMS_vhbb_trigger_MET_Znn_8TeVUp", 
+    "NONE",
+    "CMS_vhbb_Znn_res_jUp",
+    "CMS_vhbb_Znn_res_jDown",
+    "CMS_vhbb_Znn_scale_jUp",
+    "CMS_vhbb_Znn_scale_jDown",
+    "CMS_vhbb_eff_bUp",
+    "CMS_vhbb_eff_bDown",
+    "CMS_vhbb_fake_b_8TeVUp",
+    "CMS_vhbb_fake_b_8TeVDown",
+    "UEPSUp",
+    "UEPSDown",
+    "CMS_vhbb_trigger_MET_Znn_8TeVUp",
     "CMS_vhbb_trigger_MET_Znn_8TeVDown",
-    "CMS_vhbb_trigger_CSV_Znn_8TeVUp", 
+    "CMS_vhbb_trigger_CSV_Znn_8TeVUp",
     "CMS_vhbb_trigger_CSV_Znn_8TeVDown",
 };
 
 /// Regions
 const TString g_regions[1+5] = {
-    "VH", 
-    "ZjLF", 
-    "ZjHF", 
+    "VH",
+    "ZjLF",
+    "ZjHF",
     "WjLF",
-    "WjHF", 
+    "WjHF",
     "TT"
 };
 
@@ -303,7 +303,7 @@ public:
         assert(data_obs  != 0 && data_obs ->GetEntriesFast() > 0);
         return;
     }
-    
+
     void set_scalefactors(const double sf[7]) {
         sf_Wj0b = sf[0];
         sf_Wj1b = sf[1];
@@ -417,11 +417,11 @@ using namespace std;
 /// Declare rebinner
 Rebinner* rebinner = 0;
 
-void MakePlots(const EventsJ12 * ev, TString var_, 
-               TCut cutmc_, TCut cutdata_, const TString syst, const TString region, 
-               const char* xtitle, int nbins, double xlow, double xup, 
-               long long newnbins, double errorffirst, double errorflast, 
-               const double scalefactors_lnN[7], 
+void MakePlots(const EventsJ12 * ev, TString var_,
+               TCut cutmc_, TCut cutdata_, const TString syst, const TString region,
+               const char* xtitle, int nbins, double xlow, double xup,
+               long long newnbins, double errorffirst, double errorflast,
+               const double scalefactors_lnN[7],
                TString options="printStat:printCard:plotData:plotLog:plotSig")
 {
 #ifdef HCPANALYSIS
@@ -439,7 +439,7 @@ void MakePlots(const EventsJ12 * ev, TString var_,
     str       = cutdata_.GetTitle();
     regexp.Substitute(str, "selectFlags[0][$1] * selectMjj[$1]", "g");  // "g" for global
     cutdata_  = TCut(str);
-    
+
     if (TString(xtitle) == "BDT") {
         var_      = "HmassReg+0";
         if (syst == "CMS_vhbb_Znn_res_jUp")
@@ -450,7 +450,7 @@ void MakePlots(const EventsJ12 * ev, TString var_,
             var_  = "HmassReg_scale_j_up";
         else if (syst == "CMS_vhbb_Znn_scale_jDown")
             var_  = "HmassReg_scale_j_down";
-        
+
         // FIXME post mortem fix
         if (channel == "ZnunuHighPt") {
             if (syst == "CMS_vhbb_Znn_res_jUp") {
@@ -486,7 +486,7 @@ void MakePlots(const EventsJ12 * ev, TString var_,
             //    cutmc_   *= "HptReg>140 && hJet_ptReg[0]>80";
             //    cutdata_ *= "HptReg>140 && hJet_ptReg[0]>80";
             //}
-            
+
             if (syst == "CMS_vhbb_Znn_res_jUp") {
                 cutmc_   *= "HptReg_res_j_up > 140";
                 cutdata_ *= "HptReg_res_j_up > 140";
@@ -505,13 +505,13 @@ void MakePlots(const EventsJ12 * ev, TString var_,
             }
 
         }
-        
+
         xtitle    = "m(jj) [GeV]";
         nbins     = 17;
         xlow      = 0.;
         xup       = 255.;
         newnbins  = 17;
-        
+
         if (!options.Contains("!plotLog"))
             options.ReplaceAll("plotLog", "!plotLog");
     }
@@ -525,7 +525,7 @@ void MakePlots(const EventsJ12 * ev, TString var_,
     const TCut    cutmc   = cutmc_;
     const TCut    cutdata = cutdata_;
     const TString var     = var_;
-    
+
     std::clog << "MakePlots(): Using cutmc = " << cutmc << ", cutdata = " << cutdata << std::endl;
 
     // Parse options
@@ -564,7 +564,7 @@ void MakePlots(const EventsJ12 * ev, TString var_,
     TH1F * hVV_0        = new TH1F("VV_0"       , "", nbins, xlow, xup);
     TH1F * hmc_exp_0    = new TH1F("mc_exp_0"   , "", nbins, xlow, xup);
     TH1F * hdata_obs_0  = new TH1F("data_obs_0" , "", nbins, xlow, xup);
-    
+
     std::vector<TH1 *> histos_0;
     histos_0.push_back(hZH_0);
     histos_0.push_back(hWH_0);
@@ -592,12 +592,13 @@ void MakePlots(const EventsJ12 * ev, TString var_,
     histos_0.push_back(hVV_0);
     histos_0.push_back(hmc_exp_0);
     histos_0.push_back(hdata_obs_0);
-    
+
     for (UInt_t ih = 0; ih < histos_0.size(); ih++)
         histos_0.at(ih)->Sumw2();
 
     TCut cutvhewk = "weightSignalEWKNew";
     TCut cutvhqcd = "weightSignalQCD";
+    TCut cutvhqcdnew = "weightSignalQCDNew";
 #if !defined(VHEWKCORRECTION)
     ev->ZH->Project("ZH_0", var, cutmc);
     std::clog << "... DONE: project ZH_0." << std::endl;
@@ -617,11 +618,11 @@ void MakePlots(const EventsJ12 * ev, TString var_,
     ev->WH_SM->Project("WH_SM_0", var, cutmc * cutvhewk);
     std::clog << "... DONE: project WH_SM_0." << std::endl;
 #else
-    ev->ZH->Project("ZH_0", var, cutmc * cutvhewk * cutvhqcd);
+    ev->ZH->Project("ZH_0", var, cutmc * cutvhewk * cutvhqcd * cutvhqcdnew);
     std::clog << "... DONE: project ZH_0." << std::endl;
     ev->WH->Project("WH_0", var, cutmc * cutvhewk * cutvhqcd);
     std::clog << "... DONE: project WH_0." << std::endl;
-    ev->ZH_SM->Project("ZH_SM_0", var, cutmc * cutvhewk * cutvhqcd);
+    ev->ZH_SM->Project("ZH_SM_0", var, cutmc * cutvhewk * cutvhqcd * cutvhqcdnew);
     std::clog << "... DONE: project ZH_SM_0." << std::endl;
     ev->WH_SM->Project("WH_SM_0", var, cutmc * cutvhewk * cutvhqcd);
     std::clog << "... DONE: project WH_SM_0." << std::endl;
@@ -635,7 +636,7 @@ void MakePlots(const EventsJ12 * ev, TString var_,
     double ZJSlope = -1.00;
     TCut cutwjslope = Form("apply_pt_slope(genW.pt, %f, 150)", WJSlope * WJSlopeErr);
     TCut cutzjslope = Form("apply_pt_slope(genZ.pt, %f, 130)", ZJSlope * ZJSlopeErr);
-    
+
     // Apply scale factors
     TCut cutsf = "1.0";
     cutsf = Form("%f", ev->sf_Wj0b);
@@ -659,7 +660,7 @@ void MakePlots(const EventsJ12 * ev, TString var_,
     cutsf = Form("%f", ev->sf_TT);
     ev->TT->Project("TT_0", var, cutmc * cutsf);
     std::clog << "... DONE: project TT_0, scaled by " << cutsf << "." << std::endl;
-    
+
     ev->s_Top->Project("s_Top_0", var, cutmc);
     std::clog << "... DONE: project s_Top_0." << std::endl;
     ev->VVLF->Project("VVLF_0", var, cutmc);
@@ -695,7 +696,7 @@ void MakePlots(const EventsJ12 * ev, TString var_,
     std::clog << "... DONE: project Zj2b_syst_0." << std::endl;
     ev->TT_syst->Project("TT_syst_0", var, cutmc);
     std::clog << "... DONE: project TT_syst_0." << std::endl;
-    
+
     ev->data_obs->Project("data_obs_0", var, cutdata);
     std::clog << "... DONE: project data_obs_0." << std::endl;
 
@@ -723,7 +724,7 @@ void MakePlots(const EventsJ12 * ev, TString var_,
     hmc_exp_0->Add(hVVLF_0);
     //hmc_exp_0->Add(hVH_0);  // VH is not counted as background
 #endif
-    //hmc_exp_0->Add(hQCD_0);  // QCD is added after rebinning
+    hmc_exp_0->Add(hQCD_0);  // QCD is added after rebinning  //FIXME
     std::clog << "... DONE: add MC backgrounds to mc_exp_0." << std::endl;
 
     if (rebinner == 0) {
@@ -757,9 +758,9 @@ void MakePlots(const EventsJ12 * ev, TString var_,
     TH1F * hVV        = rebinner->rebin(hVV_0         , newnbins, "VV"        );
     TH1F * hmc_exp    = rebinner->rebin(hmc_exp_0     , newnbins, "mc_exp"    );
     TH1F * hdata_obs  = rebinner->rebin(hdata_obs_0   , newnbins, "data_obs"  );
-    
-    // Add QCD after rebinning
-    hmc_exp->Add(hQCD);
+
+    // Add QCD after rebinning  //FIXME
+    //hmc_exp->Add(hQCD);
 
     std::vector<TH1 *> histos;
     histos.push_back(hZH);
@@ -788,27 +789,27 @@ void MakePlots(const EventsJ12 * ev, TString var_,
     histos.push_back(hVV);
     histos.push_back(hmc_exp);
     histos.push_back(hdata_obs);
-    
+
     assert(histos.size() == histos_0.size());
     for (UInt_t ih = 0; ih < histos.size(); ih++)
         histos.at(ih)->Sumw2();
-    
+
     if (printStat && syst == "NONE") {
         std::clog << "MakePlots(): Printing statistics..." << std::endl;
-        
+
         const int p_bin1=0, p_bin2=9999;
         double p_integral=0., p_error=0.;
         double D=0., S=0., B=0.;
         std::cout.setf(ios::fixed,ios::floatfield);
         std::cout.precision(3);
-        
+
         p_integral = hZH->IntegralAndError(p_bin1, p_bin2, p_error);
         S += p_integral;
         std::cout << setw(10) << left << "ZH " << "(" << p_bin1 << ", " << p_bin2 << ") = " << setw(8) << right << p_integral << " +/- " << setw(6) << right << p_error << std::endl;
         p_integral = hWH->IntegralAndError(p_bin1, p_bin2, p_error);
         S += p_integral;
         std::cout << setw(10) << left << "WH " << "(" << p_bin1 << ", " << p_bin2 << ") = " << setw(8) << right << p_integral << " +/- " << setw(6) << right << p_error << std::endl;
-        
+
         p_integral = hWj0b->IntegralAndError(p_bin1, p_bin2, p_error);
         B += p_integral;
         std::cout << setw(10) << left << "Wj0b " << "(" << p_bin1 << ", " << p_bin2 << ") = " << setw(8) << right << p_integral << " +/- " << setw(6) << right << p_error << std::endl;
@@ -842,7 +843,7 @@ void MakePlots(const EventsJ12 * ev, TString var_,
         p_integral = hQCD->IntegralAndError(p_bin1, p_bin2, p_error);
         B += p_integral;
         std::cout << setw(10) << left << "QCD " << "(" << p_bin1 << ", " << p_bin2 << ") = " << setw(8) << right << p_integral << " +/- " << setw(6) << right << p_error << std::endl;
-        
+
         p_integral = hVH->IntegralAndError(p_bin1, p_bin2, p_error);
         std::cout << setw(10) << left << "VH " << "(" << p_bin1 << ", " << p_bin2 << ") = " << setw(8) << right << p_integral << " +/- " << setw(6) << right << p_error << std::endl;
         p_integral = hVV->IntegralAndError(p_bin1, p_bin2, p_error);
@@ -871,7 +872,7 @@ void MakePlots(const EventsJ12 * ev, TString var_,
         TString channel_8TeV_1 = channel_8TeV;  // scale factors
         if (channel == "ZnunuLowCSV")
             channel_8TeV_1.ReplaceAll("ZnunuLowCSV", "ZnunuHighPt");
-        
+
         std::ofstream dc;
         dc.setf(ios::fixed,ios::floatfield);
         dc.precision(3);
@@ -900,7 +901,7 @@ void MakePlots(const EventsJ12 * ev, TString var_,
         dc << "-----------------------------------" << std::endl;
         dc << "" << std::endl;
         dc << "### Flat ########################### #####  ZH    WH    Wj0b  Wj1b  Wj2b  Zj0b  Zj1b  Zj2b  TT    s_Top VVLF  VVHF  QCD  " << std::endl;
-        dc << "lumi_8TeV                            lnN    1.05  1.05  -     -     -     -     -     -     -     1.05  1.05  1.05  1.05 " << std::endl;
+        dc << "lumi_8TeV                            lnN    1.026 1.026 -     -     -     -     -     -     -     1.026 1.026 1.026 1.026" << std::endl;
         dc << "pdf_qqbar                            lnN    1.01  1.01  -     -     -     -     -     -     -     -     1.01  1.01  -    " << std::endl;
         dc << "pdf_gg                               lnN    -     -     -     -     -     -     -     -     -     1.01  -     -     1.01 " << std::endl;
         dc << "QCDscale_VH                          lnN    1.04  1.04  -     -     -     -     -     -     -     -     -     -     -    " << std::endl;
@@ -933,7 +934,7 @@ void MakePlots(const EventsJ12 * ev, TString var_,
         dc << "CMS_vhbb_Zj1b_SF_" << channel_8TeV_1 << "    lnN    -     -     -     -     -     -     " << scalefactors_lnN[4] << "  -     -     -     -     -     -    " << std::endl;
         dc << "CMS_vhbb_Zj2b_SF_" << channel_8TeV_1 << "    lnN    -     -     -     -     -     -     -     " << scalefactors_lnN[5] << "  -     -     -     -     -    " << std::endl;
         dc << "CMS_vhbb_TT_SF_" << channel_8TeV_1 << "      lnN    -     -     -     -     -     -     -     -     " << scalefactors_lnN[6] << "  -     -     -     -    " << std::endl;
-        dc << "CMS_vhbb_QCD_SF_" << channel_8TeV_1 << "     lnN    -     -     -     -     -     -     -     -     -     -     -     -     1.60 " << std::endl;
+        dc << "CMS_vhbb_QCD_SF_" << channel_8TeV_1 << "     lnN    -     -     -     -     -     -     -     -     -     -     -     -     2.00 " << std::endl;
         dc << "### Shape ########################## #####  ZH    WH    Wj0b  Wj1b  Wj2b  Zj0b  Zj1b  Zj2b  TT    s_Top VVLF  VVHF  QCD  " << std::endl;
         //dc << "CMS_vhbb_boost_QCD_8TeV                   shape  1.00  1.00  -     -     -     -     -     -     -     -     -     -     -    " << std::endl;
         dc << "CMS_vhbb_eff_b                       shape  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  -    " << std::endl;
@@ -975,14 +976,14 @@ void MakePlots(const EventsJ12 * ev, TString var_,
         dc << "CMS_vhbb_statQCD_" << channel_8TeV << "    shape  -     -     -     -     -     -     -     -     -     -     -     -     1.00 " << std::endl;
         dc << "#################################### #####  ZH    WH    Wj0b  Wj1b  Wj2b  Zj0b  Zj1b  Zj2b  TT    s_Top VVLF  VVHF  QCD  " << std::endl;
         dc.close();
-        
+
         std::clog << "MakePlots(): The datacard is written." << std::endl;
     } // end if syst == NONE
 
 
     if (syst == "NONE") {
         std::clog << "MakePlots(): Setting up histograms..." << std::endl;
-        
+
         // Setup canvas and pads
         TCanvas * c1 = new TCanvas("c1", "c1", 700, 700);
         //TCanvas * c1 = new TCanvas("c1", "c1", 600, 600);
@@ -1013,7 +1014,7 @@ void MakePlots(const EventsJ12 * ev, TString var_,
         setHisto(hVVLF, "VV");
         setHisto(hVVHF, "VVHF");
         setHisto(hQCD, "QCD");
-        
+
         TH1F * hdata_test = (TH1F *) hdata_obs->Clone("hdata_test");  // blinded plot
         TH1F * hmc_test = (TH1F *) hmc_exp->Clone("hmc_test");  // for chi2 and KS test
         hdata_test->Sumw2();
@@ -1068,13 +1069,13 @@ void MakePlots(const EventsJ12 * ev, TString var_,
         hs->Add(hVVHF);
         if (plotSig)  hs->Add(hVH);
 #endif
-        
+
         double ymax = TMath::Max(hdata_test->GetMaximum(), hs->GetMaximum());
         hs->SetMaximum(ymax * 1.7 + (ymax>1 ? sqrt(ymax) : 0.));
         if (plotLog)
             hs->SetMaximum(ymax * 200 + (ymax>1 ? sqrt(ymax) : 0.));
         hs->SetMinimum(0.01);
-        
+
         // Setup auxiliary histograms
         std::clog << "MakePlots(): Setting up auxiliary histograms..." << std::endl;
         TH1F * staterr = (TH1F *) hmc_exp->Clone("staterr");
@@ -1083,13 +1084,13 @@ void MakePlots(const EventsJ12 * ev, TString var_,
         staterr->SetFillColor(kGray+3);
         staterr->SetMarkerSize(0);
         staterr->SetFillStyle(3013);
-        
+
         TH1F * ratio = (TH1F *) hdata_test->Clone("ratio");
         ratio->Sumw2();
         ratio->SetMarkerSize(0.8);
         //ratio->SetMarkerSize(0.5);
         ratio->Divide(hdata_test, hmc_exp, 1., 1., "");
-        
+
         TH1F * ratiostaterr = (TH1F *) hmc_exp->Clone("ratiostaterr");
         ratiostaterr->Sumw2();
         ratiostaterr->SetStats(0);
@@ -1114,10 +1115,10 @@ void MakePlots(const EventsJ12 * ev, TString var_,
         //ratiostaterr->GetYaxis()->SetTitleSize(0.10);
         ratiostaterr->GetYaxis()->SetTitleOffset(0.6);
         ratiostaterr->GetYaxis()->SetNdivisions(505);
-        
+
         TLine* ratiounity = new TLine(xlow,1,xup,1);
         ratiounity->SetLineStyle(2);
-        
+
         for (Int_t i = 0; i < hmc_exp->GetNbinsX()+2; i++) {
             ratiostaterr->SetBinContent(i, 1.0);
             if (hmc_exp->GetBinContent(i) > 1e-6) {  // use smaller tolerance?
@@ -1126,12 +1127,12 @@ void MakePlots(const EventsJ12 * ev, TString var_,
             } else {
                 ratiostaterr->SetBinError(i, 999.);
             }
-            
+
             //if (!(hdata_test->GetBinContent(i) > 1e-6)) {
             //    ratiostaterr->SetBinError(i, 0.);
             //}
         }
-        
+
         TH1F * ratiosysterr = (TH1F *) ratiostaterr->Clone("ratiosysterr");
         ratiosysterr->Sumw2();
         ratiosysterr->SetMarkerSize(0);
@@ -1139,7 +1140,7 @@ void MakePlots(const EventsJ12 * ev, TString var_,
         ratiosysterr->SetFillColor(kYellow-4);
         //ratiosysterr->SetFillStyle(3002);
         ratiosysterr->SetFillStyle(1001);
-        
+
         for (Int_t i = 0; i < hmc_exp->GetNbinsX()+2; i++) {
             if (hmc_exp->GetBinContent(i) > 1e-6) {  // use smaller tolerance?
 
@@ -1155,12 +1156,12 @@ void MakePlots(const EventsJ12 * ev, TString var_,
 #ifndef VVANALYSIS
                                     pow(0.25 * hVVLF->GetBinContent(i), 2) +
                                     pow(0.25 * hVVHF->GetBinContent(i), 2));
-#else                                    
+#else
                                     pow(0.25 * hVVLF->GetBinContent(i), 2));
 #endif
                 double binerror = sqrt(binerror2);
                 ratiosysterr->SetBinError(i, binerror / hmc_exp->GetBinContent(i));
-                
+
                 if (hmc_test->GetBinContent(i) > 1e-6)  // use smaller tolerance?
                     hmc_test->SetBinError(i, binerror);
                 if (hdata_test->GetBinContent(i) > 1e-6)
@@ -1228,7 +1229,7 @@ void MakePlots(const EventsJ12 * ev, TString var_,
         leg2->AddEntry(hZj1b, "Z + b", "f");
         leg2->AddEntry(hZj0b, "Z + udscg", "f");
         leg2->AddEntry(staterr, "MC uncert. (stat)", "f");
-        
+
 
 //        //TLegend * ratioleg1 = new TLegend(0.54, 0.86, 0.72, 0.96);
 //        TLegend * ratioleg1 = new TLegend(0.54, 0.88, 0.72, 0.96);
@@ -1240,7 +1241,7 @@ void MakePlots(const EventsJ12 * ev, TString var_,
 //        ratioleg1->SetTextFont(62);
 //        ratioleg1->SetTextSize(0.06);
 //        ratioleg1->SetBorderSize(1);
-//        
+//
 //        //TLegend * ratioleg2 = new TLegend(0.72, 0.86, 0.95, 0.96);
 //        TLegend * ratioleg2 = new TLegend(0.72, 0.88, 0.95, 0.96);
 //        //TLegend * ratioleg2 = new TLegend(0.69, 0.86, 0.9, 0.96);
@@ -1275,7 +1276,7 @@ void MakePlots(const EventsJ12 * ev, TString var_,
         hs->GetYaxis()->SetTitle(ytitle);
         if (TString(xtitle).Contains(" ; "))
             hs->SetTitle(TString(";")+xtitle);
-        
+
         staterr->Draw("e2 same");
         if (plotSig) {
             hVH->SetLineWidth(3);
@@ -1288,10 +1289,10 @@ void MakePlots(const EventsJ12 * ev, TString var_,
         hVVHF->SetFillColor(0);
         hVVHF->Draw("hist same");
 #endif
-        
+
         // Draw data
         hdata_test->Draw("e1 same");
-        
+
         // Draw legends
         //leg->Draw();
         leg1->Draw();
@@ -1308,7 +1309,7 @@ void MakePlots(const EventsJ12 * ev, TString var_,
 #else
         latex->DrawLatex(0.19, 0.84, "#sqrt{s} = 8 TeV, L = 12.3 fb^{-1}");
 #endif
-        
+
         latex->DrawLatex(0.19, 0.79, "Z(#nu#bar{#nu})H(b#bar{b})");
         if (region == "ZjLF")
             latex->DrawLatex(0.19, 0.74, "Z + udscg enriched");
@@ -1320,7 +1321,7 @@ void MakePlots(const EventsJ12 * ev, TString var_,
             latex->DrawLatex(0.19, 0.74, "W + b#bar{b} enriched");
         else if (region == "TT")
             latex->DrawLatex(0.19, 0.74, "t#bar{t} enriched");
-        
+
         // Under/overflows a la TMVA
         TString uoflow = Form("U/O-flow (Data,MC): (%.1f, %.1f) / (%.1f, %.1f)", hdata_test->GetBinContent(0), hmc_exp->GetBinContent(0), hdata_test->GetBinContent(nbins_plot+1), hmc_exp->GetBinContent(nbins_plot+1));
         TLatex * latex2 = new TLatex(0.99, 0.1, uoflow);
@@ -1328,7 +1329,7 @@ void MakePlots(const EventsJ12 * ev, TString var_,
         latex2->SetTextSize(0.02);
         latex2->SetTextAngle(90);
         latex2->AppendPad();
-        
+
         // Draw ratio
         pad2->cd();
         pad2->SetGridy(0);
@@ -1337,7 +1338,7 @@ void MakePlots(const EventsJ12 * ev, TString var_,
         ratiostaterr->Draw("e2 same");
         ratiounity->Draw();
         ratio->Draw("e1 same");
-        
+
         // Draw ratio legends
         ratioleg1->Draw();
         //ratioleg2->Draw();
@@ -1373,7 +1374,7 @@ void MakePlots(const EventsJ12 * ev, TString var_,
         FormatFileName(plotname);
         gPad->Print(g_plotdir+plotname+".png");
         gPad->Print(g_plotdir+plotname+".pdf");
-        
+
         delete hdata_test;
         delete hmc_test;
         delete staterr;
@@ -1431,12 +1432,12 @@ void MakePlots(const EventsJ12 * ev, TString var_,
                     TH1F * h_statDown = (TH1F *) VaryStatErrors((TH1F *) histos.at(ih), -1.0, name);
                     h_statUp->Write(h_statUp->GetName());
                     h_statDown->Write(h_statDown->GetName());
-                    
+
                     delete h_statUp;
                     delete h_statDown;
                 }
             }
-            
+
             name = "Wj0b_CMS_vhbb_WJModel_Znn_8TeVUp";
             TH1F * hWj0b_modelUp = VaryModelErrors((TH1F *) hWj0b, (TH1F *) hWj0b_syst, 1.0, name);
             name = "Wj1b_CMS_vhbb_WJModel_Znn_8TeVUp";
@@ -1455,14 +1456,14 @@ void MakePlots(const EventsJ12 * ev, TString var_,
             hWj0b_modelDown->Write(hWj0b_modelDown->GetName());
             hWj1b_modelDown->Write(hWj1b_modelDown->GetName());
             hWj2b_modelDown->Write(hWj2b_modelDown->GetName());
-            
+
             delete hWj0b_modelUp;
             delete hWj1b_modelUp;
             delete hWj2b_modelUp;
             delete hWj0b_modelDown;
             delete hWj1b_modelDown;
             delete hWj2b_modelDown;
-            
+
             name = "Zj0b_CMS_vhbb_ZJModel_Znn_8TeVUp";
             TH1F * hZj0b_modelUp = VaryModelErrors((TH1F *) hZj0b, (TH1F *) hZj0b_syst, 1.0, name);
             name = "Zj1b_CMS_vhbb_ZJModel_Znn_8TeVUp";
@@ -1481,24 +1482,24 @@ void MakePlots(const EventsJ12 * ev, TString var_,
             hZj0b_modelDown->Write(hZj0b_modelDown->GetName());
             hZj1b_modelDown->Write(hZj1b_modelDown->GetName());
             hZj2b_modelDown->Write(hZj2b_modelDown->GetName());
-            
+
             delete hZj0b_modelUp;
             delete hZj1b_modelUp;
             delete hZj2b_modelUp;
             delete hZj0b_modelDown;
             delete hZj1b_modelDown;
             delete hZj2b_modelDown;
-            
+
             name = "TT_CMS_vhbb_TTModel_Znn_8TeVUp";
             TH1F * hTT_modelUp = VaryModelErrors((TH1F *) hTT, (TH1F *) hTT_syst, 1.0, name);
             name = "TT_CMS_vhbb_TTModel_Znn_8TeVDown";
             TH1F * hTT_modelDown = VaryModelErrors((TH1F *) hTT, (TH1F *) hTT_syst, -1.0, name);
             hTT_modelUp->Write(hTT_modelUp->GetName());
             hTT_modelDown->Write(hTT_modelDown->GetName());
-            
+
             delete hTT_modelUp;
             delete hTT_modelDown;
-            
+
             TH1F * hWj0b_slopeUp_0    = new TH1F("Wj0b_slopeUp_0"   , "", nbins, xlow, xup);
             TH1F * hWj1b_slopeUp_0    = new TH1F("Wj1b_slopeUp_0"   , "", nbins, xlow, xup);
             TH1F * hWj2b_slopeUp_0    = new TH1F("Wj2b_slopeUp_0"   , "", nbins, xlow, xup);
@@ -1511,10 +1512,10 @@ void MakePlots(const EventsJ12 * ev, TString var_,
             TH1F * hZj0b_slopeDown_0  = new TH1F("Zj0b_slopeDown_0" , "", nbins, xlow, xup);
             TH1F * hZj1b_slopeDown_0  = new TH1F("Zj1b_slopeDown_0" , "", nbins, xlow, xup);
             TH1F * hZj2b_slopeDown_0  = new TH1F("Zj2b_slopeDown_0" , "", nbins, xlow, xup);
-            
+
             cutwjslope = Form("apply_pt_slope(genW.pt, %f, 150)", (WJSlope + 1.0) * WJSlopeErr);
             cutzjslope = Form("apply_pt_slope(genZ.pt, %f, 130)", (ZJSlope + 1.0) * ZJSlopeErr);
-            
+
             TCut cutslope = "1.0";
             cutsf = Form("%f", ev->sf_Wj0b);
             ev->Wj0b->Project("Wj0b_slopeUp_0", var, cutmc * cutsf * cutwjslope);
@@ -1528,10 +1529,10 @@ void MakePlots(const EventsJ12 * ev, TString var_,
             ev->Zj1b->Project("Zj1b_slopeUp_0", var, cutmc * cutsf * cutzjslope);
             cutsf = Form("%f", ev->sf_Zj2b);
             ev->Zj2b->Project("Zj2b_slopeUp_0", var, cutmc * cutsf * cutzjslope);
-            
+
             cutwjslope = Form("apply_pt_slope(genW.pt, %f, 150)", (WJSlope - 1.0) * WJSlopeErr);
             cutzjslope = Form("apply_pt_slope(genZ.pt, %f, 130)", (ZJSlope - 1.0) * ZJSlopeErr);
-            
+
             cutsf = Form("%f", ev->sf_Wj0b);
             ev->Wj0b->Project("Wj0b_slopeDown_0", var, cutmc * cutsf * cutwjslope);
             cutsf = Form("%f", ev->sf_Wj1b);
@@ -1544,7 +1545,7 @@ void MakePlots(const EventsJ12 * ev, TString var_,
             ev->Zj1b->Project("Zj1b_slopeDown_0", var, cutmc * cutsf * cutzjslope);
             cutsf = Form("%f", ev->sf_Zj2b);
             ev->Zj2b->Project("Zj2b_slopeDown_0", var, cutmc * cutsf * cutzjslope);
-            
+
             TH1F * hWj0b_slopeUp    = rebinner->rebin(hWj0b_slopeUp_0   , newnbins, "Wj0b_CMS_vhbb_WJSlope_Znn_8TeVUp"    );
             TH1F * hWj1b_slopeUp    = rebinner->rebin(hWj1b_slopeUp_0   , newnbins, "Wj1b_CMS_vhbb_WJSlope_Znn_8TeVUp"    );
             TH1F * hWj2b_slopeUp    = rebinner->rebin(hWj2b_slopeUp_0   , newnbins, "Wj2b_CMS_vhbb_WJSlope_Znn_8TeVUp"    );
@@ -1557,7 +1558,7 @@ void MakePlots(const EventsJ12 * ev, TString var_,
             TH1F * hZj0b_slopeDown  = rebinner->rebin(hZj0b_slopeDown_0 , newnbins, "Zj0b_CMS_vhbb_ZJSlope_Znn_8TeVDown"  );
             TH1F * hZj1b_slopeDown  = rebinner->rebin(hZj1b_slopeDown_0 , newnbins, "Zj1b_CMS_vhbb_ZJSlope_Znn_8TeVDown"  );
             TH1F * hZj2b_slopeDown  = rebinner->rebin(hZj2b_slopeDown_0 , newnbins, "Zj2b_CMS_vhbb_ZJSlope_Znn_8TeVDown"  );
-            
+
             hWj0b_slopeUp->Scale(hWj0b->GetSumOfWeights() / hWj0b_slopeUp->GetSumOfWeights());
             hWj1b_slopeUp->Scale(hWj1b->GetSumOfWeights() / hWj1b_slopeUp->GetSumOfWeights());
             hWj2b_slopeUp->Scale(hWj2b->GetSumOfWeights() / hWj2b_slopeUp->GetSumOfWeights());
@@ -1570,7 +1571,7 @@ void MakePlots(const EventsJ12 * ev, TString var_,
             hZj0b_slopeDown->Scale(hZj0b->GetSumOfWeights() / hZj0b_slopeDown->GetSumOfWeights());
             hZj1b_slopeDown->Scale(hZj1b->GetSumOfWeights() / hZj1b_slopeDown->GetSumOfWeights());
             hZj2b_slopeDown->Scale(hZj2b->GetSumOfWeights() / hZj2b_slopeDown->GetSumOfWeights());
-            
+
             hWj0b_slopeUp->Write(hWj0b_slopeUp->GetName());
             hWj1b_slopeUp->Write(hWj1b_slopeUp->GetName());
             hWj2b_slopeUp->Write(hWj2b_slopeUp->GetName());
@@ -1583,7 +1584,7 @@ void MakePlots(const EventsJ12 * ev, TString var_,
             hZj0b_slopeDown->Write(hZj0b_slopeDown->GetName());
             hZj1b_slopeDown->Write(hZj1b_slopeDown->GetName());
             hZj2b_slopeDown->Write(hZj2b_slopeDown->GetName());
-            
+
             delete hWj0b_slopeUp_0; delete hWj0b_slopeUp;
             delete hWj1b_slopeUp_0; delete hWj1b_slopeUp;
             delete hWj2b_slopeUp_0; delete hWj2b_slopeUp;
@@ -1596,7 +1597,7 @@ void MakePlots(const EventsJ12 * ev, TString var_,
             delete hZj0b_slopeDown_0; delete hZj0b_slopeDown;
             delete hZj1b_slopeDown_0; delete hZj1b_slopeDown;
             delete hZj2b_slopeDown_0; delete hZj2b_slopeDown;
-            
+
             TH1F * hZH_vhqcdUp_0      = new TH1F("ZH_vhqcdUp_0"     , "", nbins, xlow, xup);
             TH1F * hWH_vhqcdUp_0      = new TH1F("WH_vhqcdUp_0"     , "", nbins, xlow, xup);
             TH1F * hZH_SM_vhqcdUp_0   = new TH1F("ZH_SM_vhqcdUp_0"  , "", nbins, xlow, xup);
@@ -1605,7 +1606,7 @@ void MakePlots(const EventsJ12 * ev, TString var_,
             TH1F * hWH_vhqcdDown_0    = new TH1F("WH_vhqcdDown_0"   , "", nbins, xlow, xup);
             TH1F * hZH_SM_vhqcdDown_0 = new TH1F("ZH_SM_vhqcdDown_0", "", nbins, xlow, xup);
             TH1F * hWH_SM_vhqcdDown_0 = new TH1F("WH_SM_vhqcdDown_0", "", nbins, xlow, xup);
-            
+
             TCut cutvhqcdUp   = Form("(1-0.5*(1-%s))", cutvhqcd.GetTitle());
             TCut cutvhqcdDown = Form("(1-1.5*(1-%s))", cutvhqcd.GetTitle());
             ev->ZH->Project("ZH_vhqcdUp_0", var, cutmc * cutvhqcdUp);
@@ -1616,7 +1617,7 @@ void MakePlots(const EventsJ12 * ev, TString var_,
             ev->WH->Project("WH_vhqcdDown_0", var, cutmc * cutvhqcdDown);
             ev->ZH_SM->Project("ZH_SM_vhqcdDown_0", var, cutmc * cutvhqcdDown);
             ev->WH_SM->Project("WH_SM_vhqcdDown_0", var, cutmc * cutvhqcdDown);
-            
+
             TH1F * hZH_vhqcdUp      = rebinner->rebin(hZH_vhqcdUp_0     , newnbins, "ZH_CMS_vhbb_boost_QCD_8TeVUp");
             TH1F * hWH_vhqcdUp      = rebinner->rebin(hWH_vhqcdUp_0     , newnbins, "WH_CMS_vhbb_boost_QCD_8TeVUp");
             TH1F * hZH_SM_vhqcdUp   = rebinner->rebin(hZH_SM_vhqcdUp_0  , newnbins, "ZH_SM_CMS_vhbb_boost_QCD_8TeVUp");
@@ -1625,7 +1626,7 @@ void MakePlots(const EventsJ12 * ev, TString var_,
             TH1F * hWH_vhqcdDown    = rebinner->rebin(hWH_vhqcdDown_0   , newnbins, "WH_CMS_vhbb_boost_QCD_8TeVDown");
             TH1F * hZH_SM_vhqcdDown = rebinner->rebin(hZH_SM_vhqcdDown_0, newnbins, "ZH_SM_CMS_vhbb_boost_QCD_8TeVDown");
             TH1F * hWH_SM_vhqcdDown = rebinner->rebin(hWH_SM_vhqcdDown_0, newnbins, "WH_SM_CMS_vhbb_boost_QCD_8TeVDown");
-            
+
             hZH_vhqcdUp->Scale(hZH->GetSumOfWeights() / hZH_vhqcdUp->GetSumOfWeights());
             hWH_vhqcdUp->Scale(hWH->GetSumOfWeights() / hWH_vhqcdUp->GetSumOfWeights());
             hZH_SM_vhqcdUp->Scale(hZH_SM->GetSumOfWeights() / hZH_SM_vhqcdUp->GetSumOfWeights());
@@ -1634,7 +1635,7 @@ void MakePlots(const EventsJ12 * ev, TString var_,
             hWH_vhqcdDown->Scale(hWH->GetSumOfWeights() / hWH_vhqcdDown->GetSumOfWeights());
             hZH_SM_vhqcdDown->Scale(hZH_SM->GetSumOfWeights() / hZH_SM_vhqcdDown->GetSumOfWeights());
             hWH_SM_vhqcdDown->Scale(hWH_SM->GetSumOfWeights() / hWH_SM_vhqcdDown->GetSumOfWeights());
-            
+
             hZH_vhqcdUp->Write(hZH_vhqcdUp->GetName());
             hWH_vhqcdUp->Write(hWH_vhqcdUp->GetName());
             hZH_SM_vhqcdUp->Write(hZH_SM_vhqcdUp->GetName());
@@ -1643,7 +1644,7 @@ void MakePlots(const EventsJ12 * ev, TString var_,
             hWH_vhqcdDown->Write(hWH_vhqcdDown->GetName());
             hZH_SM_vhqcdDown->Write(hZH_SM_vhqcdDown->GetName());
             hWH_SM_vhqcdDown->Write(hWH_SM_vhqcdDown->GetName());
-            
+
             delete hZH_vhqcdUp_0; delete hZH_vhqcdUp;
             delete hWH_vhqcdUp_0; delete hWH_vhqcdUp;
             delete hZH_SM_vhqcdUp_0; delete hZH_SM_vhqcdUp;
@@ -1672,50 +1673,50 @@ EventsJ12 * Read(bool isControlRegion, const TCut cutallmc, const TCut cutalldat
 {
     std::clog << "Read(): Using cutallmc = " << cutallmc << ", cutalldata = " << cutalldata << std::endl;
     std::clog << "Read():       indir = " << indir << std::endl;
-    
+
     const TString treename = Form("tree_%s_%s", channel.Data(), (isControlRegion ? "ctrl" : "test"));
-    
+
     TChain ZH(treename);
     ZH.Add(indir + prefix + Form("ZH%i", massH) + suffix);
-    
+
     TChain WH(treename);
     WH.Add(indir + prefix + Form("WH%i", massH) + suffix);
-    
+
     TChain Wj(treename);
     Wj.Add(indir + prefix + "Wj" + suffix);
-    
+
     TChain Zj(treename);
     Zj.Add(indir + prefix + "Zj" + suffix);
-    
+
     TChain TT(treename);
     TT.Add(indir + prefix + "TT" + suffix);
-    
+
     TChain s_Top(treename);
     s_Top.Add(indir + prefix + "s_Top" + suffix);
-    
+
     TChain VV(treename);
     VV.Add(indir + prefix + "VV" + suffix);
-    
+
     TChain QCD(treename);
 #ifdef QCDSHAPE
     QCD.Add(indir + prefix + "QCD" + suffix);
 #endif
-    
+
     TChain Wj_syst(treename);
     Wj_syst.Add(indir + prefix + "WjHW" + suffix);
-    
+
     TChain Zj_syst(treename);
     Zj_syst.Add(indir + prefix + "ZjHW" + suffix);
-    
+
     TChain TT_syst(treename);
     TT_syst.Add(indir + prefix + "TTPowheg" + suffix);
-    
+
     TChain ZH_SM(treename);
     ZH_SM.Add(indir + prefix + "ZH125" + suffix);
-    
+
     TChain WH_SM(treename);
     WH_SM.Add(indir + prefix + "WH125" + suffix);
-    
+
     TChain data_obs(treename);
     data_obs.Add(indir + prefix + "data_obs" + suffix);
 
@@ -1723,7 +1724,7 @@ EventsJ12 * Read(bool isControlRegion, const TCut cutallmc, const TCut cutalldat
     /// Get more MC statistics
     if (treename.EndsWith("test")) {
         const TString traintreename = Form("tree_%s_%s", channel.Data(), "train");
-    
+
         ZH.AddFile(indir + prefix + Form("ZH%i", massH) + suffix, TChain::kBigNumber, traintreename);
         WH.AddFile(indir + prefix + Form("WH%i", massH) + suffix, TChain::kBigNumber, traintreename);
         Wj.AddFile(indir + prefix + "Wj" + suffix, TChain::kBigNumber, traintreename);
@@ -1745,14 +1746,14 @@ EventsJ12 * Read(bool isControlRegion, const TCut cutallmc, const TCut cutalldat
     // Start copying trees
     const TCut cutHF = "eventFlav==5";
     const TCut cutLF = "eventFlav!=5";
-    
+
     const TCut cutVVHF = "eventFlav==5 && processname!=\"WW\"";
     const TCut cutVVLF = "eventFlav!=5 || processname==\"WW\"";
 
     const TCut cut2b = "abs(hJet_flavour[0])==5 && abs(hJet_flavour[1])==5";
     const TCut cut1b = "(abs(hJet_flavour[0])==5 && abs(hJet_flavour[1])!=5) || (abs(hJet_flavour[0])!=5 && abs(hJet_flavour[1])==5)";
     const TCut cut0b = "abs(hJet_flavour[0])!=5 && abs(hJet_flavour[1])!=5";
-    
+
     EventsJ12 * ev = new EventsJ12();
     ev->ZH = (TTree *) ZH.CopyTree(cutallmc);
     std::clog << "... DONE: ZH copy tree." << std::endl;
@@ -1812,7 +1813,7 @@ EventsJ12 * Read(bool isControlRegion, const TCut cutallmc, const TCut cutalldat
     std::clog << "... DONE: ZH_SM copy tree." << std::endl;
     ev->WH_SM = (TTree *) WH_SM.CopyTree(cutallmc);
     std::clog << "... DONE: WH_SM copy tree." << std::endl;
-    
+
     ev->data_obs = (TTree *) data_obs.CopyTree(cutalldata);
     std::clog << "... DONE: data_obs copy tree." << std::endl;
 
@@ -1823,10 +1824,10 @@ EventsJ12 * Read(bool isControlRegion, const TCut cutallmc, const TCut cutalldat
 /// Main                                                                     ///
 ////////////////////////////////////////////////////////////////////////////////
 
-void BDTShapeJ12(int nbins=500, long long newnbins=22, double rebinerrorf=0.25, bool freerebin=false, bool isControlRegion=false)  
-// 2000,10101010, 0.25 for multi-BDT
+void BDTShapeJ12(int nbins=500, long long newnbins=22, double rebinerrorf=0.25, bool freerebin=false, bool isControlRegion=false)
+// 2000,10101010,0.25 for multi-BDT
 // 500,16 for VV BDT
-// 1500,101010, 0.25 for VV multi-BDT
+// 1500,101010,0.25 for VV multi-BDT
 {
     /// BINNING CHOICES
 #ifndef VVANALYSIS
@@ -1843,14 +1844,14 @@ void BDTShapeJ12(int nbins=500, long long newnbins=22, double rebinerrorf=0.25, 
     const bool is_nBDT = (newnbins < 0);
     if (!is_mBDT)  assert(nbins > newnbins);
     if (is_nBDT)   newnbins = -1 * newnbins;
-    
+
     gROOT->LoadMacro("tdrstyle.C");
     gROOT->ProcessLine("setTDRStyle()");
     gROOT->LoadMacro("HelperFunctions.h");
-    
+
     TH1::SetDefaultSumw2(1);
     gROOT->SetBatch(1);
-    
+
     //if (!TString(gROOT->GetVersion()).Contains("5.34")) {
     //    std::cout << "INCORRECT ROOT VERSION! Please use 5.34:" << std::endl;
     //    std::cout << "source /uscmst1/prod/sw/cms/slc5_amd64_gcc472/lcg/root/5.34.03-cms4/bin/thisroot.csh" << std::endl;
@@ -1863,12 +1864,12 @@ void BDTShapeJ12(int nbins=500, long long newnbins=22, double rebinerrorf=0.25, 
 
     const int begin = (isControlRegion) ?   1 : 0;
     const int end   = (isControlRegion) ? 1+5 : 1;
-    
-    
+
+
     ///-- ZnunuHighPt ----------------------------------------------------------
     channel = "ZnunuHighPt";
     std::clog << "\n*** " << channel << " ***\n" << std::endl;
-    
+
     EventsJ12 * ev = Read(isControlRegion, g_cutallmc, g_cutalldata);
     ev->check();
     double errorffirst = rebinerrorf;
@@ -1879,7 +1880,7 @@ void BDTShapeJ12(int nbins=500, long long newnbins=22, double rebinerrorf=0.25, 
         errorffirst = binning_BDT[1];
         errorflast  = binning_BDT[2];
         if (is_mBDT) {
-            nbins       = 2000;
+            nbins       = 1500;
 #ifdef VVANALYSIS
             nbins       = 1500;
 #endif
@@ -1902,28 +1903,28 @@ void BDTShapeJ12(int nbins=500, long long newnbins=22, double rebinerrorf=0.25, 
         if (ireg==0) {  // signal region
             /// Reset rebinner
             delete rebinner; rebinner = 0;
-            
+
             /// Make BDT plots
             /// Loop over systematics
             for (int isyst = 0; isyst < nsyst; isyst++) {
                 ev->set_scalefactors(&scalefactors[0]);
                 std::clog << "isyst " << isyst << ": scale factors: " << ev->sf_Wj0b << " (Wj0b), " << ev->sf_Wj1b << " (Wj1b), " << ev->sf_Wj2b << " (Wj2b), " << ev->sf_Zj0b << " (Zj0b), " << ev->sf_Zj1b << " (Zj1b), " << ev->sf_Zj2b << " (Zj2b), " << ev->sf_TT << " (TT)." << std::endl;
-                
+
                 /// Replace "ISYST" with the index of systematic
                 TString var = (!is_mBDT) ? g_var : g_varslice;
                 TString ssyst=Form("%i",isyst);
                 var.ReplaceAll("ISYST",ssyst);
-                
+
                 TCut cutmc_test   = Form("2.0 * weightsMC[%i] * (selectFlags[0][%i]) * 19040/19624", isyst, isyst); // FIXME
                 TCut cutdata_test = Form("selectFlags[0][%i]", isyst);
-                
+
                 MakePlots(ev, var, cutmc_test, cutdata_test, g_systematics[isyst], g_regions[ireg], "BDT", nbins, g_xlow, g_xup, newnbins, errorffirst, errorflast, scalefactors_lnN, "printStat:printCard:writeRoot:!plotData:plotLog:plotSig");
-                
+
                 //TCut lastpartition = "(BDTtt_125[0]>-0.5 && BDTvjlf_125[0]>-0.5 && BDTzz_125[0]>-0.3)";
                 //MakePlots(ev, var+"+0", cutmc_test*lastpartition, cutdata_test*lastpartition, g_systematics[isyst], g_regions[ireg], "BDT", nbins, g_xlow, g_xup, newnbins, errorffirst, errorflast, scalefactors_lnN, "printStat:printCard:writeRoot:!plotData:plotLog:plotSig");
             }
         }
-        
+
         if (g_manyplots) {
             /// Make plots of 13 input variables
             ev->set_scalefactors(&scalefactors[0]);
@@ -1934,7 +1935,7 @@ void BDTShapeJ12(int nbins=500, long long newnbins=22, double rebinerrorf=0.25, 
                 cutmc_ctrl = Form("2.0 * weightsMC[0] * (selectFlags[%i][0]) * 19040/19624", ireg);  // FIXME
                 cutmass_ctrl = "(HmassReg<100 || 140<HmassReg)";
             }
-            
+
             if (ireg!=0) {  // control region
                 MakePlots(ev, Form("BDTregular_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "BDT", nbins, g_xlow, g_xup, newnbins, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
 #ifdef VVANALYSIS
@@ -1960,7 +1961,7 @@ void BDTShapeJ12(int nbins=500, long long newnbins=22, double rebinerrorf=0.25, 
             MakePlots(ev, "naJets_Znn", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "N_{aj}", 8, 0, 8, 8, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:plotData:!plotLog:plotSig");
             MakePlots(ev, "MaxIf$(max(aJet_csv_nominal,0), aJet_pt>20 && abs(aJet_eta)<2.5)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "maxCSV_{aj}", 15, 0.0, 1.05, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "min(mindRHJet_dR,5.653)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "min #DeltaR(jj,aj)", 23, 0, 5.75, 23, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
-            
+
             // Bkg specific BDT
             MakePlots(ev, Form("BDTtt_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "BDTtt", 15, -1, 1, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
             MakePlots(ev, Form("BDTvjlf_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "BDTvjlf", 15, -1, 1, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
@@ -1968,28 +1969,28 @@ void BDTShapeJ12(int nbins=500, long long newnbins=22, double rebinerrorf=0.25, 
             //MakePlots(ev, Form("BDTtt__sigzzhf_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "BDTtt", 15, -1, 1, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
             //MakePlots(ev, Form("BDTvjlf__sigzzhf_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "BDTvjlf", 15, -1, 1, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
             //MakePlots(ev, Form("BDTzz__sigzzhf_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "BDTzz", 15, -1, 1, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
-            
+
             // QCD check
             MakePlots(ev, "METtype1corr.et/sqrt(METtype1corr.sumet)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "Type-1 corr. pfMET/sqrt(sumET) [GeV]", 20, 0, 18, 20, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "METtype1corr.sig", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "Type-1 corr. pfMET significance", 18, 0, 360, 18, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "nPVs", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "# of primary vertices", 20, 0, 40, 20, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "mindPhiMETCtrJet_dPhi", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "min #Delta #phi(E_T^{miss},cjet20) ", 16, 0, 3.2, 16, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
-            
+
             // Angle
             MakePlots(ev, "abs(evalCosThetaHbb(hJet_ptReg[0], hJet_pt[0], hJet_eta[0], hJet_phi[0], hJet_e[0], hJet_ptReg[1], hJet_pt[1], hJet_eta[1], hJet_phi[1], hJet_e[1]))", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "cos #theta* (H,j)", 20, 0, 1, 20, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "evalHMETMt(HptReg, H.phi, METtype1corr.et, METtype1corr.phi)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "m_{T}(V,H)", 8, 305, 585, 8, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "evalHMETMassiveMt(HptReg, H.phi, METtype1corr.et, METtype1corr.phi)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "massive m_{T}(V,H)", 8, 305, 585, 8, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
-            
+
             // FatH.filteredmass
             //MakePlots(ev, "FatH.filteredmass * (nfathFilterJets>0 && FatH.FatHiggsFlag==1)", cutmc_ctrl*cutmass_ctrl, cutdata_ctrl*cutmass_ctrl, g_systematics[0], g_regions[ireg], "H_{fj} mass [GeV]", 25, 0, 250, 25, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");  // apply mass veto
             //MakePlots(ev, "FatH.filteredpt * (nfathFilterJets>0 && FatH.FatHiggsFlag==1)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "H_{fj} p_{T} [GeV]", 20, 50, 450, 20, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
-            
+
             // FatHmassReg
             //MakePlots(ev, "FatHmassReg * (nfathFilterJets>0 && FatH.FatHiggsFlag==1)", cutmc_ctrl*cutmass_ctrl, cutdata_ctrl*cutmass_ctrl, g_systematics[0], g_regions[ireg], "H_{fj} mass [GeV]", 25, 0, 250, 25, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");  // apply mass veto
             //MakePlots(ev, "FatHptReg * (nfathFilterJets>0 && FatH.FatHiggsFlag==1)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "H_{fj} p_{T} [GeV]", 20, 50, 450, 20, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             //MakePlots(ev, "fathFilterJets_ptReg[0] * (nfathFilterJets>0 && FatH.FatHiggsFlag==1)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "H fj1 p_{T} [GeV]", 20, 50, 350, 20, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             //MakePlots(ev, "fathFilterJets_ptReg[1] * (nfathFilterJets>0 && FatH.FatHiggsFlag==1)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "H fj2 p_{T} [GeV]", 10, 20, 170, 10, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
-            
+
             // Out of the box
             //MakePlots(ev, "H.mass", cutmc_ctrl*cutmass_ctrl, cutdata_ctrl*cutmass_ctrl, g_systematics[0], g_regions[ireg], "m(jj) [GeV]", 15, 30, 255, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");  // apply mass veto
             MakePlots(ev, "H.mass", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "m(jj) [GeV]", 15, 30, 255, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");  // don't apply mass veto
@@ -2000,7 +2001,7 @@ void BDTShapeJ12(int nbins=500, long long newnbins=22, double rebinerrorf=0.25, 
             MakePlots(ev, "V.pt", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "p_{T}(V) [GeV] (no JEC update)", 20, 155, 455, 20, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "Sum$(aJet_pt>30 && abs(aJet_eta)<4.5 && aJet_id==1 && aJet_puJetIdL>0)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "N_{aj} (p_{T} > 30 GeV)", 8, 0, 8, 8, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:plotData:!plotLog:plotSig");
 
-/*        
+/*
             if (g_regions[ireg]=="TT") {
                 // Regression inputs
                 MakePlots(ev, "nPVs", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "# of primary vertices (UNUSED)", 20, 0, 40, 20, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:plotData:!plotLog:plotSig");
@@ -2064,25 +2065,25 @@ void BDTShapeJ12(int nbins=500, long long newnbins=22, double rebinerrorf=0.25, 
         if (ireg==0) {  // signal region
             /// Reset rebinner
             delete rebinner; rebinner = 0;
-            
+
             /// Make BDT plots
             /// Loop over systematics
             for (int isyst = 0; isyst < nsyst; isyst++) {
                 ev->set_scalefactors(&scalefactors[0]);
                 std::clog << "isyst " << isyst << ": scale factors: " << ev->sf_Wj0b << " (Wj0b), " << ev->sf_Wj1b << " (Wj1b), " << ev->sf_Wj2b << " (Wj2b), " << ev->sf_Zj0b << " (Zj0b), " << ev->sf_Zj1b << " (Zj1b), " << ev->sf_Zj2b << " (Zj2b), " << ev->sf_TT << " (TT)." << std::endl;
-                
+
                 /// Replace "ISYST" with the index of systematic
                 TString var = (!is_mBDT) ? g_var : g_varslice;
                 TString ssyst=Form("%i",isyst);
                 var.ReplaceAll("ISYST",ssyst);
-                
+
                 TCut cutmc_test   = Form("2.0 * weightsMC[%i] * (selectFlags[0][%i]) * 19040/19624", isyst, isyst); // FIXME
                 TCut cutdata_test = Form("selectFlags[0][%i]", isyst);
-                
+
                 MakePlots(ev, var, cutmc_test, cutdata_test, g_systematics[isyst], g_regions[ireg], "BDT", nbins, g_xlow, g_xup, newnbins, errorffirst, errorflast, scalefactors_lnN, "printStat:printCard:writeRoot:!plotData:plotLog:plotSig");
             }
         }
-        
+
         if (g_manyplots) {
             /// Make plots of 13 input variables
             ev->set_scalefactors(&scalefactors[0]);
@@ -2093,7 +2094,7 @@ void BDTShapeJ12(int nbins=500, long long newnbins=22, double rebinerrorf=0.25, 
                 cutmc_ctrl = Form("2.0 * weightsMC[0] * (selectFlags[%i][0]) * 19040/19624", ireg);  // FIXME
                 cutmass_ctrl = "(HmassReg<100 || 140<HmassReg)";
             }
-            
+
             if (ireg!=0) {  // control region
                 MakePlots(ev, Form("BDTregular_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "BDT", nbins, g_xlow, g_xup, newnbins, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
 #ifdef VVANALYSIS
@@ -2117,23 +2118,23 @@ void BDTShapeJ12(int nbins=500, long long newnbins=22, double rebinerrorf=0.25, 
             MakePlots(ev, "naJets_Znn", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "N_{aj}", 8, 0, 8, 8, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:plotData:!plotLog:plotSig");
             MakePlots(ev, "MaxIf$(max(aJet_csv_nominal,0), aJet_pt>20 && abs(aJet_eta)<2.5)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "maxCSV_{aj}", 15, 0.0, 1.05, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "min(mindRHJet_dR,5.653)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "min #DeltaR(jj,aj)", 23, 0, 5.75, 23, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
-            
+
             // Bkg specific BDT
             MakePlots(ev, Form("BDTtt_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "BDTtt", 15, -1, 1, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
             MakePlots(ev, Form("BDTvjlf_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "BDTvjlf", 15, -1, 1, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
             MakePlots(ev, Form("BDTzz_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "BDTzz", 15, -1, 1, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
-            
+
             // QCD check
             MakePlots(ev, "METtype1corr.et/sqrt(METtype1corr.sumet)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "Type-1 corr. pfMET/sqrt(sumET) [GeV]", 20, 0, 12, 20, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "METtype1corr.sig", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "Type-1 corr. pfMET significance", 15, 0, 270, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "nPVs", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "# of primary vertices", 20, 0, 40, 20, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "mindPhiMETCtrJet_dPhi", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "min #Delta #phi(E_T^{miss},cjet20) ", 16, 0, 3.2, 16, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
-            
+
             // Angle
             MakePlots(ev, "abs(evalCosThetaHbb(hJet_ptReg[0], hJet_pt[0], hJet_eta[0], hJet_phi[0], hJet_e[0], hJet_ptReg[1], hJet_pt[1], hJet_eta[1], hJet_phi[1], hJet_e[1]))", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "cos #theta* (H,j)", 20, 0, 1, 20, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "evalHMETMt(HptReg, H.phi, METtype1corr.et, METtype1corr.phi)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "m_{T}(V,H)", 4, 260, 360, 4, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "evalHMETMassiveMt(HptReg, H.phi, METtype1corr.et, METtype1corr.phi)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "massive m_{T}(V,H)", 4, 260, 360, 4, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
-            
+
             // Out of the box
             //MakePlots(ev, "H.mass", cutmc_ctrl*cutmass_ctrl, cutdata_ctrl*cutmass_ctrl, g_systematics[0], g_regions[ireg], "m(jj) [GeV]", 15, 30, 255, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");  // apply mass veto
             MakePlots(ev, "H.mass", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "m(jj) [GeV]", 15, 30, 255, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");  // don't apply mass veto
@@ -2172,30 +2173,30 @@ void BDTShapeJ12(int nbins=500, long long newnbins=22, double rebinerrorf=0.25, 
     /// Select scale factors
     scalefactors     = g_scalefactors_ZnunuLowPt;
     scalefactors_lnN = g_scalefactors_lnN_ZnunuLowPt;
-    
+
     for (int ireg=begin; ireg<end; ireg++) {
         if (ireg==0) {  // signal region
             /// Reset rebinner
             delete rebinner; rebinner = 0;
-            
+
             /// Make BDT plots
             /// Loop over systematics
             for (int isyst = 0; isyst < nsyst; isyst++) {
                 ev->set_scalefactors(&scalefactors[0]);
                 std::clog << "isyst " << isyst << ": scale factors: " << ev->sf_Wj0b << " (Wj0b), " << ev->sf_Wj1b << " (Wj1b), " << ev->sf_Wj2b << " (Wj2b), " << ev->sf_Zj0b << " (Zj0b), " << ev->sf_Zj1b << " (Zj1b), " << ev->sf_Zj2b << " (Zj2b), " << ev->sf_TT << " (TT)." << std::endl;
-                
+
                 /// Replace "ISYST" with the index of systematic
                 TString var = (!is_mBDT) ? g_var : g_varslice;
                 TString ssyst=Form("%i",isyst);
                 var.ReplaceAll("ISYST",ssyst);
-                
+
                 TCut cutmc_test   = Form("2.0 * weightsMC[%i] * (selectFlags[0][%i]) * 19040/19624", isyst, isyst); // FIXME
                 TCut cutdata_test = Form("selectFlags[0][%i]", isyst);
-                
+
                 MakePlots(ev, var, cutmc_test, cutdata_test, g_systematics[isyst], g_regions[ireg], "BDT", nbins, g_xlow, g_xup, newnbins, errorffirst, errorflast, scalefactors_lnN, "printStat:printCard:writeRoot:!plotData:plotLog:plotSig");
             }
         }
-        
+
         if (g_manyplots) {
             /// Make plots of 13 input variables
             ev->set_scalefactors(&scalefactors[0]);
@@ -2206,7 +2207,7 @@ void BDTShapeJ12(int nbins=500, long long newnbins=22, double rebinerrorf=0.25, 
                 cutmc_ctrl = Form("2.0 * weightsMC[0] * (selectFlags[%i][0]) * 19040/19624", ireg);  // FIXME
                 cutmass_ctrl = "(HmassReg<100 || 140<HmassReg)";
             }
-            
+
             if (ireg!=0) {  // control region
                 MakePlots(ev, Form("BDTregular_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "BDT", nbins, g_xlow, g_xup, newnbins, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
 #ifdef VVANALYSIS
@@ -2230,23 +2231,23 @@ void BDTShapeJ12(int nbins=500, long long newnbins=22, double rebinerrorf=0.25, 
             MakePlots(ev, "naJets_Znn", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "N_{aj}", 8, 0, 8, 8, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:plotData:!plotLog:plotSig");
             MakePlots(ev, "MaxIf$(max(aJet_csv_nominal,0), aJet_pt>20 && abs(aJet_eta)<2.5)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "maxCSV_{aj}", 15, 0.0, 1.05, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "min(mindRHJet_dR,5.653)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "min #DeltaR(jj,aj)", 23, 0, 5.75, 23, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
-            
+
             // Bkg specific BDT
             MakePlots(ev, Form("BDTtt_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "BDTtt", 15, -1, 1, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
             MakePlots(ev, Form("BDTvjlf_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "BDTvjlf", 15, -1, 1, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
             MakePlots(ev, Form("BDTzz_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "BDTzz", 15, -1, 1, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
-            
+
             // QCD check
             MakePlots(ev, "METtype1corr.et/sqrt(METtype1corr.sumet)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "Type-1 corr. pfMET/sqrt(sumET) [GeV]", 20, 0, 10, 20, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "METtype1corr.sig", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "Type-1 corr. pfMET significance", 12, 0, 180, 12, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "nPVs", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "# of primary vertices", 20, 0, 40, 20, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "mindPhiMETCtrJet_dPhi", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "min #Delta #phi(E_T^{miss},cjet20) ", 16, 0, 3.2, 16, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
-            
+
             // Angle
             MakePlots(ev, "abs(evalCosThetaHbb(hJet_ptReg[0], hJet_pt[0], hJet_eta[0], hJet_phi[0], hJet_e[0], hJet_ptReg[1], hJet_pt[1], hJet_eta[1], hJet_phi[1], hJet_e[1]))", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "cos #theta* (H,j)", 20, 0, 1, 20, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "evalHMETMt(HptReg, H.phi, METtype1corr.et, METtype1corr.phi)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "m_{T}(V,H)", 4, 200, 280, 4, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "evalHMETMassiveMt(HptReg, H.phi, METtype1corr.et, METtype1corr.phi)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "massive m_{T}(V,H)", 4, 200, 280, 4, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
-            
+
             // Out of the box
             //MakePlots(ev, "H.mass", cutmc_ctrl*cutmass_ctrl, cutdata_ctrl*cutmass_ctrl, g_systematics[0], g_regions[ireg], "m(jj) [GeV]", 15, 30, 255, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");  // apply mass veto
             MakePlots(ev, "H.mass", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "m(jj) [GeV]", 15, 30, 255, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");  // don't apply mass veto
@@ -2275,30 +2276,30 @@ void BDTShapeJ12(int nbins=500, long long newnbins=22, double rebinerrorf=0.25, 
     /// Select scale factors
     scalefactors     = g_scalefactors_ZnunuLowCSV;
     scalefactors_lnN = g_scalefactors_lnN_ZnunuLowCSV;
-    
+
     for (int ireg=begin; ireg<TMath::Min(end,3); ireg++) {
         if (ireg==0) {  // signal region
             /// Reset rebinner
             delete rebinner; rebinner = 0;
-            
+
             /// Make BDT plots
             /// Loop over systematics
             for (int isyst = 0; isyst < nsyst; isyst++) {
                 ev->set_scalefactors(&scalefactors[0]);
                 std::clog << "isyst " << isyst << ": scale factors: " << ev->sf_Wj0b << " (Wj0b), " << ev->sf_Wj1b << " (Wj1b), " << ev->sf_Wj2b << " (Wj2b), " << ev->sf_Zj0b << " (Zj0b), " << ev->sf_Zj1b << " (Zj1b), " << ev->sf_Zj2b << " (Zj2b), " << ev->sf_TT << " (TT)." << std::endl;
-                
+
                 /// Replace "ISYST" with the index of systematic
                 TString var = (!is_mBDT) ? g_var : g_varslice;
                 TString ssyst=Form("%i",isyst);
                 var.ReplaceAll("ISYST",ssyst);
-                
+
                 TCut cutmc_test   = Form("2.0 * weightsMC[%i] * (selectFlags[0][%i])", isyst, isyst);
                 TCut cutdata_test = Form("selectFlags[0][%i]", isyst);
 
                 MakePlots(ev, var, cutmc_test, cutdata_test, g_systematics[isyst], g_regions[ireg], "BDT", nbins, g_xlow, g_xup, newnbins, errorffirst, errorflast, scalefactors_lnN, "printStat:printCard:writeRoot:!plotData:plotLog:plotSig");
             }
         }
-        
+
         if (g_manyplots) {
             /// Make plots of 13 input variables
             ev->set_scalefactors(&scalefactors[0]);
@@ -2309,7 +2310,7 @@ void BDTShapeJ12(int nbins=500, long long newnbins=22, double rebinerrorf=0.25, 
                 cutmc_ctrl = Form("2.0 * weightsMC[0] * (selectFlags[%i][0])", ireg);
                 cutmass_ctrl = "(HmassReg<100 || 140<HmassReg)";
             }
-            
+
             if (ireg!=0) {  // control region
                 MakePlots(ev, Form("BDTregular_%i[0]", massH), cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "BDT", nbins, g_xlow, g_xup, newnbins, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:plotLog:plotSig");
             }

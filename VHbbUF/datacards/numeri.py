@@ -19,8 +19,8 @@ observeprofi = "run_observeprofilelikelihoodJ12_bbb.csh"
 observemaxli = "run_observemaxlikelihoodJ12_bbb.csh"
 injectsignal = "run_injectsignalJ12_bbb.csh"
 
-outdir = "res_20130426/"
-afsdir = "/afs/cern.ch/user/j/jiafulow/public/vhbb_LHCP_20130426/Znn/"
+outdir = "res_20140407/"
+afsdir = "/afs/cern.ch/user/j/jiafulow/public/vhbb_LHCP_20140407/Znn/"
 
 #------------------------------------------------------------------------------
 
@@ -37,13 +37,13 @@ argws = ""
 
 
 def make(var, analysis, data):
-    
+
     global arg, argws
     outsubdir = outdir+var+"_"+data+"/"+str(analysis)+"/"
     outsubdir = outsubdir.replace("_LHCP", "")
     if not os.path.exists(outsubdir):
         os.makedirs(outsubdir)
-    
+
     subprocess.call(["cp", header1+".h", newheader1+".h"])
     subprocess.call(["cp", macro1+".C", newmacro1+".C"])
     subprocess.call(["cp", macro2+".C", newmacro2+".C"])
@@ -51,26 +51,26 @@ def make(var, analysis, data):
     subprocess.call(["sed", "-i", "s@%s@%s@" % (macro2+"(", newmacro2+"("), newmacro2+".C"])
     subprocess.call(["sed", "-i", "s@%s@%s@" % (header1, newheader1), newmacro1+".C"])
     subprocess.call(["sed", "-i", "s@%s@%s@" % (header1, newheader1), newmacro2+".C"])
-    
+
     if var == "MJJ":
         old = "//#define MJJANALYSIS"
         new = "#define MJJANALYSIS"
         subprocess.call(["sed", "-i", "s@%s@%s@" % (old, new), newmacro1+".C"])
-        subprocess.call(["sed", "-i", "s@%s@%s@" % (old, new), newmacro2+".C"])        
+        subprocess.call(["sed", "-i", "s@%s@%s@" % (old, new), newmacro2+".C"])
         old = "Step4_20130404/reload_20130401/"
         new = "Step4_20130404/stitch/"
         subprocess.call(["sed", "-i", "s@%s@%s@" % (old, new), newmacro1+".C"])
-    
+
     elif var == "mBDT":
         arg = "500,100"
-    
+
     elif var == "nBDT":
         arg = "500,-100"
-        
+
         old = "//#define REBINFIRSTTHREE"
         new = "#define REBINFIRSTTHREE"
         subprocess.call(["sed", "-i", "s@%s@%s@" % (old, new), newheader1+".h"])
-    
+
     elif var == "BDT":
         arg = ""
 
@@ -79,7 +79,7 @@ def make(var, analysis, data):
         old = "//#define VVANALYSIS"
         new = "#define VVANALYSIS"
         subprocess.call(["sed", "-i", "s@%s@%s@" % (old, new), newmacro1+".C"])
-        
+
         old = "Step4_20130404/reload_20130401/"
         new = "Step4_20130404/stitch/"
         subprocess.call(["sed", "-i", "s@%s@%s@" % (old, new), newmacro1+".C"])
@@ -90,11 +90,11 @@ def make(var, analysis, data):
         old = "const int massH             = 125;"
         new = "const int massH             = %i;" % massH
         subprocess.call(["sed", "-i", "s@%s@%s@" % (old, new), newmacro1+".C"])
-        
+
         old = "Form(\"ZH%i\", massH)"
         new = "Form(\"ZH%i\", "+ ("%i)" % analysis)
         subprocess.call(["sed", "-i", "s@%s@%s@" % (old, new), newmacro1+".C"])
-        
+
         old = "Form(\"WH%i\", massH)"
         new = "Form(\"WH%i\", "+ ("%i)" % analysis)
         subprocess.call(["sed", "-i", "s@%s@%s@" % (old, new), newmacro1+".C"])
@@ -104,18 +104,18 @@ def make(var, analysis, data):
         old = "//#define HCPANALYSIS"
         new = "#define HCPANALYSIS"
         subprocess.call(["sed", "-i", "s@%s@%s@" % (old, new), newmacro1+".C"])
-    
+
     # Run
     p1 = subprocess.Popen(["root", "-b", "-l", "-q", "%s+(%s)" % (newmacro1+".C", arg)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     output = p1.communicate()
     #print output[1]
-    
+
     # Signal injection
     p2 = subprocess.Popen(["root", "-b", "-l", "-q", "%s+(%s)" % (newmacro2+".C", "\"injectsignal\"")], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     output = p2.communicate()
     #print output[1]
     subprocess.call("cp vhbb_Znn_SI_J12_bbb_Znunu*Pt_8TeV.txt vhbb_Znn_SI_J12_8TeV.root " + outsubdir, shell=True)  # use shell for wildcard expansion
-    
+
     # Default
     p3 = subprocess.Popen(["root", "-b", "-l", "-q", "%s+(%s)" % (newmacro2+".C", "")], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     output = p3.communicate()
@@ -131,7 +131,7 @@ def make(var, analysis, data):
 
 
 def numeri(var, analysis, data):
-    
+
     outsubdir = outdir+var+"_"+data+"/"+str(analysis)+"/"
     outsubdir = outsubdir.replace("_LHCP", "")
 
@@ -161,7 +161,7 @@ def numeri(var, analysis, data):
     p8 = subprocess.Popen(["/bin/tcsh", injectsignal], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     output = p8.communicate()
     #print output[0]
-    
+
     # Make copies
     subprocess.call("cp vhbb_Znn_J12_bbb_combo_8TeV.txt vhbb_Znn_J12_combo_8TeV.txt", shell=True)
     subprocess.call("cp vhbb_Znn_SI_J12_bbb_combo_8TeV.txt vhbb_Znn_SI_J12_combo_8TeV.txt", shell=True)
@@ -172,10 +172,10 @@ def numeri(var, analysis, data):
     subprocess.call("cp N6.html nuisances_combo2.html", shell=True)
     subprocess.call("cp N5.html nuisances_combo.html", shell=True)
     subprocess.call("cp SI1.log inject.log", shell=True)
-    
+
     # Clean up
     subprocess.call("rm roostats-*", shell=True)
-    
+
     print outsubdir
     with open("asymp.log") as f:
         for line in f:
@@ -212,7 +212,7 @@ def numeri(var, analysis, data):
 
 
 def transfer(outdir, afsdir):
-    
+
     writeme_ = []
     for dirname, dirnames, filenames in os.walk(outdir):
     # make all subdirectories first.
@@ -229,12 +229,12 @@ def transfer(outdir, afsdir):
     with open("afstransfer_"+outdir.strip("/")+".csh", "w") as f:
         f.write(writeme)
     print "To transfer, do: \nsource afstransfer_"+outdir.strip("/")+".csh"
-    
+
 
 if __name__ == "__main__":
-    
-    var = "BDT"
-    #var = "mBDT"
+
+    #var = "BDT"
+    var = "mBDT"
     #var = "nBDT"
     #var = "MJJ"
     data = "LHCP"
@@ -243,6 +243,6 @@ if __name__ == "__main__":
     #for analysis in ["VV"] + range(110, 150+5, 5):
         make(var, analysis, data)
         numeri(var, analysis, data)
-    
+
     transfer(outdir, afsdir)
 

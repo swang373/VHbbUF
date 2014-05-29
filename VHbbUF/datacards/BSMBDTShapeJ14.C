@@ -61,7 +61,7 @@
 #include "TSystem.h"
 #include "TTree.h"
 
-#include "HelperBDTShape.h"
+#include "HelperBDTShapeJ14.h"
 #include "HelperFunctions.h"
 
 //#define MJJANALYSIS
@@ -856,10 +856,10 @@ void MakePlots(const EventsJ14 * ev, TString var_,
     for (UInt_t ih = 0; ih < histos_0.size(); ih++)
         histos_0.at(ih)->Sumw2();
 
-    //TCut cutzhewk = Form("weightSignalEWKNew * %.3f", scaleZHfromYR3toYR2(massH) );
-    //TCut cutwhewk = Form("weightSignalEWKNew * %.3f", scaleWHfromYR3toYR2(massH) );
-    TCut cutzhewk = "weightSignalEWKNew";
-    TCut cutwhewk = "weightSignalEWKNew";
+    TCut cutzhewk = Form("weightSignalEWKNew * %.3f", scaleZHfromYR3toYR2(massH) );
+    TCut cutwhewk = Form("weightSignalEWKNew * %.3f", scaleWHfromYR3toYR2(massH) );
+    //TCut cutzhewk = "weightSignalEWKNew";
+    //TCut cutwhewk = "weightSignalEWKNew";
     TCut cutzhqcd = "weightSignalQCD";
     TCut cutwhqcd = "weightSignalQCD";
 #if !defined(VHEWKCORRECTION) && !defined(ZEROVHBB)
@@ -879,8 +879,8 @@ void MakePlots(const EventsJ14 * ev, TString var_,
     std::clog << "... DONE: project WH_0." << std::endl;
 #endif
 
-    TCut cutzhewk_pythia = "weightSignalEWK * 176432/160481";
-    //TCut cutzhewk_pythia = Form("weightSignalEWK * 176432/160481 * %.3f", scaleZHfromYR3toYR2(massH) );
+    TCut cutzhewk_pythia = Form("weightSignalEWK * 176432/160481 * %.3f", scaleZHfromYR3toYR2(massH) );
+    //TCut cutzhewk_pythia = "weightSignalEWK * 176432/160481";
     TCut cutzhqcd_pythia = "weightSignalQCD * hpythia_naJets(min(Sum$(aJet_genPt>20 && abs(aJet_eta)<2.5),4))";
     ev->ZbbHinv->Project("ZbbHinv_0", var, cutmc * cutzhewk_pythia * cutzhqcd_pythia);
     std::clog << "... DONE: project ZbbHinv_0." << std::endl;
@@ -925,6 +925,7 @@ void MakePlots(const EventsJ14 * ev, TString var_,
     ev->s_Top->Project("s_Top_0", var, cutmc);
     std::clog << "... DONE: project s_Top_0." << std::endl;
 
+    // Correction is a function of trailing boson pT, but this info is not saved for ZZ :(
     TCut cutvvslope = "genZ.pt > 50 ? 1.0 + (((processname==\"WZ\") * (-0.037*min(genW.pt,genZ.pt)+1.9) + (processname==\"ZZ\") * (-0.071*genZ.pT+0.55)) / 100) : 1.0";
 
     cutsf = Form("%f", g_scalefactor_VV);
@@ -1006,10 +1007,10 @@ void MakePlots(const EventsJ14 * ev, TString var_,
         rebinner->set_signal_backgr(hZbbHinv_0, hmc_exp_0);
     }
 
-    TH1F * hZH        = rebinner->rebin(hZH_0         , newnbins, "ZH_SM"     );
-    TH1F * hWH        = rebinner->rebin(hWH_0         , newnbins, "WH_SM"     );
+    TH1F * hZH        = rebinner->rebin(hZH_0         , newnbins, "ZH_hbb"    );
+    TH1F * hWH        = rebinner->rebin(hWH_0         , newnbins, "WH_hbb"    );
 #ifndef HZZ2L2VNAMES
-    TH1F * hZbbHinv   = rebinner->rebin(hZbbHinv_0    , newnbins, "ZH"        );
+    TH1F * hZbbHinv   = rebinner->rebin(hZbbHinv_0    , newnbins, "ZH_hinv"   );
 #else
     TH1F * hZbbHinv   = rebinner->rebin(hZbbHinv_0    , newnbins, "zh1252lmet");
 #endif
@@ -1189,7 +1190,7 @@ void MakePlots(const EventsJ14 * ev, TString var_,
         dc << "bin         "; for (int j=0; j!=jmax+1; j++)  dc << channel_8TeV << " "; dc << std::endl;
 #ifndef HZZ2L2VNAMES
         //dc << "process     ZH         WH         ZbbHinv    Wj0b       Wj1b       Wj2b       Zj0b       Zj1b       Zj2b       TT         s_Top      VVLF       ZZHF       WZHF       QCD        " << std::endl;
-        dc << "process     ZH_SM      WH_SM      ZH         Wj0b       Wj1b       Wj2b       Zj0b       Zj1b       Zj2b       TT         s_Top      VVLF       ZZ         WZ         QCD        " << std::endl;
+        dc << "process     ZH_hbb     WH_hbb     ZH_hinv    Wj0b       Wj1b       Wj2b       Zj0b       Zj1b       Zj2b       TT         s_Top      VVLF       ZZ         WZ         QCD        " << std::endl;
 #else
         dc << "process     ZH_SM      WH_SM      zh1252lmet Wj0b       Wj1b       Wj2b       Zj0b       Zj1b       Zj2b       TT         s_Top      VVLF       zz2l2nu    wz3lnu     QCD        " << std::endl;
 #endif
@@ -1209,11 +1210,16 @@ void MakePlots(const EventsJ14 * ev, TString var_,
         //dc << "pdf_gg                               lnN    -     -     -     -     -     -     -     -     -     -     1.01  -     -     -     1.01 " << std::endl;
         dc << "QCDscale_VH                          lnN    1.032 1.025 1.032 -     -     -     -     -     -     -     -     -     -     -     -    " << std::endl;  // for 125 GeV
         //dc << "QCDscale_ttbar                       lnN    -     -     -     -     -     -     -     -     -     -     1.06  -     -     -     -    " << std::endl;
-        dc << "QCDscale_s_Top                       lnN    -     -     -     -     -     -     -     -     -     -     1.015 -     -     -     -    " << std::endl;
+        //dc << "QCDscale_s_Top                       lnN    -     -     -     -     -     -     -     -     -     -     1.15  -     -     -     -    " << std::endl;
         dc << "QCDscale_VV                          lnN    -     -     -     -     -     -     -     -     -     -     -     1.067 1.067 1.077 -    " << std::endl;
         //dc << "QCDscale_VV                          lnN    -     -     -     -     -     -     -     -     -     -     -     1.05  1.05  1.05  -    " << std::endl;  // 5% is used by VZbb
-        dc << "QCDscale_QCD                         lnN    -     -     -     -     -     -     -     -     -     -     -     -     -     -     1.30 " << std::endl;
-        dc << "BR_Hbb                               lnN    1.033 1.033 -     -     -     -     -     -     -     -     -     -     -     -     -    " << std::endl;
+        //dc << "QCDscale_QCD                         lnN    -     -     -     -     -     -     -     -     -     -     -     -     -     -     1.30 " << std::endl;
+        if (channel == "ZnunuHighPt") {
+        dc << "CMS_scale_met                        lnN    1.01  1.01  1.01  -     -     -     -     -     -     -     1.01  1.01  1.01  1.01  1.01 " << std::endl;
+        } else {
+        dc << "CMS_scale_met                        lnN    1.02  1.02  1.02  -     -     -     -     -     -     -     1.02  1.02  1.02  1.02  1.02 " << std::endl;
+        }
+        dc << "CMS_vhbb_BR_Hbb                      lnN    1.033 1.033 -     -     -     -     -     -     -     -     -     -     -     -     -    " << std::endl;
 #ifndef VHEWKCORRECTION
         dc << "CMS_vhbb_boost_EWK_8TeV              lnN    1.05  1.10  1.05  -     -     -     -     -     -     -     -     -     -     -     -    " << std::endl;
 #else
@@ -1224,7 +1230,7 @@ void MakePlots(const EventsJ14 * ev, TString var_,
 #else
         dc << "CMS_vhbb_boost_QCD_8TeV              lnN    1.05  1.05  1.05  -     -     -     -     -     -     -     -     -     -     -     -    " << std::endl;
 #endif
-        //dc << "CMS_vhbb_ST                          lnN    -     -     -     -     -     -     -     -     -     -     1.15  -     -     -     -    " << std::endl;
+        dc << "CMS_vhbb_s_Top                       lnN    -     -     -     -     -     -     -     -     -     -     1.15  -     -     -     -    " << std::endl;
 #ifndef VVANALYSIS
         //dc << "CMS_vhbb_VV                          lnN    -     -     -     -     -     -     -     -     -     -     -     1.15  1.15  1.15  -    " << std::endl;
         //dc << "CMS_vhbb_VV                          lnN    -     -     -     -     -     -     -     -     -     -     -     1.07  1.07  1.08  -    " << std::endl;
@@ -1232,8 +1238,8 @@ void MakePlots(const EventsJ14 * ev, TString var_,
         //dc << "CMS_vhbb_VV                          lnN    -     -     -     -     -     -     -     -     -     -     -     1.05  1.05  1.05  -    " << std::endl;
         //dc << "CMS_vhbb_VH                          lnN    1.25  1.25  1.25  -     -     -     -     -     -     -     -     -     -     -     -    " << std::endl;
 #endif
-        dc << "##CMS_vhbb_MET_nojets                 lnN    1.03  1.03  1.03  -     -     -     -     -     -     -     1.03  1.03  1.03  1.03  1.03 " << std::endl;
-        dc << "##CMS_vhbb_trigger_MET                lnN    1.03  1.03  1.03  -     -     -     -     -     -     -     1.03  1.03  1.03  1.03  1.03 " << std::endl;
+        dc << "##CMS_vhbb_MET_nojets                  lnN    1.03  1.03  1.03  -     -     -     -     -     -     -     1.03  1.03  1.03  1.03  1.03 " << std::endl;
+        dc << "##CMS_vhbb_trigger_MET                 lnN    1.03  1.03  1.03  -     -     -     -     -     -     -     1.03  1.03  1.03  1.03  1.03 " << std::endl;
         dc << "CMS_vhbb_Wj0b_SF_" << channel_8TeV_1 << "    lnN    -     -     -     " << scalefactors_lnN[0] << "  -     -     -     -     -     -     -     -     -     -     -    " << std::endl;
         dc << "CMS_vhbb_Wj1b_SF_" << channel_8TeV_1 << "    lnN    -     -     -     -     " << scalefactors_lnN[1] << "  -     -     -     -     -     -     -     -     -     -    " << std::endl;
         dc << "CMS_vhbb_Wj2b_SF_" << channel_8TeV_1 << "    lnN    -     -     -     -     -     " << scalefactors_lnN[2] << "  -     -     -     -     -     -     -     -     -    " << std::endl;
@@ -1241,7 +1247,7 @@ void MakePlots(const EventsJ14 * ev, TString var_,
         dc << "CMS_vhbb_Zj1b_SF_" << channel_8TeV_1 << "    lnN    -     -     -     -     -     -     -     " << scalefactors_lnN[4] << "  -     -     -     -     -     -     -    " << std::endl;
         dc << "CMS_vhbb_Zj2b_SF_" << channel_8TeV_1 << "    lnN    -     -     -     -     -     -     -     -     " << scalefactors_lnN[5] << "  -     -     -     -     -     -    " << std::endl;
         dc << "CMS_vhbb_TT_SF_" << channel_8TeV_1 << "      lnN    -     -     -     -     -     -     -     -     -     " << scalefactors_lnN[6] << "  -     -     -     -     -    " << std::endl;
-        dc << "CMS_vhbb_QCD_SF_" << channel_8TeV_1 << "     lnN    -     -     -     -     -     -     -     -     -     -     -     -     -     -     1.60 " << std::endl;
+        dc << "CMS_vhbb_QCD_SF_" << channel_8TeV_1 << "     lnN    -     -     -     -     -     -     -     -     -     -     -     -     -     -     2.00 " << std::endl;
         //dc << "### Shape ########################## #####  ZH    WH    ZHinv Wj0b  Wj1b  Wj2b  Zj0b  Zj1b  Zj2b  TT    s_Top VVLF  ZZHF  WZHF  QCD  " << std::endl;
         //dc << "CMS_vhbb_boost_QCD_8TeV                   shape  1.00  1.00  1.00  -     -     -     -     -     -     -     -     -     -     -     -    " << std::endl;
         dc << "CMS_vhbb_eff_b                       shape  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  -    " << std::endl;
@@ -1268,10 +1274,10 @@ void MakePlots(const EventsJ14 * ev, TString var_,
         dc << "CMS_vhbb_TTModel_Znn_8TeV            shape  -     -     -     -     -     -     -     -     -     1.00  -     -     -     -     -    " << std::endl;
         dc << "CMS_vhbb_WJSlope_Znn_8TeV            shape  -     -     -     1.00  1.00  1.00  -     -     -     -     -     -     -     -     -    " << std::endl;
         dc << "CMS_vhbb_ZJSlope_Znn_8TeV            shape  -     -     -     -     -     -     1.00  1.00  1.00  -     -     -     -     -     -    " << std::endl;
-        dc << "CMS_vhbb_statZH_SM_" << channel_8TeV << "  shape  1.00  -     -     -     -     -     -     -     -     -     -     -     -     -     -    " << std::endl;
-        dc << "CMS_vhbb_statWH_SM_" << channel_8TeV << "  shape  -     1.00  -     -     -     -     -     -     -     -     -     -     -     -     -    " << std::endl;
+        dc << "CMS_vhbb_statZH_hbb_" << channel_8TeV << " shape  1.00  -     -     -     -     -     -     -     -     -     -     -     -     -     -    " << std::endl;
+        dc << "CMS_vhbb_statWH_hbb_" << channel_8TeV << " shape  -     1.00  -     -     -     -     -     -     -     -     -     -     -     -     -    " << std::endl;
 #ifndef HZZ2L2VNAMES
-        dc << "CMS_vhbb_statZH_" << channel_8TeV << "     shape  -     -     1.00  -     -     -     -     -     -     -     -     -     -     -     -    " << std::endl;
+        dc << "CMS_vhbb_statZH_hinv_" << channel_8TeV << " shape  -     -     1.00  -     -     -     -     -     -     -     -     -     -     -     -    " << std::endl;
 #else
         dc << "CMS_vhbb_statzh1252lmet_" << channel_8TeV << "  shape  -  -   1.00  -     -     -     -     -     -     -     -     -     -     -     -    " << std::endl;
 #endif
@@ -2308,19 +2314,22 @@ void BSMBDTShapeJ14(int nbins=500, long long newnbins=-100, double rebinerrorf=0
             //MakePlots(ev, "HmassReg", cutmc_ctrl*cutmass_ctrl, cutdata_ctrl*cutmass_ctrl, g_systematics[0], g_regions[ireg], "m(jj) [GeV]", 15, 30, 255, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");  // apply mass veto
             MakePlots(ev, "HmassReg", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "m(jj) [GeV]", 15, 30, 255, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");  // don't apply mass veto
             MakePlots(ev, "HptReg", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "p_{T}(jj) [GeV]", 15, 130, 355, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
-            MakePlots(ev, "min(HptReg,354)+0", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "p_{T}(jj) [GeV] ; Events / 15 GeV", 15, 130, 355, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig"); // Jaco's version
+            if (g_regions[ireg] == "WjHF")
+                MakePlots(ev, "min(HptReg,354)+0", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "p_{T}(jj) [GeV] ; Events / 15 GeV", 15, 130, 355, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig"); // Jaco's version
             MakePlots(ev, "max(hJet_ptReg[0],hJet_ptReg[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "p_{T}(j_{1}) [GeV]", 15, 60, 285, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "min(hJet_ptReg[0],hJet_ptReg[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "p_{T}(j_{2}) [GeV]", 13, 30, 160, 13, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "deltaR(hJet_eta[0], hJet_phi[0], hJet_eta[1], hJet_phi[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "#Delta R(jj)", 14, 0, 3.5, 14, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "abs(deltaPhi(hJet_phi[0], hJet_phi[1]))", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "#Delta #phi(jj)", 16, 0, 3.2, 16, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "abs(hJet_eta[0]-hJet_eta[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "|#Delta #eta(jj)|", 14, 0, 3.5, 14, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "min(abs(deltaPullAngle),pi)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "#Delta #theta_{pull}", 16, 0, 3.2, 16, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
-            MakePlots(ev, "min(METtype1corr.et,349)+0", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "E_{T}^{miss} [GeV] ; Events / 15 GeV", 12, 170, 350, 12, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig"); // Jaco's version
+            if (g_regions[ireg] == "TT")
+                MakePlots(ev, "min(METtype1corr.et,349)+0", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "E_{T}^{miss} [GeV] ; Events / 15 GeV", 12, 170, 350, 12, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig"); // Jaco's version
             MakePlots(ev, "METtype1corr.et", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "E_{T}^{miss} [GeV]", 12, 170, 350, 12, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "HMETdPhi", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "#Delta #phi(V,H)", 16, 1.6, 3.2, 16, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "mindPhiMETJet_dPhi", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "min #Delta #phi(E_T^{miss},jet)", 16, 0, 3.2, 16, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "max(hJet_csv_nominal[0],hJet_csv_nominal[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "CSV_{max}", 15, 0.0, 1.05, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
-            MakePlots(ev, "min(min(hJet_csv_nominal[0],hJet_csv_nominal[1]),0.999)+0", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "CSV_{min} ; Events / 0.07", 11, 0.23, 1, 11, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig"); // Jaco's version
+            if (g_regions[ireg] == "ZjHF")
+                MakePlots(ev, "min(min(hJet_csv_nominal[0],hJet_csv_nominal[1]),0.999)+0", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "CSV_{min} ; Events / 0.07", 11, 0.23, 1, 11, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig"); // Jaco's version
             MakePlots(ev, "min(hJet_csv_nominal[0],hJet_csv_nominal[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "CSV_{min}", 15, 0.0, 1.05, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "naJets_Znn", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "N_{aj}", 8, 0, 8, 8, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:plotData:!plotLog:plotSig");
             MakePlots(ev, "MaxIf$(max(aJet_csv_nominal,0), aJet_pt>20 && abs(aJet_eta)<2.5)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "maxCSV_{aj}", 15, 0.0, 1.05, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");

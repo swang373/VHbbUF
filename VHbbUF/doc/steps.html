@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="generator" content="Docutils 0.10: http://docutils.sourceforge.net/" />
+<meta name="generator" content="Docutils 0.11: http://docutils.sourceforge.net/" />
 <title>Z(υυ) H(bb) Step by Step</title>
 <style type="text/css">
 
@@ -579,9 +579,17 @@ python printNuisances.py mlfit.root
 </span>root -l -b -q BDTShapeJ12.C++O
 root -l -b -q BDTShapeWorkspaceJ12.C++O
 
-<span class="comment"># calculate final limit and significance (blinded)
+<span class="comment"># calculate expected limit and significance
 </span>combine -M Asymptotic -t -1 vhbb_Znn_J11_ZnunuHighPt_8TeV.txt
 combine -M ProfileLikelihood -m 125 --signif --pvalue -t -1 --toysFreq --expectSignal<span class="operator">=</span>1 vhbb_Znn_J11_ZnunuHighPt_8TeV.txt
+combine -M MaxLikelihoodFit -m 125 --robustFit<span class="operator">=</span>1 --stepSize<span class="operator">=</span>0.05 --rMin<span class="operator">=</span>-5 --rMax<span class="operator">=</span>5 --saveNorm -t -1 --toysFreq --expectSignal<span class="operator">=</span>1 vhbb_Znn_J11_ZnunuHighPt_8TeV.txt
+python diffNuisances.py -f html mlfit.root
+
+<span class="comment"># calculate observed limit and significance
+</span>combine -M Asymptotic vhbb_Znn_J11_ZnunuHighPt_8TeV.txt
+combine -M ProfileLikelihood -m 125 --signif --pvalue vhbb_Znn_J11_ZnunuHighPt_8TeV.txt
+combine -M MaxLikelihoodFit -m 125 --robustFit<span class="operator">=</span>1 --stepSize<span class="operator">=</span>0.05 --rMin<span class="operator">=</span>-5 --rMax<span class="operator">=</span>5 --saveNorm vhbb_Znn_J11_ZnunuHighPt_8TeV.txt
+python diffNuisances.py -f html mlfit.root
 </pre>
 </div>
 <div class="section" id="tuning">
@@ -597,7 +605,7 @@ combine -M ProfileLikelihood -m 125 --signif --pvalue -t -1 --toysFreq --expectS
 <li>Use <cite>BDTShapeJ12_reload.C.diff</cite> to patch <cite>BDTShapeJ12_reload.C</cite>.</li>
 </ol>
 <pre class="code bash literal-block">
-<span class="comment"># the patch was created with `diff -u BDTShapeJ12.C BDTShapeJ12_reload.C`
+<span class="comment"># the patch was created with `diff -u BDTShapeJ12_reload.C.orig BDTShapeJ12_reload.C`
 # it might only work with a specific version of BDTShapeJ12.C
 </span>patch -p0 &lt; BDTShapeJ12_reload.C.diff
 </pre>
@@ -631,9 +639,14 @@ combine -M ProfileLikelihood -m 125 --signif --pvalue -t -1 --toysFreq --expectS
 <pre class="code bash literal-block">
 root <span class="operator">[</span>0<span class="operator">]</span> fomtree-&gt;Scan<span class="operator">(</span><span class="literal string double">&quot;NTrees:nEventsMin:MaxDepth:COMB_limit:COMB_signif:TMVA_kolS:TMVA_kolB:USER_psig&quot;</span>,<span class="literal string double">&quot;COMB_limit&lt;3.6 &amp;&amp; COMB_signif&gt;0.68&quot;</span><span class="operator">)</span>
 </pre>
-<ol class="arabic simple" start="99">
+<ol class="arabic simple" start="98">
 <li>BDT binning optimization instructions pending...</li>
+<li>Find yield uncertainties (only for ZbbHinv cards).</li>
 </ol>
+<pre class="code bash literal-block">
+<span class="comment"># edit nuisances, processes, soverb if necessary
+</span>python systematica_ZbbHinv.py
+</pre>
 <!-- HTML generation command: rst2html.py - -no-toc-backlinks - -stylesheet=style.css < steps.txt > steps.html -->
 </div>
 </div>

@@ -5,20 +5,20 @@
 
 //#define REBINLASTTHREE
 
-#define REBINFIRSTTHREE
+//#define REBINFIRSTTHREE
 
 
 ///_____________________________________________________________________________
 /// Rebinner
 
-/// partnbins       : The number of bins in the returned TH1F. To make m=3 
-///                   partitions of n=80 bins, input 808080. The max nbins in 
-///                   each partition is 99; the max npartitions is 9 (due to 
-///                   limit of long long). The number of rightmost partition 
+/// partnbins       : The number of bins in the returned TH1F. To make m=3
+///                   partitions of n=80 bins, input 808080. The max nbins in
+///                   each partition is 99; the max npartitions is 9 (due to
+///                   limit of long long). The number of rightmost partition
 ///                   is indicated by the leftmost 2 digits.
-/// errorffirst     : thresholds of the error fractions. Both the leftmost and 
-/// errorflast        rightmost bins are grouped until the error fractions are 
-///                   lower than the threshold. If it's outside of [0,1], 
+/// errorffirst     : thresholds of the error fractions. Both the leftmost and
+/// errorflast        rightmost bins are grouped until the error fractions are
+///                   lower than the threshold. If it's outside of [0,1],
 ///                   call TH1F::Rebin().
 /// xlow, xup       : the boundaries of the returned TH1F. If they are
 ///                   the same, the boundaries of the input TH1F are used.
@@ -33,7 +33,7 @@ void findFirstN(UInt_t& firstN, const UInt_t begin, const TH1F* bkg, const doubl
     while ((firstbinerrorf > errorf) && (firstN <= (UInt_t) bkg->GetNbinsX())) {
         //hdummy->Info("Rebin", "firstN=%2i int. binc=%f int. bine=%f frac=%f", firstN, firstbincontent, sqrt(firstbinerror2), firstbinerrorf);
         //std::cout << firstN << " " << firstbincontent << " " << TMath::Sqrt(firstbinerror2) << " " << firstbinerrorf << std::endl;
-        
+
         const UInt_t ibin = begin + firstN;
         const Double_t bincontent    = bkg->GetBinContent(ibin);
         const Double_t binerror      = bkg->GetBinError(ibin);
@@ -53,7 +53,7 @@ void findLastN(UInt_t& lastN, const UInt_t end, const TH1F* bkg, const double er
     // Find lastN such that its error fraction becomes less than the threshold
     while ((lastbinerrorf > errorf) && (lastN <= (UInt_t) bkg->GetNbinsX())) {
         //hdummy->Info("Rebin", "lastN=%2i int. binc=%f int. bine=%f frac=%f", lastN, lastbincontent, sqrt(lastbinerror2), lastbinerrorf);
-                
+
         const UInt_t ibin = end-1 - lastN;
         const Double_t bincontent    = bkg->GetBinContent(ibin);
         const Double_t binerror      = bkg->GetBinError(ibin);
@@ -74,9 +74,9 @@ void findLastN2(UInt_t& lastN, const UInt_t end, const double bkgrej, const doub
     double lastbinerrorf    = (lastbincontent > 1e0) ? (TMath::Sqrt(lastbinerror2) / lastbincontent) : 1.0;
     // Find lastN such that its error fraction becomes less than the threshold
     //while ((lastbinerrorf > errorf || sig->Integral(end - lastN, end-1)/sigint < sigeff) /*&& (lastN <= oldnbins)*/) {
-    while ((lastbinerrorf > errorf || (1.0 - bkg->Integral(end-1 - lastN+1, end-1)/bkgint) > bkgrej) && (lastN <= (UInt_t) bkg->GetNbinsX())) {
+    while ((lastbinerrorf > errorf || (1.0 - bkg->Integral(end - lastN, end-1)/bkgint) > bkgrej) && (lastN <= (UInt_t) bkg->GetNbinsX())) {
         //hdummy->Info("Rebin", "lastN=%2i int. binc=%f int. bine=%f frac=%f", lastN, lastbincontent, sqrt(lastbinerror2), lastbinerrorf);
-                
+
         const UInt_t ibin = end-1 - lastN;
         const Double_t bincontent    = bkg->GetBinContent(ibin);
         const Double_t binerror      = bkg->GetBinError(ibin);
@@ -111,7 +111,7 @@ public:
                 break;
             npartitions++;
         }
-        
+
         for (int ipart=0; ipart < npartitions; ipart++) {
             int npb = partnbins % (long long)(pow(100, ipart+1)) / (long long)(pow(100, ipart));
             nbinsvec.push_back(npb);
@@ -119,17 +119,17 @@ public:
         }
         if (npartitions == 1)
             assert(totalnbins == partnbins);
-        
+
         //lowedges.resize(totalnbins+1);
     }
-    
+
     Rebinner(long long nb)
     {
         Rebinner(nb, 0.25, 0.25, 0., 0.);
     }
-    
+
     ~Rebinner() {}
-    
+
     void set_signal_backgr(const TH1F * s, const TH1F * b) {
         sig = s;
         bkg = b;
@@ -162,7 +162,7 @@ public:
             hdummy->Rebin(float(in_nbins)/float(nb));
             return hdummy;
         }
-        
+
         /// From here on, don't allow underflow or overflow
         if (h->GetBinContent(0) > 0. || h->GetBinContent(in_nbins+1) > 0.) {
             hdummy->Error("Rebin", "Underflow and/or overflow is not empty! h=%s", h->GetName());
@@ -176,7 +176,7 @@ public:
             hdummy->Error("Rebin", "in_nbins / npartitions is less than minimum. in_nbins=%i, npartitions=%i", in_nbins, npartitions);
             return hdummy;
         }
-        
+
         if (!recreate) {
             for (int ipart=0; ipart < npartitions; ipart++) {
                 UInt_t newnbins = nbinsvec.at(ipart);
@@ -207,7 +207,7 @@ public:
             lowedges.clear();
             lowedges.resize(totalnbins+1);
             int iedge = 0;
-            
+
             for (int ipart=0; ipart < npartitions; ipart++) {
                 UInt_t newnbins = nbinsvec.at(ipart);
                 UInt_t oldnbins = in_nbins/npartitions;
@@ -218,22 +218,22 @@ public:
 
                 const UInt_t begin = (ipart * oldnbins) + 1;
                 const UInt_t end   = ((ipart+1) * oldnbins) + 1;
-                
+
                 double olderrorffirst = errorffirst;  // FIXME
                 double olderrorflast  = errorflast;   // FIXME
                 if (ipart != npartitions-1) {
                     errorffirst = 0.15;  // FIXME
                     errorflast  = errorffirst;  // FIXME
                 }
-                
+
                 /// Group bins from the left
                 UInt_t firstN = 1;  // starts with 1 bin
                 findFirstN(firstN, begin, bkg, errorffirst);
-                
+
                 /// Group bins from the right
                 UInt_t lastN = 1;  // starts with 1 bin
                 findLastN(lastN, end, bkg, errorflast);
-                
+
 #if !defined(REBINFIRSTTHREE) && !defined(REBINLASTTHREE)
                 /// Group bins in the middle
                 int nmiddlebins = oldnbins - firstN - lastN;
@@ -246,7 +246,7 @@ public:
                 } else {
                     // Group more bins from the left until nmiddlebins can be divided by ngroup
                     while ((nbg*ngroup != nmiddlebins)){
-                        firstN++;  
+                        firstN++;
                         nmiddlebins = oldnbins - firstN - lastN;
                         nbg = nmiddlebins / ngroup;
                     }
@@ -272,15 +272,15 @@ public:
                 UInt_t lastN2 = 1;  // starts with 1 bin
                 findLastN2(lastN2, end - lastN, (1.0 - bkg->Integral(end - lastN, end-1)/bkg->Integral(begin, end-1))*0.99, bkg->Integral(begin, end-1 - lastN), bkg, errorflast);
                 //findLastN2(lastN2, end - lastN, sig->Integral(end - lastN, end-1)/sig->Integral(begin, end-1)*1.30, sig->Integral(begin, end-1 - lastN));
-                
+
                 UInt_t lastN3 = 1;  // starts with 1 bin
                 findLastN2(lastN3, end - lastN - lastN2, (1.0 - bkg->Integral(end - lastN - lastN2, end-1 - lastN)/bkg->Integral(begin, end-1 - lastN))*0.99, bkg->Integral(begin, end-1 - lastN - lastN2));
                 //findLastN2(lastN3, end - lastN - lastN2, sig->Integral(end - lastN - lastN2, end-1 - lastN)/sig->Integral(begin, end-1 - lastN)*1.50, sig->Integral(begin, end-1 - lastN - lastN2));
-                
+
                 std::cout << (1.0 - bkg->Integral(end - lastN, end-1)/bkg->Integral(begin, end-1)) << std::endl;
                 std::cout << (1.0 - bkg->Integral(end - lastN - lastN2, end-1 - lastN)/bkg->Integral(begin, end-1 - lastN)) << std::endl;
                 std::cout << (1.0 - bkg->Integral(end - lastN - lastN2 - lastN3, end-1 - lastN - lastN2)/bkg->Integral(begin, end-1 - lastN - lastN2)) << std::endl;
-                
+
                 /// Group bins in the middle
                 int nmiddlebins = oldnbins - firstN - lastN - lastN2 - lastN3;
                 int ngroup = newnbins-4;
@@ -292,7 +292,7 @@ public:
                 } else {
                     // Group more bins from the left until nmiddlebins can be divided by ngroup
                     while ((nbg*ngroup != nmiddlebins)){
-                        firstN++;  
+                        firstN++;
                         nmiddlebins = oldnbins - firstN - lastN - lastN2 - lastN3;
                         nbg = nmiddlebins / ngroup;
                     }
@@ -321,16 +321,16 @@ public:
                 /// Group bins from the left
                 UInt_t firstN2 = 1;  // starts with 1 bin
                 findFirstN(firstN2, begin + firstN, bkg, errorffirst*1.08);
-                
+
                 UInt_t firstN3 = 1;  // starts with 1 bin
                 findFirstN(firstN3, begin + firstN + firstN2, bkg, errorffirst*1.08*1.05);
-                
+
                 /// Reset when errorffirst == errorflast
                 if(TMath::AreEqualRel(errorffirst, errorflast,1.E-7)) {
                     firstN2 = 0;
                     firstN3 = 0;
                 }
-                
+
                 double integral=0., error=0.;
                 integral = bkg->IntegralAndError(begin, begin+firstN-1, error);
                 std::cout << firstN << ": " << error/integral << std::endl;
@@ -338,7 +338,7 @@ public:
                 std::cout << firstN2 << ": " << error/integral << std::endl;
                 integral = bkg->IntegralAndError(begin+firstN+firstN2, begin+firstN+firstN2+firstN3-1, error);
                 std::cout << firstN3 << ": " << error/integral << std::endl;
-                
+
                 /// Group bins in the middle
                 int nmiddlebins = oldnbins - firstN - firstN2 - firstN3 - lastN;
                 int ngroup = newnbins-4;
@@ -364,7 +364,7 @@ public:
                 if (ipart == 0) {  // the lowest edges
                     lowedges.at(iedge) = in_xaxis->GetBinLowEdge(begin);
                     iedge++;
-                    
+
                     if(!TMath::AreEqualRel(errorffirst, errorflast,1.E-7)) {
                         lowedges.at(iedge) = in_xaxis->GetBinLowEdge(begin + firstN);
                         iedge++;
@@ -385,20 +385,20 @@ public:
                 iedge++;
 #endif
                 hdummy->Info("Rebin", "Transform %i bins into %i bins {|%i|,|%i|x%i,|%i|}", oldnbins, newnbins, firstN, nbg, ngroup, lastN);
-                hdummy->Info("Rebin", "Last 3 bins correspond to %.3f, %.3f, %.3f, %.3f", lowedges.at(iedge-4), lowedges.at(iedge-3), lowedges.at(iedge-2), lowedges.at(iedge-1));
-                
+                hdummy->Info("Rebin", "Last 4 bins correspond to %.3f, %.3f, %.3f, %.3f, %.3f", lowedges.at(iedge-5), lowedges.at(iedge-4), lowedges.at(iedge-3), lowedges.at(iedge-2), lowedges.at(iedge-1));
+
                 //for(UInt_t ie=0; ie<lowedges.size(); ie++)
                 //    std::cout << lowedges.at(ie) << std::endl;
-                
+
                 errorffirst = olderrorffirst;  // FIXME
                 errorflast  = olderrorflast;   // FIXME
             }
-            
+
             assert(iedge == totalnbins+1);
             recreate = false;
         }  // end if else
-    
-    
+
+
         //for (int iedge=0; iedge < totalnbins+1; iedge++)
         //    std::cout << "iedge " << iedge << ": " << lowedges.at(iedge) << std::endl;
 
@@ -406,7 +406,7 @@ public:
         hnew->Sumw2();
         TH1F * hnewrebin = (TH1F *) hnew->Rebin(totalnbins, "hnewrebin", &lowedges[0]);  // temp histogram with the new binning of variable size
         hnewrebin->Sumw2();
-    
+
         // Sanity checks
         const TAxis* anewrebin = hnewrebin->GetXaxis();
         if (! TMath::AreEqualRel(in_xaxis->GetXmin(), anewrebin->GetXmin(),1.E-10) ||
@@ -465,7 +465,7 @@ private:
     const TH1F * bkg;
     std::vector<int> nbinsvec;
     std::vector<double> lowedges;
-    
+
 };
 
 
@@ -476,9 +476,9 @@ class Normalizer {
 public:
     Normalizer()
      : nsf_res_j(1.), nsf_scale_j(1.), nsf_eff_b(1.), nsf_fake_b(1.) {}
-    
+
     ~Normalizer();
-    
+
     void set_nuisancefactors(const double nsf[4]) {
         nsf_res_j   = nsf[0];
         nsf_scale_j = nsf[1];
@@ -486,7 +486,7 @@ public:
         nsf_fake_b  = nsf[3];
         return;
     }
-    
+
     double normalize(const TString& syst, std::vector<TH1*>& histos) {
         if (syst == "NONE") {
             norms.clear();
@@ -504,9 +504,9 @@ public:
                 nsf = nsf_eff_b;
             else if (syst == "CMS_vhbb_fake_b_8TeVUp" || syst == "CMS_vhbb_fake_b_8TeVDown")
                 nsf = nsf_fake_b;
-            else 
+            else
                 return nsf;
-            
+
             for (UInt_t ih = 0; ih < histos.size(); ih++) {
                 double oldsumofweights = histos.at(ih)->GetSumOfWeights();
                 double norm = norms.at(ih);
@@ -676,8 +676,8 @@ bool CheckConsistency(const TH1 * h1, const TH1 * h2)
         h1->Error("CheckConsistency", "Two input histograms have different axis limits!");
         return false;
     }
-    const TArrayD * h1Array = a1->GetXbins(); 
-    const TArrayD * h2Array = a2->GetXbins(); 
+    const TArrayD * h1Array = a1->GetXbins();
+    const TArrayD * h2Array = a2->GetXbins();
     Int_t fN = h1Array->fN;
     if ( fN != 0 ) {
         if ( h2Array->fN != fN ) {

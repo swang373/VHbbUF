@@ -2,14 +2,15 @@ import os
 import re
 
 # Use these commands to extract the list of nuisances
-#sed -n 's/\(^\S\+\).*\(shape\|lnN\).*/("\1","\2",""),/p' vhbb_Znn_8TeV.txt > ! temp
+#sed -n 's/\(^\S\+\).*\(shape\|lnN\).*/("\1","\2",""),/p' zhinv_Zbb_8TeV.txt  > ! temp
 
 # For stat only mu uncertainty
 #combine -M MaxLikelihoodFit -m 125 --stepSize=0.05 --rMin=-5 --rMax=5 -t -1 --expectSignal=1 -S 0 vhbb_Znn_8TeV.txt
 
 nuisances = [
 ("FULL","shape","FULL"),  #! KEEP THIS AS THE FIRST
-("BR_Hbb","lnN","VH2"),
+("CMS_scale_met","lnN","QCD"),
+("CMS_vhbb_BR_Hbb","lnN","VH2"),
 ("CMS_vhbb_QCD_SF_ZnunuHighPt_8TeV","lnN","QCD"),
 ("CMS_vhbb_QCD_SF_ZnunuLowPt_8TeV","lnN","QCD"),
 ("CMS_vhbb_QCD_SF_ZnunuMedPt_8TeV","lnN","QCD"),
@@ -44,6 +45,7 @@ nuisances = [
 ("CMS_vhbb_boost_QCD_8TeV","lnN","VH"),
 ("CMS_vhbb_eff_b","shape","BTAG"),
 ("CMS_vhbb_fake_b_8TeV","shape","BTAG"),
+("CMS_vhbb_s_Top","lnN","ST"),
 ("CMS_vhbb_statQCD_ZnunuHighPt_bin1_8TeV","shape","STAT"),
 ("CMS_vhbb_statQCD_ZnunuHighPt_bin2_8TeV","shape","STAT"),
 ("CMS_vhbb_statQCD_ZnunuHighPt_bin3_8TeV","shape","STAT"),
@@ -64,6 +66,7 @@ nuisances = [
 ("CMS_vhbb_statTT_ZnunuHighPt_bin16_8TeV","shape","STAT"),
 ("CMS_vhbb_statTT_ZnunuHighPt_bin17_8TeV","shape","STAT"),
 ("CMS_vhbb_statTT_ZnunuMedPt_bin20_8TeV","shape","STAT"),
+("CMS_vhbb_statVVLF_ZnunuHighPt_bin13_8TeV","shape","STAT"),
 ("CMS_vhbb_statVVLF_ZnunuHighPt_bin14_8TeV","shape","STAT"),
 ("CMS_vhbb_statVVLF_ZnunuHighPt_bin15_8TeV","shape","STAT"),
 ("CMS_vhbb_statVVLF_ZnunuHighPt_bin16_8TeV","shape","STAT"),
@@ -77,11 +80,6 @@ nuisances = [
 ("CMS_vhbb_statVVLF_ZnunuMedPt_bin17_8TeV","shape","STAT"),
 ("CMS_vhbb_statVVLF_ZnunuMedPt_bin18_8TeV","shape","STAT"),
 ("CMS_vhbb_statWH_SM_ZnunuLowPt_bin19_8TeV","shape","STAT"),
-("CMS_vhbb_statWZ_ZnunuHighPt_bin16_8TeV","shape","STAT"),
-("CMS_vhbb_statWZ_ZnunuHighPt_bin18_8TeV","shape","STAT"),
-("CMS_vhbb_statWZ_ZnunuHighPt_bin19_8TeV","shape","STAT"),
-("CMS_vhbb_statWZ_ZnunuLowPt_bin20_8TeV","shape","STAT"),
-("CMS_vhbb_statWZ_ZnunuMedPt_bin20_8TeV","shape","STAT"),
 ("CMS_vhbb_statWj0b_ZnunuHighPt_bin16_8TeV","shape","STAT"),
 ("CMS_vhbb_statWj0b_ZnunuHighPt_bin19_8TeV","shape","STAT"),
 ("CMS_vhbb_statWj0b_ZnunuLowPt_bin19_8TeV","shape","STAT"),
@@ -132,23 +130,24 @@ nuisances = [
 ("CMS_vhbb_stats_Top_ZnunuMedPt_bin18_8TeV","shape","STAT"),
 ("CMS_vhbb_stats_Top_ZnunuMedPt_bin19_8TeV","shape","STAT"),
 ("CMS_vhbb_stats_Top_ZnunuMedPt_bin20_8TeV","shape","STAT"),
+("CMS_vhbb_statwz3lnu_ZnunuHighPt_bin16_8TeV","shape","STAT"),
+("CMS_vhbb_statwz3lnu_ZnunuHighPt_bin18_8TeV","shape","STAT"),
+("CMS_vhbb_statwz3lnu_ZnunuHighPt_bin19_8TeV","shape","STAT"),
+("CMS_vhbb_statwz3lnu_ZnunuLowPt_bin20_8TeV","shape","STAT"),
+("CMS_vhbb_statwz3lnu_ZnunuMedPt_bin20_8TeV","shape","STAT"),
 ("CMS_vhbb_trigger_CSV_Znn_8TeV","shape","MET"),
 ("CMS_vhbb_trigger_CSV_fake_Znn_8TeV","shape","MET"),
 ("CMS_vhbb_trigger_MET_Znn_8TeV","shape","MET"),
-("QCDscale_QCD","lnN","QCD"),
 ("QCDscale_VH","lnN","VH2"),
 ("QCDscale_VV","lnN","VV"),
-("QCDscale_s_Top","lnN","ST"),
 ("lumi_8TeV","lnN","LUMI"),
 ("pdf_qqbar","lnN","VH2"),
 ]
 
-orig = "vhbb_Znn_8TeV.txt"
-test = "test_8TeV.txt"
+orig = "zhinv_Zbb_8TeV.txt"
 #orig = "vhbb_Znn_8TeV.txt"
-#test = "test_8TeV.txt"
 #orig = "vhbb_VH_7p8TeV.txt"
-#test = "test_datacard.txt"
+test = "test_8TeV.txt"
 rootfile = None
 wsname = ""
 processes = ""
@@ -168,15 +167,15 @@ if mode == "YIELD_UNCERTAINTY":
     #orig = "vhbb_Znn_J14_bbb_ZnunuLowPt_8TeV.txt"
     #wsname = "ZnunuLowPt_8TeV"
     from ROOT import TFile
-    rootfile = TFile.Open("vhbb_Znn_J14_8TeV.root")
+    rootfile = TFile.Open("zhinv_Zbb_8TeV.root")
     processes = "ZH_SM      WH_SM      ZH         Wj0b       Wj1b       Wj2b       Zj0b       Zj1b       Zj2b       TT         s_Top      VVLF       ZZ         WZ         QCD".split()
-    
-    
+
+
 
 #-------------------------------------------------------------------------------
 
 assert(nuisances[0][0] == "FULL")
-nuisances_1 = []  # nuisances
+nuisances_1 = []  # nuisance names
 nuisances_2 = []  # nuisance types
 nuisances_3 = []  # nuisance groups
 for n1, n2, n3 in nuisances:
@@ -197,12 +196,12 @@ strlog2 = []
 
 for n1, n2, n3 in zip(nuisances_1, nuisances_2, nuisances_3):
     nui = n3
-    
+
     # Copy to a temporary datacard
     os.system("cp " + orig + " " + test)
     # Uses "kmax *"
     os.system("sed -i 's/^kmax.*/kmax */' " + test)
-    
+
     # Write the temporary datacard
     writeme = []
     with open(test,"r") as f:
@@ -217,7 +216,7 @@ for n1, n2, n3 in zip(nuisances_1, nuisances_2, nuisances_3):
                 if found:
                     line = "#" + line
                 writeme.append(line)
-        
+
         elif mode == "ONE_AT_A_TIME":
             # For each line that contains "shape" or "lnN", loops over the nuisances
             # If not matched, comment it out
@@ -230,9 +229,9 @@ for n1, n2, n3 in zip(nuisances_1, nuisances_2, nuisances_3):
                     if not found:
                         line = "#" + line
                 writeme.append(line)
-        
+
         elif mode == "YIELD_UNCERTAINTY":
-            
+
             # For each line that contains "shape" or "lnN", loops over the nuisances
             # If matched, calculate the changes in yield
             for line in f:
@@ -267,17 +266,17 @@ for n1, n2, n3 in zip(nuisances_1, nuisances_2, nuisances_3):
                                                 up = max(up, up_)
                                                 dn = max(dn, dn_)
                             print "%-6s %-48s, %.2f, %.2f" % (n3, n+" ("+n2+")", up, dn)
-                            
+
             #ZnunuHighPt_8TeV->data("ZH_SM")->sumEntries()
-            
-            
+
+
     with open(test,"w") as f:
         # Rewrite the temporary datacard
         f.write('\n'.join(writeme))
-    
+
     if mode == "YIELD_UNCERTAINTY":
         continue
-    
+
     # Execute combine
     os.system(comb1 + test + " > " + log1)
     os.system(comb2 + test + " > " + log2)
@@ -290,7 +289,7 @@ for n1, n2, n3 in zip(nuisances_1, nuisances_2, nuisances_3):
             if m:
                 sigma = (float(m.group(2)) * -1. + float(m.group(3))) / 2
                 if verbose:
-                    print nui, m.group(2), m.group(3), sigma 
+                    print nui, m.group(2), m.group(3), sigma
                 if not strlog1:
                     strlog1.append((nui, sigma, sigma/sigma))  # first entry, assumed to be "FULL"
                 else:

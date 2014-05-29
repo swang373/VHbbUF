@@ -19,8 +19,9 @@ argv.remove( '-b-' )
 if hasHelp: argv.append("-h")
 
 parser = OptionParser(usage="usage: %prog [options] mlfit.root  \nrun with --help to get list of options")
-parser.add_option("--xlow", dest="xlow", default=-999., type="float", help="Lower bound [default: %default]")
-parser.add_option("--xup", dest="xup", default=999., type="float", help="Upper bound [default: %default]")
+#parser.add_option("--xlow", dest="xlow", default=-999., type="float", help="Lower bound [default: %default]")
+#parser.add_option("--xup", dest="xup", default=999., type="float", help="Upper bound [default: %default]")
+parser.add_option("--soverb", dest="soverb", default=-1., type="float", help="S/B threshold (in %%) above which bins are considered [default: %default]")
 parser.add_option("-f", "--format", dest="format", default="text", type="string", help="Output format ('text', 'latex', 'twiki', 'html')")
 parser.add_option("--plots", action="store_true", dest="plots", default=False, help="Draw stacked histograms")
 parser.add_option("--workspace", dest="workspace", default="zhinv_Zbb_8TeV.root", type="string", help="RooWorkspace file [default: %default]")
@@ -38,11 +39,15 @@ if tfile == None: raise RuntimeError, "Cannot open file %s" % args[0]
 norms_all = []
 for fit in ["prefit", "fit_b", "fit_s"]:
     norms = {}
-    
+
     fitnorm = tfile.Get("norm_"+fit)
     fitdir = tfile.Get("shapes_"+fit)
+
+    # Loop over channels
     channels = [key.ReadObj() for key in fitdir.GetListOfKeys() if key.IsFolder()]
     for channel in channels:
+
+        # Loop over processes
         processes = [key.ReadObj() for key in channel.GetListOfKeys() if key.GetClassName() == "TH1F"]
         for process in processes:
             key = channel.GetName()+"/"+process.GetName()
@@ -50,27 +55,34 @@ for fit in ["prefit", "fit_b", "fit_s"]:
                 processnorm = fitnorm[key].getVal()
                 processnormerr = fitnorm[key].getError()
             else:
-                processnorm = process.Integral()
-                processnormerr = sqrt(process.Integral())
-            
-            fraction = 1.0
-            if options.xlow != -999. or options.xup != 999.:
-                bxlow = process.FindFixBin(options.xlow)
-                bxup = process.FindFixBin(options.xup)
-                if process.Integral() > 1e-3:
-                    fraction = process.Integral(bxlow, bxup) / process.Integral()
-            norms[key] = (processnorm * fraction, processnormerr * fraction)
+                processnorm = process.Integral()  # this is bugged
+                processnormerr = sqrt(process.Integral())  # this is bugged
+
+            # Bad logic below
+            #fraction = 1.0
+            #if options.xlow != -999. or options.xup != 999.:
+            #    bxlow = process.FindFixBin(options.xlow)
+            #    bxup = process.FindFixBin(options.xup)
+            #    integral = process.Integral(bxlow, bxup)
+            #    if integral > 1e-3:
+            #        fraction = integral / process.Integral()
+            #norms[key] = (processnorm * fraction, processnormerr * fraction)
+            #print fit, process.GetName(), processnorm, processnormerr, abs(processnorm - process.Integral()) < 1e-2
+
+            norms[key] = (processnorm, processnormerr)
+
         # Create zero norms
-        for process in ["QCD"]:
+        for process in ["QCD", "Wj1b"]:
             key = channel.GetName()+"/"+process
             if key not in norms:
                 norms[key] = (0., 0.)
+
     norms_all.append(norms)
-    
+
 dprocesses = OrderedDict([
-    ("ZH", "\ZbbHinv"),
-    ("ZH_SM", "\ZnnH (SM)"),
-    ("WH_SM", "\WlnH (SM)"),
+    ("ZH_hinv", "\ZbbHinv"),
+    ("ZH_hbb", "\ZnnH (SM)"),
+    ("WH_hbb", "\WlnH (SM)"),
     ("ZZ", "ZZ(bb)"),
     ("WZ", "WZ(bb)"),
     ("VVLF", "VV(udscg)"),
@@ -83,7 +95,9 @@ dprocesses = OrderedDict([
     ("TT", "\\ttbar"),
     ("s_Top", "single top"),
     ("QCD", "QCD"),
-    ("total_background", "Total background")
+    ("total_background", "Total background"),
+    ("total_signal", "Total signal"),
+    ("data_obs", "Observed data")
 ])
 
 dchannels = OrderedDict([
@@ -103,15 +117,22 @@ for i in xrange(len(norms_all)):
             key = channel+"/"+process
             print " & %7.1f $\pm$ %5.1f " % norms_all[i][key],
         print "\\\\"
+    print "%-16s " % "S/B (\\%)",
+    for channel in dchannels.keys():
+        keyS = channel+"/"+"total_signal"
+        keyB = channel+"/"+"total_background"
+        print " & %7.1f             " % (norms_all[i][keyS][0] / norms_all[i][keyB][0] * 100),
+    print "\\\\"
 
 
 #_______________________________________________________________________________
 def MakePlots(processes, plotname, whatfit, options):
     massH    = 125
     plotData = True
-    plotLog  = True
     plotSig  = True
+    plotLog  = True
     plotdir  = "./"
+    writeStack = True
     kRed     = 632
     kYellow  = 400
     kBlue    = 600
@@ -120,13 +141,13 @@ def MakePlots(processes, plotname, whatfit, options):
         whatfit_s = "pre-fit"
     else:
         whatfit_s = "post-fit"
-    
+
     if options.doMJJ:
         plotLog = False
-    
-    hZH        = processes["ZH_SM"]
-    hWH        = processes["WH_SM"]
-    hZbbHinv   = processes["ZH"]
+
+    hZH        = processes["ZH_hbb"]
+    hWH        = processes["WH_hbb"]
+    hZbbHinv   = processes["ZH_hinv"]
     hWj0b      = processes["Wj0b"]
     hWj1b      = processes["Wj1b"]
     hWj2b      = processes["Wj2b"]
@@ -141,10 +162,10 @@ def MakePlots(processes, plotname, whatfit, options):
     hQCD       = processes["QCD"]
     hdata_obs  = processes["data_obs"]
     hmc_exp    = processes["total_background"]
-    
-    eZH        = processes["ZH_SM"+"_err"]
-    eWH        = processes["WH_SM"+"_err"]
-    eZbbHinv   = processes["ZH"+"_err"]
+
+    eZH        = processes["ZH_hbb"+"_err"]
+    eWH        = processes["WH_hbb"+"_err"]
+    eZbbHinv   = processes["ZH_hinv"+"_err"]
     eWj0b      = processes["Wj0b"+"_err"]
     eWj1b      = processes["Wj1b"+"_err"]
     eWj2b      = processes["Wj2b"+"_err"]
@@ -157,7 +178,7 @@ def MakePlots(processes, plotname, whatfit, options):
     eWZHF      = processes["WZ"+"_err"]
     eZZHF      = processes["ZZ"+"_err"]
     eQCD       = processes["QCD"+"_err"]
-    
+
     varname = hdata_obs.GetXaxis().GetTitle()
     xtitle = "BDT"
     if options.doMJJ:  xtitle = "m_{T} [GeV]"
@@ -168,11 +189,11 @@ def MakePlots(processes, plotname, whatfit, options):
     hVVHF      = TH1F("VVHF"     , "", nbins, xlow, xup)
     hVV        = TH1F("VV"       , "", nbins, xlow, xup)
     #hmc_exp    = TH1F("mc_exp"   , "", nbins, xlow, xup)
-    
+
     eVH        = TH1F("VH"+"_err"   , "", nbins, xlow, xup)
     eVVHF      = TH1F("VVHF"+"_err" , "", nbins, xlow, xup)
     eVV        = TH1F("VV"+"_err"   , "", nbins, xlow, xup)
-    
+
     # Make sum of histograms
     hVH.Add(hZH)
     hVH.Add(hWH)
@@ -205,7 +226,7 @@ def MakePlots(processes, plotname, whatfit, options):
     #    hmc_exp.Add(hVVLF)
     #    hmc_exp.Add(hVH)  # VH is counted as background
     #hmc_exp.Add(hQCD)
-    
+
     if True:
         print "MakePlots(): Setting up histograms..."
 
@@ -240,7 +261,7 @@ def MakePlots(processes, plotname, whatfit, options):
         setHisto(hVVLF, "VV")
         setHisto(hVVHF, "VVHF")
         setHisto(hQCD, "QCD")
-        
+
         hdata_test = hdata_obs.Clone("hdata_test")  # blinded plot
         hmc_test = hmc_exp.Clone("hmc_test")  # for chi2 and KS test
         hdata_test.Sumw2()
@@ -254,7 +275,7 @@ def MakePlots(processes, plotname, whatfit, options):
                     hdata_test.SetBinError(i, 0.)
                     hmc_test.SetBinContent(i, 0.)
                     hmc_test.SetBinError(i, 0.)
-            
+
             else:
                 #for i in xrange(hdata_test.FindFixBin(105+1), hdata_test.FindFixBin(150-1)+1):
                 #for i in xrange(hdata_test.FindFixBin(105+1)-2, hdata_test.FindFixBin(150-1)+1):  # hide VV as well
@@ -263,9 +284,9 @@ def MakePlots(processes, plotname, whatfit, options):
                     hdata_test.SetBinError(i, 0.)
                     hmc_test.SetBinContent(i, 0.)
                     hmc_test.SetBinError(i, 0.)
-        
-        
-        
+
+
+
         setHisto(hdata_test, "data_obs")
 
         print "MakePlots(): Setting up the stack..."
@@ -275,7 +296,7 @@ def MakePlots(processes, plotname, whatfit, options):
             hs.Add(hVVLF)
         elif not options.doMJJ:
             hs.Add(hVVLF)
-        
+
         hs.Add(hQCD)
         hs.Add(hs_Top)
         hs.Add(hTT)
@@ -305,7 +326,7 @@ def MakePlots(processes, plotname, whatfit, options):
         if plotLog:
             hs.SetMaximum(ymax * 200 + (sqrt(ymax) if ymax>1 else 0))
         hs.SetMinimum(0.01)
-        
+
         # Setup auxiliary histograms
         print "MakePlots(): Setting up auxiliary histograms..."
         staterr = hmc_exp.Clone("staterr")
@@ -314,13 +335,13 @@ def MakePlots(processes, plotname, whatfit, options):
         staterr.SetFillColor(kGray+3)
         staterr.SetMarkerSize(0)
         staterr.SetFillStyle(3013)
-        
+
         ratio = hdata_test.Clone("ratio")
         ratio.Sumw2()
         ratio.SetMarkerSize(0.8)
         #ratio.SetMarkerSize(0.5)
         ratio.Divide(hdata_test, hmc_exp, 1., 1., "")
-        
+
         ratiostaterr = hmc_exp.Clone("ratiostaterr")
         ratiostaterr.Sumw2()
         ratiostaterr.SetStats(0)
@@ -345,10 +366,10 @@ def MakePlots(processes, plotname, whatfit, options):
         #ratiostaterr.GetYaxis().SetTitleSize(0.10)
         ratiostaterr.GetYaxis().SetTitleOffset(0.6)
         ratiostaterr.GetYaxis().SetNdivisions(505)
-        
+
         ratiounity = TLine(xlow,1,xup,1)
         ratiounity.SetLineStyle(2)
-        
+
         for i in xrange(0, hmc_exp.GetNbinsX()+2):
             ratiostaterr.SetBinContent(i, 1.0)
             if (hmc_exp.GetBinContent(i) > 1e-6):  # use smaller tolerance?
@@ -356,13 +377,13 @@ def MakePlots(processes, plotname, whatfit, options):
                 ratiostaterr.SetBinError(i, binerror)
             else:
                 ratiostaterr.SetBinError(i, 999.)
-           
-            
+
+
             #if (!(hdata_test.GetBinContent(i) > 1e-6)):
             #    ratiostaterr.SetBinError(i, 0.)
-        
-        
-        
+
+
+
         ratiosysterr = ratiostaterr.Clone("ratiosysterr")
         ratiosysterr.Sumw2()
         ratiosysterr.SetMarkerSize(0)
@@ -370,7 +391,7 @@ def MakePlots(processes, plotname, whatfit, options):
         ratiosysterr.SetFillColor(kYellow-4)
         #ratiosysterr.SetFillStyle(3002)
         ratiosysterr.SetFillStyle(1001)
-        
+
         for i in xrange(1, hmc_exp.GetNbinsX()+1):
             if hmc_exp.GetBinContent(i) > 1e-6:  # use smaller tolerance?
 
@@ -393,13 +414,13 @@ def MakePlots(processes, plotname, whatfit, options):
 
                 binerror = sqrt(binerror2)
                 ratiosysterr.SetBinError(i, binerror / hmc_exp.GetBinContent(i))
-                
+
                 if hmc_test.GetBinContent(i) > 1e-6:  # use smaller tolerance?
                     hmc_test.SetBinError(i, binerror)
                 if hdata_test.GetBinContent(i) > 1e-6:
                     hdata_test.SetBinError(i, sqrt(hdata_test.GetBinContent(i)))
-            
-        
+
+
 
         # Setup legends
         print "MakePlots(): Setting up legends..."
@@ -442,7 +463,7 @@ def MakePlots(processes, plotname, whatfit, options):
         if plotSig:  leg1.AddEntry(hZbbHinv, "ZH(inv)", "l")
         if options.doVV:
             leg1.AddEntry(hVVHF, "VV(b#bar{b})", "l")
-        
+
         leg1.AddEntry(hTT, "t#bar{t}", "f")
         leg1.AddEntry(hs_Top, "single top", "f")
         leg1.AddEntry(hQCD, "QCD", "f")
@@ -484,7 +505,7 @@ def MakePlots(processes, plotname, whatfit, options):
         #ratioleg2.SetTextFont(62)
         #ratioleg2.SetTextSize(0.06)
         #ratioleg2.SetBorderSize(1)
-        
+
         ratioleg1 = TLegend(0.72, 0.88, 0.94, 0.96)
         #ratioleg1 = TLegend(0.50, 0.86, 0.69, 0.96)
         ratioleg1.AddEntry(ratiostaterr, "MC uncert. (%s)" % whatfit_s, "f")
@@ -507,7 +528,7 @@ def MakePlots(processes, plotname, whatfit, options):
         hs.GetYaxis().SetTitle(ytitle)
         if " ; " in xtitle:
             hs.SetTitle(";"+xtitle)
-        
+
         staterr.Draw("e2 same")
         if plotSig:
             hVH.SetLineWidth(3)
@@ -525,10 +546,10 @@ def MakePlots(processes, plotname, whatfit, options):
             hVVHF.SetFillColor(0)
             hVVHF.Draw("hist same")
 
-        
+
         # Draw data
         hdata_test.Draw("e1 same")
-        
+
         # Draw legends
         #leg.Draw()
         leg1.Draw()
@@ -548,7 +569,7 @@ def MakePlots(processes, plotname, whatfit, options):
 
         #latex.DrawLatex(0.19, 0.79, "Z(#nu#bar{#nu})H(b#bar{b})")
         latex.DrawLatex(0.19, 0.79, "Z(b#bar{b})H(inv)")
-        
+
         # Under/overflows a la TMVA
         #uoflow = "U/O-flow (Data,MC): (%.1f, %.1f) / (%.1f, %.1f)" % (hdata_test.GetBinContent(0), hmc_exp.GetBinContent(0), hdata_test.GetBinContent(nbins_plot+1), hmc_exp.GetBinContent(nbins_plot+1))
         #latex2 = TLatex(0.99, 0.1, uoflow)
@@ -556,7 +577,7 @@ def MakePlots(processes, plotname, whatfit, options):
         #latex2.SetTextSize(0.02)
         #latex2.SetTextAngle(90)
         #latex2.AppendPad()
-        
+
         # Draw ratio
         pad2.cd()
         pad2.SetGridy(0)
@@ -565,7 +586,7 @@ def MakePlots(processes, plotname, whatfit, options):
         ratiostaterr.Draw("e2 same")
         ratiounity.Draw()
         ratio.Draw("e1 same")
-        
+
         # Draw ratio legends
         ratioleg1.Draw()
         #ratioleg2.Draw()
@@ -601,7 +622,18 @@ def MakePlots(processes, plotname, whatfit, options):
         #FormatFileName(plotname)
         gPad.Print(plotdir+plotname+"_"+whatfit+".png")
         gPad.Print(plotdir+plotname+"_"+whatfit+".pdf")
-        
+
+        if writeStack:
+            stackrootfile = TFile.Open(plotdir+plotname+"_"+whatfit+".root", "RECREATE")
+            for i in xrange(hs.GetHists().GetSize()):
+                hs.GetHists().At(i).Write()
+
+            print hdata_obs
+            hdata_test.Write("data_obs")
+            print hdata_obs
+            stackrootfile.Close()
+
+
     return 0
 
 if options.plots:
@@ -611,13 +643,13 @@ if options.plots:
     from ROOT import TH1, TH1F, TColor, TCanvas, TPad, TLegend, THStack, TLatex, TPaveText, TLine, RooFit, RooAbsData, gPad, setHisto
     from array import array
     TH1.SetDefaultSumw2(1)
-    
+
     wstfile = TFile.Open(options.workspace)
     if not options.doMJJ:
         varnameprefix = "zhinv_Zbb_BDT_"
     else:
         varnameprefix = "zhinv_Zbb_MJJ_"
-    
+
     for whatfit in ["prefit", "fit_s"]:
         for channel in dchannels.keys():
             processes_plots = {}
@@ -629,9 +661,9 @@ if options.plots:
                     key = process
                     processes_plots[key] = hist
                     processes_plots[key+"_err"] = hist.Clone(process+"_err")
-            
+
             # Create empty histograms
-            for process in ["QCD"]:
+            for process in ["QCD", "Wj1b"]:
                 key = process
                 if key not in processes_plots:
                     hist = processes_plots["total_background"].Clone(key)
@@ -639,7 +671,7 @@ if options.plots:
                     hist.SetDirectory(0)
                     processes_plots[key] = hist
                     processes_plots[key+"_err"] = hist.Clone(process+"_err")
-            
+
             # Need to get data_obs from somewhere else...
             process = "data_obs"
             ws = wstfile.Get(channel)
@@ -663,7 +695,10 @@ if options.plots:
                 key = process
                 processes_plots[key] = hist
                 processes_plots[key+"_err"] = hist.Clone(process+"_err")
-            
+
             plotname = varnameprefix+channel
             MakePlots(processes_plots, plotname, whatfit, options)
-    
+
+
+#combine -M MaxLikelihoodFit2 -m 125 --robustFit=1 --stepSize=0.05 --rMin=-5 --rMax=5 --saveShapes --saveWithUncertainties --dontUseWidth zhinv_Zbb_J14_bbb_combo_8TeV.txt
+#python printNormalizations.py --plots --workspace=zhinv_Zbb_8TeV.root mlfit2.root

@@ -3,7 +3,7 @@ import os
 import re
 import glob
 
-header1 = "HelperBDTShape.h"
+header1 = "HelperBDTShapeJ14.h"
 macro1 = "BSMBDTShapeJ14.C"
 macro2 = "BSMBDTShapeWorkspaceJ14.C"
 #combinecards = "run_combinecards.csh"
@@ -19,8 +19,8 @@ observeprofi = "run_observeprofilelikelihoodJ14_bbb.csh"
 observemaxli = "run_observemaxlikelihoodJ14_bbb.csh"
 injectsignal = "run_injectsignalJ14_bbb.csh"
 
-outdir = "res_20131111/"
-afsdir = "/afs/cern.ch/user/j/jiafulow/public/zhinv_20131111/Zbb/"
+outdir = "res_20131121/"
+afsdir = "/afs/cern.ch/user/j/jiafulow/public/zhinv_20131121/Zbb/"
 
 #------------------------------------------------------------------------------
 
@@ -103,10 +103,10 @@ def make(var, analysis, data):
         new = "ZbbHinv%i" % massH
         subprocess.call(["sed", "-i", "s@%s@%s@g" % (old, new), newmacro1+".C"])
         
-        old = "//#define HZZ2L2VNAMES"
-        new = "#define HZZ2L2VNAMES"
-        subprocess.call(["sed", "-i", "s@%s@%s@g" % (old, new), newmacro1+".C"])
-        subprocess.call(["sed", "-i", "s@%s@%s@g" % (old, new), newmacro2+".C"])
+        #old = "//#define HZZ2L2VNAMES"
+        #new = "#define HZZ2L2VNAMES"
+        #subprocess.call(["sed", "-i", "s@%s@%s@g" % (old, new), newmacro1+".C"])
+        #subprocess.call(["sed", "-i", "s@%s@%s@g" % (old, new), newmacro2+".C"])
 
         old = "zh1252lmet"
         new = "zh%i2lmet" % massH

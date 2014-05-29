@@ -85,23 +85,49 @@
     //double y_up_points2[n_points]=  {  0.4631, 0.3795, 0.3184, 0.2697, 0.2323, 0.2212 };
 
     // ZbbHinv (2013-09-24 mT, no XS uncert)
-    double y_injected[n_points]=    {  0.2304, 0.1892, 0.1579, 0.134, 0.1151, 0.1097 };
-    double y_observed[n_points]=    {  0.1582, 0.1258, 0.1069, 0.0921, 0.0798, 0.0763 };
-    double y_down_points2[n_points]={  0.122, 0.1001, 0.083, 0.0709, 0.0605, 0.0576 };
-    double y_down_points1[n_points]={  0.1639, 0.1342, 0.1113, 0.0953, 0.0816, 0.0773 };
-    double y_vals[n_points]=        {  0.2304, 0.1892, 0.1579, 0.134, 0.1151, 0.1097 };
-    double y_up_points1[n_points]=  {  0.3287, 0.2699, 0.2252, 0.1911, 0.1642, 0.1564 };
-    double y_up_points2[n_points]=  {  0.4522, 0.3713, 0.3099, 0.263, 0.2259, 0.2152 };
+    //double y_injected[n_points]=    {  0.2304, 0.1892, 0.1579, 0.134, 0.1151, 0.1097 };
+    //double y_observed[n_points]=    {  0.1582, 0.1258, 0.1069, 0.0921, 0.0798, 0.0763 };
+    //double y_down_points2[n_points]={  0.122, 0.1001, 0.083, 0.0709, 0.0605, 0.0576 };
+    //double y_down_points1[n_points]={  0.1639, 0.1342, 0.1113, 0.0953, 0.0816, 0.0773 };
+    //double y_vals[n_points]=        {  0.2304, 0.1892, 0.1579, 0.134, 0.1151, 0.1097 };
+    //double y_up_points1[n_points]=  {  0.3287, 0.2699, 0.2252, 0.1911, 0.1642, 0.1564 };
+    //double y_up_points2[n_points]=  {  0.4522, 0.3713, 0.3099, 0.263, 0.2259, 0.2152 };
 
     // ZbbHinv (2013-11-11)
-    double y_injected[n_points]=    {  0.1667, 0.1399, 0.1163, 0.0989, 0.0833, 0.0791 };
-    double y_observed[n_points]=    {  0.1558, 0.1298, 0.1129, 0.0934, 0.0835, 0.0814 };
-    double y_down_points2[n_points]={  0.0883, 0.074, 0.0615, 0.0522, 0.0439, 0.0415 };
-    double y_down_points1[n_points]={  0.1186, 0.0995, 0.0827, 0.0703, 0.0592, 0.0561 };
-    double y_vals[n_points]=        {  0.1667, 0.1399, 0.1163, 0.0989, 0.0833, 0.0791 };
-    double y_up_points1[n_points]=  {  0.2378, 0.1984, 0.1649, 0.1411, 0.1188, 0.1128 };
-    double y_up_points2[n_points]=  {  0.3251, 0.2702, 0.2261, 0.1929, 0.1624, 0.1542 };
+    //double y_injected[n_points]=    {  0.1667, 0.1399, 0.1163, 0.0989, 0.0833, 0.0791 };
+    //double y_observed[n_points]=    {  0.1558, 0.1298, 0.1129, 0.0934, 0.0835, 0.0814 };
+    //double y_down_points2[n_points]={  0.0883, 0.074, 0.0615, 0.0522, 0.0439, 0.0415 };
+    //double y_down_points1[n_points]={  0.1186, 0.0995, 0.0827, 0.0703, 0.0592, 0.0561 };
+    //double y_vals[n_points]=        {  0.1667, 0.1399, 0.1163, 0.0989, 0.0833, 0.0791 };
+    //double y_up_points1[n_points]=  {  0.2378, 0.1984, 0.1649, 0.1411, 0.1188, 0.1128 };
+    //double y_up_points2[n_points]=  {  0.3251, 0.2702, 0.2261, 0.1929, 0.1624, 0.1542 };
 
+    // ZbbHinv (2013-11-15)
+    //double y_injected[n_points]=    {  0.1674, 0.1396, 0.116, 0.0991, 0.0833, 0.0793 };
+    //double y_observed[n_points]=    {  0.1557, 0.1301, 0.1132, 0.0936, 0.0837, 0.0817 };
+    //double y_down_points2[n_points]={  0.0886, 0.0739, 0.0614, 0.0521, 0.0439, 0.0417 };
+    //double y_down_points1[n_points]={  0.1191, 0.0993, 0.0825, 0.0703, 0.0592, 0.0559 };
+    //double y_vals[n_points]=        {  0.1674, 0.1396, 0.116, 0.0991, 0.0833, 0.0793 };
+    //double y_up_points1[n_points]=  {  0.2375, 0.1981, 0.1654, 0.1406, 0.1189, 0.1125 };
+    //double y_up_points2[n_points]=  {  0.3256, 0.2715, 0.2261, 0.1928, 0.1625, 0.1542 };
+
+    // ZbbHinv (2013-11-18)
+    //double y_injected[n_points]=    {  0.1682, 0.1396, 0.1169, 0.0991, 0.0833, 0.0793 };
+    //double y_observed[n_points]=    {  0.156, 0.1299, 0.113, 0.0936, 0.0836, 0.0815 };
+    //double y_down_points2[n_points]={  0.0884, 0.0739, 0.0614, 0.0525, 0.0441, 0.0417 };
+    //double y_down_points1[n_points]={  0.1193, 0.0996, 0.0829, 0.0705, 0.0593, 0.0562 };
+    //double y_vals[n_points]=        {  0.1682, 0.1396, 0.1169, 0.0991, 0.0833, 0.0793 };
+    //double y_up_points1[n_points]=  {  0.2387, 0.1992, 0.1658, 0.1414, 0.1189, 0.1131 };
+    //double y_up_points2[n_points]=  {  0.3271, 0.2723, 0.2273, 0.1933, 0.1635, 0.1547 };
+
+    // ZbbHinv (2013-11-18, fixed -- not including 0.1512)
+    double y_injected[n_points]=    {  1.1127, 0.9235, 0.7732, 0.6556, 0.5511, 0.5246 };
+    double y_observed[n_points]=    {  1.0321, 0.8593, 0.7473, 0.6193, 0.5528, 0.5391 };
+    double y_down_points2[n_points]={  0.5846, 0.4888, 0.4062, 0.347, 0.2917, 0.2756 };
+    double y_down_points1[n_points]={  0.7888, 0.6586, 0.5482, 0.4664, 0.392, 0.3719 };
+    double y_vals[n_points]=        {  1.1127, 0.9235, 0.7732, 0.6556, 0.5511, 0.5246 };
+    double y_up_points1[n_points]=  {  1.5784, 1.3173, 1.0968, 0.9353, 0.7861, 0.7483 };
+    double y_up_points2[n_points]=  {  2.1636, 1.8007, 1.5035, 1.2784, 1.0815, 1.0229 };
 
     // -------------------------------------------------------------------------
 
@@ -163,17 +189,18 @@
     m_y_band_graph_2sigma->GetYaxis()->SetTitleSize(0.048);
     m_y_band_graph_2sigma->GetYaxis()->SetTitleOffset(1.25);
     //m_y_band_graph_2sigma->GetYaxis()->SetTitle("95% CL limit on #sigma_{ZH} x BR_{inv}/#sigma_{ZH,SM}");
-    m_y_band_graph_2sigma->GetYaxis()->SetTitle("95% CL limit on #sigma_{ZH} x BR_{inv} [pb]");
+    //m_y_band_graph_2sigma->GetYaxis()->SetTitle("95% CL limit on #sigma_{ZH} x BR_{inv} [pb]");
+    m_y_band_graph_2sigma->GetYaxis()->SetTitle("95% CL limit on #sigma_{ZH} x BR(H #rightarrow inv) [pb]");
     //m_y_band_graph_2sigma->GetYaxis()->SetTitle("Asymptotic 95% CL Limit on #sigma/#sigma_{SM}");
 
-    m_y_band_graph_2sigma->SetMaximum(0.5*1.1);
+    m_y_band_graph_2sigma->SetMaximum(3.0);
     m_y_band_graph_2sigma->SetMinimum(0.0);
 
     // y = 1 line
     m_one_line = new TLine(x_vals[0], 1, x_vals[n_points-1], 1);
     //m_one_line = new TLine(110, 1, 150, 1);
     //m_one_line = new TLine(110, 1, 135, 1);
-    m_one_line->SetLineColor(2);
+    m_one_line->SetLineColor(4);
     m_one_line->SetLineWidth(2);
 
     // Legend
@@ -214,7 +241,8 @@
 
     // -------------------------------------------------------------------------
 
-    TCanvas *c1 = new TCanvas();
+    //TCanvas *c1 = new TCanvas();
+    TCanvas *c1 = new TCanvas("c1","c1",600,400);
     //TCanvas *c1 = new TCanvas("c1","c1",300,300,700,500);
     //c1->SetGridx();
     //c1->SetGridy();
@@ -240,16 +268,19 @@
     //latex->DrawLatex(0.19, 0.89, "CMS Preliminary");
     //latex->SetTextSize(0.04);
     //latex->DrawLatex(0.19, 0.84, "#sqrt{s} = 8 TeV, L = 19.0 fb^{-1}");
-    latex->SetTextSize(0.032);
-    latex->DrawLatex(0.16, 0.97, "CMS Preliminary  #sqrt{s} = 8 TeV, L = 18.9 fb^{-1}");
+    //latex->SetTextSize(0.032);
+    //latex->DrawLatex(0.16, 0.97, "CMS Preliminary  #sqrt{s} = 8 TeV, L = 18.9 fb^{-1}");
+    //latex->SetTextSize(0.045);
+    //latex->DrawLatex(0.19, 0.90, "Z(#rightarrow b#bar{b}) H(#rightarrow inv)");
     latex->SetTextSize(0.045);
-    latex->DrawLatex(0.19, 0.90, "Z(#rightarrow b#bar{b}) H(#rightarrow inv)");
+    latex->DrawLatex(0.19, 0.90, "CMS Preliminary, Z(#rightarrow b#bar{b}) H(#rightarrow inv)");
+    latex->DrawLatex(0.19, 0.84, "#sqrt{s} = 8 TeV, L = 18.9 fb^{-1}");
     if (isMJJ) {
         latex->DrawLatex(0.19, 0.84, "#color[4]{m_{T} analysis}");
     }
 
     gPad->RedrawAxis();
-    TString postfix = "_20131111";
+    TString postfix = "_20131118";
     if (!isMJJ) {
         gPad->Print("Limit_XS_ZbbHinv_BDT"+postfix+".pdf");
         gPad->Print("Limit_XS_ZbbHinv_BDT"+postfix+".png");
