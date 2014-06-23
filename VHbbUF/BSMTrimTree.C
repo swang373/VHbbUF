@@ -46,7 +46,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 //const TString indir       = "dcache:/pnfs/cms/WAX/resilient/jiafu//ZnunuHbb/Step3_20130314/";
-const TString indir       = "/uscms_data/d3/lpchbb/jiafu/ZnnH_postHCP/Step3_20130314/";
+const TString indir       = "/eos/uscms/store/user/jiafu/ZnunuHbb/ZnunuHbb/Step3_20130314/";
 const TString outdir      = "skim/";
 const TString prefix      = "Step3_";
 const TString suffix      = ".root";
@@ -99,24 +99,24 @@ const char* g_channels[] = {
 /// Variables to keep
 const char* g_variables[] = {
     "Vtype", "EVENT*", "event*", "lhe*", "nPVs",
-    "lumi", "efflumi*", "PUweight*", 
+    "lumi", "efflumi*", "PUweight*",
     "H*", "Hmass*", "Hpt*", "V*", "MET*",
-    "nhJets", "naJets", "nvlep", "nalep", 
-    "hJet_pt*", "hJet_eta*", "hJet_phi*", "hJet_e*", "hJet_csv*", "hJet_id", "hJet_puJetIdL", "hJet_genPt", "hJet_flavour", "hJet_nhf", "hJet_nef", 
-    "hJet_ptRaw", "hJet_JECUnc", "hJet_vtxMass", "hJet_vtxPt", "hJet_vtx3dL", "hJet_vtx3deL", "hJet_chf", "hJet_cef", "hJet_nconstituents", "hJet_nch", 
-    "hJet_SoftLeptPt", "hJet_SoftLeptdR", "hJet_SoftLeptptRel", "hJet_SoftLeptIdlooseMu", "hJet_SoftLeptId95", 
-    "aJet_pt*", "aJet_eta*", "aJet_phi*", "aJet_e*", "aJet_csv*", "aJet_id", "aJet_puJetIdL", "aJet_genPt", "aJet_flavour", 
-    "FatH", "FatHmass*", "FatHpt*", 
-    "nfathFilterJets", "naJetsFat", 
-    "fathFilterJets_pt*", "fathFilterJets_eta*", "fathFilterJets_phi*", "fathFilterJets_e*", "fathFilterJets_csv*", "fathFilterJets_genPt", "fathFilterJets_flavour", "fathFilterJets_vtxMass", 
+    "nhJets", "naJets", "nvlep", "nalep",
+    "hJet_pt*", "hJet_eta*", "hJet_phi*", "hJet_e*", "hJet_csv*", "hJet_id", "hJet_puJetIdL", "hJet_genPt", "hJet_flavour", "hJet_nhf", "hJet_nef",
+    "hJet_ptRaw", "hJet_JECUnc", "hJet_vtxMass", "hJet_vtxPt", "hJet_vtx3dL", "hJet_vtx3deL", "hJet_chf", "hJet_cef", "hJet_nconstituents", "hJet_nch",
+    "hJet_SoftLeptPt", "hJet_SoftLeptdR", "hJet_SoftLeptptRel", "hJet_SoftLeptIdlooseMu", "hJet_SoftLeptId95",
+    "aJet_pt*", "aJet_eta*", "aJet_phi*", "aJet_e*", "aJet_csv*", "aJet_id", "aJet_puJetIdL", "aJet_genPt", "aJet_flavour",
+    "FatH", "FatHmass*", "FatHpt*",
+    "nfathFilterJets", "naJetsFat",
+    "fathFilterJets_pt*", "fathFilterJets_eta*", "fathFilterJets_phi*", "fathFilterJets_e*", "fathFilterJets_csv*", "fathFilterJets_genPt", "fathFilterJets_flavour", "fathFilterJets_vtxMass",
     "aJetFat_pt*", "aJetFat_eta*", "aJetFat_phi*", "aJetFat_e*", "aJetFat_csv*",
     "mindPhiMET*", "mindRH*", "naJets_Znn*", "nalep_Znn", "nalep_pt5_Znn",
     "deltaPullAngle", "rho*",
-    "triggerFlags", "hbhe", "ecalFlag", "cschaloFlag", "hcallaserFlag","trackingfailureFlag", "eebadscFlag", "isBadHcalEvent", 
+    "triggerFlags", "hbhe", "ecalFlag", "cschaloFlag", "hcallaserFlag","trackingfailureFlag", "eebadscFlag", "isBadHcalEvent",
     "TopLep*", "TopHad*", "FatTopHad*",
-    "nPdf", "PDFweight", "weightMCProd", "weightSignalEWK", "weightSignalQCD", "VtypeWithTau", "lheV_pt", "genZ", "genW", "genH", 
-    
-    //"weightTrigMu", "weightTrigDLP*", "weightTrig2012*", "weightTrig", 
+    "nPdf", "PDFweight", "weightMCProd", "weightSignalEWK", "weightSignalQCD", "VtypeWithTau", "lheV_pt", "genZ", "genW", "genH",
+
+    //"weightTrigMu", "weightTrigDLP*", "weightTrig2012*", "weightTrig",
     //"vLepton_pt", "vLepton_eta", "vLepton_phi", "vLepton_pfCombRelIso", "vLepton_vbtf", "vLepton_id95",
     //"aLepton_pt", "aLepton_eta", "aLepton_phi", "aLepton_pfCombRelIso", "aLepton_vbtf", "aLepton_id95",
 };
@@ -128,7 +128,7 @@ const char* g_variables[] = {
 /// Classes & Functions
 
 // Copied from TMVA::VariableInfo
-std::vector<TString> ParseExpression(const TString& expression) 
+std::vector<TString> ParseExpression(const TString& expression)
 {
     std::vector<TString> expressions;
     expressions.push_back("");
@@ -154,7 +154,7 @@ public:
         assert(nsyst > 0);
         assert(systematics.front().size() == 1);
         assert(systematics.front().front().first == systematics.front().front().second);
-        
+
         TTreeFormula* ttf = 0;
         TString expression(formula);
         if (expression.Contains(":="))
@@ -184,13 +184,13 @@ public:
                 std::cout << "VERBOSE: isyst " << isyst << " " << expression << " --> " << systexpression << std::endl;
         }  // end loop over systematics
     }
-    
+
     ~TTreeFormulaWithSyst()
     {
         for (UInt_t i = 0; i < size(); i++)
             delete formulas.at(i);
     }
-    
+
     void UpdateFormulaLeaves() {
         for (UInt_t i = 0; i < size(); i++)
             formulas.at(i)->UpdateFormulaLeaves();
@@ -239,7 +239,7 @@ std::vector<TString> GetVariablesFromXML(const TString& xml)
     void* doc = TMVA::gTools().xmlengine().ParseFile(xml, 1000000);  // the default buffer size in TXMLEngine::ParseFile is 100k. changed to 1000k.
     void* rootnode = TMVA::gTools().xmlengine().DocGetRootElement(doc);
     std::vector<TString> expressions;
-    
+
     bool verbose = true;
     TString nodeName = "";
     UInt_t readNVar;
@@ -341,7 +341,7 @@ void BSMTrimTree(TString process="ZnnH125", TString mvaMethod="BDT", Long64_t be
     // else, it runs from Step 3's (default)
     // If mvaMethod contains exactly two ":", then it runs from ready-made Step 4's
     // and does the MVA tuning.
-    
+
     // FIXME: store the timestamp of xml (Creator, Date under GeneralInfo)
     // ZnnH125 signal 19723 even 9882 odd 9841
     // ZnnH125 ZjLF 8705
@@ -359,7 +359,7 @@ void BSMTrimTree(TString process="ZnnH125", TString mvaMethod="BDT", Long64_t be
     const bool isData = (process.BeginsWith("Data"));
     const bool reloadStep4 = process.Contains("Step4_");
     bool tuneMVA = (mvaMethod.CountChar(':') == 2);
-    
+
     TString weightdirTuneMVA = "";
     TString outdirTuneMVA = outdir;
     int ntunes = 1;
@@ -371,7 +371,7 @@ void BSMTrimTree(TString process="ZnnH125", TString mvaMethod="BDT", Long64_t be
         pos = substr2.Index(':');
         TString substr3 = substr2(0, pos);
         TString substr4 = substr2(pos+1, substr2.Sizeof());
-        
+
         weightdir         = "./";
         mvaMethod         = substr1;
         weightdirTuneMVA += substr3;
@@ -401,9 +401,9 @@ void BSMTrimTree(TString process="ZnnH125", TString mvaMethod="BDT", Long64_t be
         gSystem->mkdir(outdir);
     if (tuneMVA && gSystem->AccessPathName(outdirTuneMVA))
         gSystem->mkdir(outdirTuneMVA);
-    
+
     std::cout << "--- TrimTree                 : Using input file: " << input->GetName() << std::endl;
-    
+
     TString outputname = "";
     if (!reloadStep4) {
         inTree = (TTree *) input->Get("tree");
@@ -467,8 +467,8 @@ void BSMTrimTree(TString process="ZnnH125", TString mvaMethod="BDT", Long64_t be
     /// Get the systematic variations
     const std::vector<std::vector<std::pair<std::string, std::string> > >& systExpressions = GetSystExpressions();
     std::cout << "--- TrimTree                 : There are " << systExpressions.size()-1 << " systematic sources." << std::endl;
-    
-    
+
+
     /// Loop over channels
     for (UInt_t ichan = 0; ichan < channels.size(); ichan++) {
         const TString& channel = channels.at(ichan);
@@ -477,19 +477,19 @@ void BSMTrimTree(TString process="ZnnH125", TString mvaMethod="BDT", Long64_t be
         /// Get the selections
         const std::vector<std::string>& selExpressions = GetSelExpressions(channel.Data());
         std::cout << "--- TrimTree                 : There are " << selExpressions.size() << " selections." << std::endl;
-        
+
         const std::vector<std::string>& selMjjExpressions = GetSelMjjExpressions(channel.Data());
         assert(selMjjExpressions.size() == 1);
-        
+
         /// Get the MC event weight
         std::string weigExpression = GetWeightExpressions()[channel.Data()];
         if (process == "DYJetsZmmToZbb") {
             weigExpression = "efflumi * PUweight * triggerweight2012ABCD(METtype1corr.et)";
         }
-        
+
         /// Get the trigger
         const std::string trigExpression = GetTriggerExpressions()[channel.Data()];
-        
+
         if (reloadStep4) {
             inTree = (TTree *) input->Get(Form("tree_%s_test", channel.Data()));  // only the test tree
             inTree->SetBranchStatus("*", 1);
@@ -507,7 +507,7 @@ void BSMTrimTree(TString process="ZnnH125", TString mvaMethod="BDT", Long64_t be
         for (UInt_t imass = 0; imass < masses.size(); imass++) {
             const int mass = masses.at(imass);
             for (UInt_t iread = 0; iread < weights.size(); iread++) {
-                
+
                 /// Loop over BDT[0-99] in the directory
                 for (Int_t jread = 0; jread < ntunes; jread++) {
                     TMVA::Reader * reader = new TMVA::Reader("!Color:!Silent");
@@ -524,7 +524,7 @@ void BSMTrimTree(TString process="ZnnH125", TString mvaMethod="BDT", Long64_t be
                         /// Add this variable to reader
                         const TString expr = variables.at(iexpr);
                         reader->AddVariable(expr, &readerVars[iexpr]);
-                        
+
                         /// Check if this variable has been used previously
                         bool found = false;
                         for (UInt_t jexpr = 0; jexpr < inputExpressions.size(); jexpr++) {
@@ -540,7 +540,7 @@ void BSMTrimTree(TString process="ZnnH125", TString mvaMethod="BDT", Long64_t be
                         }
                     }
                     assert(varIndices.size() == variables.size());
-                    
+
                     /// Load TMVA weights
                     reader->BookMVA(mvaMethod1 + " method", weightfile);
                     readers.push_back(reader);
@@ -578,7 +578,7 @@ void BSMTrimTree(TString process="ZnnH125", TString mvaMethod="BDT", Long64_t be
         float discriminants[MAXWEIGHT][MAXSYST];
         assert(nselect < MAXSELECT);
         assert(nsyst < MAXSYST);
-        
+
         if (!reloadStep4) {
             outTree->Branch("processname", processname, "processname/C");
             outTree->Branch("nselect", &nselect, "nselect/I");
@@ -594,7 +594,7 @@ void BSMTrimTree(TString process="ZnnH125", TString mvaMethod="BDT", Long64_t be
             outTree->Branch("selectMjj", selectMjj, "selectMjj[nsyst]/b");
             outTree->Branch("weightsMC", weightsMC, "weightsMC[nsyst]/F");
         }
-        
+
         for (UInt_t iread = 0; iread < readers.size(); iread++) {
             TString name = readerNames.at(iread).first + readerNames.at(iread).second;
             outTree->Branch(name, &discriminants[iread][0], name+"[nsyst]/F");
@@ -638,7 +638,7 @@ void BSMTrimTree(TString process="ZnnH125", TString mvaMethod="BDT", Long64_t be
         TTreeFormulaWithSyst * weigFormula = new TTreeFormulaWithSyst("ttfweig", weigExpression.c_str(), inTree, systExpressions, isData);
         TTreeFormulaWithSyst * trigFormula = new TTreeFormulaWithSyst("ttftrig", trigExpression.c_str(), inTree, systExpressions, isData);
         TTreeFormulaWithSyst * mjjFormula = new TTreeFormulaWithSyst("ttfmjj", selMjjExpressions.front().c_str(), inTree, systExpressions, isData);
-        
+
         /// Create TTreeFormulas
         double WJSlopeErr = 0.0020;
         double ZJSlopeErr = 0.0025;
@@ -648,10 +648,12 @@ void BSMTrimTree(TString process="ZnnH125", TString mvaMethod="BDT", Long64_t be
         TTreeFormula * genzptFormula = new TTreeFormula("ttfgenzpt", "genZ.pt", inTree);
         TTreeFormula * genhptFormula = new TTreeFormula("ttfgenhpt", "genH.pt", inTree);
         TTreeFormula * scaleFormula = new TTreeFormula("ttfscale", "(Sum$(abs(hJet_flavour)==5)==1) ? 2.0 : 1.0", inTree);
+        TTreeFormula * naJetsFormula = new TTreeFormula("ttfnaJets", "naJets_Znn", inTree);
         genwptFormula->SetQuickLoad(1);
         genzptFormula->SetQuickLoad(1);
         genhptFormula->SetQuickLoad(1);
         scaleFormula->SetQuickLoad(1);
+        naJetsFormula->SetQuickLoad(1);
 
         /// Speed up if a systematic does nothing to input variables
         std::vector<Bool_t> changed;
@@ -674,24 +676,25 @@ void BSMTrimTree(TString process="ZnnH125", TString mvaMethod="BDT", Long64_t be
         for (ievt=TMath::Max(ievt, beginEntry); ievt<TMath::Min(nentries, endEntry); ievt++) {
             if (ievt % 2000 == 0)
                 std::cout << "--- ... Processing event: " << ievt << std::endl;
-            
+
             const Long64_t local_entry = inTree->LoadTree(ievt);  // faster, but only for TTreeFormula
             if (local_entry < 0)  break;
             //inTree->GetEntry(ievt);  // same event as received by LoadTree()
-            
+
             if (inTree->GetTreeNumber() != curTree) {
                 curTree = inTree->GetTreeNumber();
                 for (formIt=inputFormulas.begin(), formItEnd=inputFormulas.end(); formIt!=formItEnd; formIt++)
                     (*formIt)->UpdateFormulaLeaves();  // if using TChain
                 for (formIt=selFormulas.begin(), formItEnd=selFormulas.end(); formIt!=formItEnd; formIt++)
                     (*formIt)->UpdateFormulaLeaves();  // if using TChain
-                weigFormula->UpdateFormulaLeaves();  // if using TChain
-                trigFormula->UpdateFormulaLeaves();  // if using TChain
-                mjjFormula->UpdateFormulaLeaves();  // if using TChain
+                weigFormula->UpdateFormulaLeaves();    // if using TChain
+                trigFormula->UpdateFormulaLeaves();    // if using TChain
+                mjjFormula->UpdateFormulaLeaves();     // if using TChain
                 genwptFormula->UpdateFormulaLeaves();  // if using TChain
                 genzptFormula->UpdateFormulaLeaves();  // if using TChain
                 genhptFormula->UpdateFormulaLeaves();  // if using TChain
-                scaleFormula->UpdateFormulaLeaves();  // if using TChain
+                scaleFormula->UpdateFormulaLeaves();   // if using TChain
+                naJetsFormula->UpdateFormulaLeaves();  // if using TChain
             }
 
             /// These need to be called when arrays of variable size are used in TTree.
@@ -706,12 +709,13 @@ void BSMTrimTree(TString process="ZnnH125", TString mvaMethod="BDT", Long64_t be
             genzptFormula->GetNdata();
             genhptFormula->GetNdata();
             scaleFormula->GetNdata();
-            
+            naJetsFormula->GetNdata();
+
             if (isData) {
                 bool passTrigger = trigFormula->EvalBoolInstance(0);
                 if (!passTrigger)  continue;
             }
-            
+
             /// Loop over systematics
             isSignal = false;
             isControl = false;
@@ -757,10 +761,10 @@ void BSMTrimTree(TString process="ZnnH125", TString mvaMethod="BDT", Long64_t be
                     weightsMC[isyst] = 1.0;
                 else
                     weightsMC[isyst] = weigFormula->EvalInstance(isyst);
-                
+
                 /// Evaluate Mjj selection
                 selectMjj[isyst] = mjjFormula->EvalInstance(isyst);
-                
+
                 /// Evaluate scale factors and slopes
                 if (isZJ(process)) {
                     double genzpt = genzptFormula->EvalInstance();
@@ -789,7 +793,7 @@ void BSMTrimTree(TString process="ZnnH125", TString mvaMethod="BDT", Long64_t be
                     weightSignalEWKNewP = 1.0 + ewk * 0.0;
                     weightSignalEWKNewM = 1.0 + ewk * 2.0;
                 }
-                
+
             }  // end loop over systematics again
 
             inTree->GetEntry(ievt);  // same event as received by LoadTree()
@@ -803,10 +807,10 @@ void BSMTrimTree(TString process="ZnnH125", TString mvaMethod="BDT", Long64_t be
         sw.Print();
 
         std::cout << "--- TrimTree                 : Keep " << outTree->GetEntriesFast() << " out of " << nentries << " events." << std::endl;
-        
+
         output->cd();
         outTree->Write();
-        
+
         delete outTree;
         for (UInt_t iread = 0; iread < readers.size(); iread++)
             delete readers.at(iread);
@@ -821,6 +825,7 @@ void BSMTrimTree(TString process="ZnnH125", TString mvaMethod="BDT", Long64_t be
         delete genzptFormula;
         delete genhptFormula;
         delete scaleFormula;
+        delete naJetsFormula;
     }  // end loop over channels
 
     /// Split
@@ -839,7 +844,7 @@ void BSMTrimTree(TString process="ZnnH125", TString mvaMethod="BDT", Long64_t be
             TTree *outTree = (TTree *) output->Get(Form("%s_%s", inTree->GetName(), channel.Data()));
 
             TTree *testTree(0), *trainTree(0), *ctrlTree(0);
-            output_tmp->cd();            
+            output_tmp->cd();
             if (isData) {
                 testTree = (TTree*) outTree->CopyTree("isSignal");
                 testTree->SetName(Form("%s_%s_test", inTree->GetName(), channel.Data()));
@@ -855,24 +860,24 @@ void BSMTrimTree(TString process="ZnnH125", TString mvaMethod="BDT", Long64_t be
             ctrlTree = (TTree*) outTree->CopyTree(ctrlCut);
             ctrlTree->SetName(Form("%s_%s_ctrl", inTree->GetName(), channel.Data()));
             ctrlTree->Write();
-            
+
             if (isData)
                 std::cout << "--- TrimTree                 : Split " << channel << " into " << testTree->GetEntriesFast() << "(test), " << ctrlTree->GetEntriesFast() << "(ctrl)." << std::endl;
             else
                 std::cout << "--- TrimTree                 : Split " << channel << " into " << trainTree->GetEntriesFast() << "(train), " << testTree->GetEntriesFast() << "(test), " << ctrlTree->GetEntriesFast() << "(ctrl)." << std::endl;
-            
+
             delete trainTree;
             delete testTree;
             delete ctrlTree;
         }  // end loop over channels
-        
+
         output_tmp->Close();
         output->Close();
         input->Close();
         delete input;
         delete output;
         delete output_tmp;
-        
+
         /// Rename the file
         gSystem->Exec("mv " + outputname_tmp + " " + outputname);
 
@@ -882,7 +887,7 @@ void BSMTrimTree(TString process="ZnnH125", TString mvaMethod="BDT", Long64_t be
         delete input;
         delete output;
     }
-    
+
     std::cout << "==> TrimTree is done!" << std::endl << std::endl;
     return;
 }

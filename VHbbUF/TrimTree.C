@@ -46,7 +46,6 @@
 
 //const TString indir       = "dcache:/pnfs/cms/WAX/resilient/jiafu//ZnunuHbb/Step3_20130314/";
 const TString indir       = "/eos/uscms/store/user/jiafu/ZnunuHbb/ZnunuHbb/Step3_20130314/";
-//const TString indir       = "/uscms_data/d3/lpchbb/jiafu/ZnnH_postHCP/Step3_20130221/";
 const TString outdir      = "skim/";
 const TString prefix      = "Step3_";
 const TString suffix      = ".root";
@@ -741,13 +740,13 @@ void TrimTree(TString process="ZnnH125", TString mvaMethod="BDT", Long64_t begin
                     (*formIt)->UpdateFormulaLeaves();  // if using TChain
                 for (formIt=selFormulas.begin(), formItEnd=selFormulas.end(); formIt!=formItEnd; formIt++)
                     (*formIt)->UpdateFormulaLeaves();  // if using TChain
-                weigFormula->UpdateFormulaLeaves();  // if using TChain
-                trigFormula->UpdateFormulaLeaves();  // if using TChain
-                mjjFormula->UpdateFormulaLeaves();  // if using TChain
+                weigFormula->UpdateFormulaLeaves();    // if using TChain
+                trigFormula->UpdateFormulaLeaves();    // if using TChain
+                mjjFormula->UpdateFormulaLeaves();     // if using TChain
                 genwptFormula->UpdateFormulaLeaves();  // if using TChain
                 genzptFormula->UpdateFormulaLeaves();  // if using TChain
                 genhptFormula->UpdateFormulaLeaves();  // if using TChain
-                scaleFormula->UpdateFormulaLeaves();  // if using TChain
+                scaleFormula->UpdateFormulaLeaves();   // if using TChain
                 naJetsFormula->UpdateFormulaLeaves();  // if using TChain
             }
 

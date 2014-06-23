@@ -96,7 +96,7 @@
 //const TString indir     = "/uscms_data/d3/lpchbb/jiafu/ZnnH_postHCP/Step4_20130302/reload_20130302/";
 //const TString indir     = "/uscms_data/d3/lpchbb/jiafu/ZnnH_postHCP/Step4_20130221/reload_20130228/";
 //const TString indir     = "/uscms_data/d3/lpchbb/jiafu/ZnnH_postHCP/Step4_20130214/reload_20130216/";
-const TString indir     = "/uscms_data/d3/lpchbb/jiafu/ZnnH_postHCP/Step4_20130919_noMjjVeto/stitch/";
+const TString indir     = "/eos/uscms/store/user/jiafu/ZnunuHbb/Step4_20130919_noMjjVeto/stitch/";
 //const TString indir     = "/uscms_data/d3/lpchbb/jiafu/ZnnH_postHCP/Step4_20130812/stitch/";
 //const TString indir     = "/uscms_data/d3/lpchbb/jiafu/ZnnH_postHCP/Step4_20130404/stitch/";
 //const TString indir     = "/uscms_data/d3/lpchbb/jiafu/ZnnH_postHCP/Step4_20130326/stitch/";
@@ -1008,10 +1008,10 @@ void MakePlots(const EventsJ14 * ev, TString var_,
         rebinner->set_signal_backgr(hZbbHinv_0, hmc_exp_0);
     }
 
-    TH1F * hZH        = rebinner->rebin(hZH_0         , newnbins, "ZH_SM"     );
-    TH1F * hWH        = rebinner->rebin(hWH_0         , newnbins, "WH_SM"     );
+    TH1F * hZH        = rebinner->rebin(hZH_0         , newnbins, "ZH_hbb"    );
+    TH1F * hWH        = rebinner->rebin(hWH_0         , newnbins, "WH_hbb"    );
 #ifndef HZZ2L2VNAMES
-    TH1F * hZbbHinv   = rebinner->rebin(hZbbHinv_0    , newnbins, "ZH"        );
+    TH1F * hZbbHinv   = rebinner->rebin(hZbbHinv_0    , newnbins, "ZH_hinv"   );
 #else
     TH1F * hZbbHinv   = rebinner->rebin(hZbbHinv_0    , newnbins, "zh1252lmet");
 #endif
@@ -1191,7 +1191,7 @@ void MakePlots(const EventsJ14 * ev, TString var_,
         dc << "bin         "; for (int j=0; j!=jmax+1; j++)  dc << channel_8TeV << " "; dc << std::endl;
 #ifndef HZZ2L2VNAMES
         //dc << "process     ZH         WH         ZbbHinv    Wj0b       Wj1b       Wj2b       Zj0b       Zj1b       Zj2b       TT         s_Top      VVLF       ZZHF       WZHF       QCD        " << std::endl;
-        dc << "process     ZH_SM      WH_SM      ZH         Wj0b       Wj1b       Wj2b       Zj0b       Zj1b       Zj2b       TT         s_Top      VVLF       ZZ         WZ         QCD        " << std::endl;
+        dc << "process     ZH_hbb     WH_hbb     ZH_hinv    Wj0b       Wj1b       Wj2b       Zj0b       Zj1b       Zj2b       TT         s_Top      VVLF       ZZ         WZ         QCD        " << std::endl;
 #else
         dc << "process     ZH_SM      WH_SM      zh1252lmet Wj0b       Wj1b       Wj2b       Zj0b       Zj1b       Zj2b       TT         s_Top      VVLF       zz2l2nu    wz3lnu     QCD        " << std::endl;
 #endif
@@ -1239,8 +1239,8 @@ void MakePlots(const EventsJ14 * ev, TString var_,
         //dc << "CMS_vhbb_VV                          lnN    -     -     -     -     -     -     -     -     -     -     -     1.05  1.05  1.05  -    " << std::endl;
         //dc << "CMS_vhbb_VH                          lnN    1.25  1.25  1.25  -     -     -     -     -     -     -     -     -     -     -     -    " << std::endl;
 #endif
-        dc << "##CMS_vhbb_MET_nojets                 lnN    1.03  1.03  1.03  -     -     -     -     -     -     -     1.03  1.03  1.03  1.03  1.03 " << std::endl;
-        dc << "##CMS_vhbb_trigger_MET                lnN    1.03  1.03  1.03  -     -     -     -     -     -     -     1.03  1.03  1.03  1.03  1.03 " << std::endl;
+        dc << "##CMS_vhbb_MET_nojets                  lnN    1.03  1.03  1.03  -     -     -     -     -     -     -     1.03  1.03  1.03  1.03  1.03 " << std::endl;
+        dc << "##CMS_vhbb_trigger_MET                 lnN    1.03  1.03  1.03  -     -     -     -     -     -     -     1.03  1.03  1.03  1.03  1.03 " << std::endl;
         dc << "CMS_vhbb_Wj0b_SF_" << channel_8TeV_1 << "    lnN    -     -     -     " << scalefactors_lnN[0] << "  -     -     -     -     -     -     -     -     -     -     -    " << std::endl;
         dc << "CMS_vhbb_Wj1b_SF_" << channel_8TeV_1 << "    lnN    -     -     -     -     " << scalefactors_lnN[1] << "  -     -     -     -     -     -     -     -     -     -    " << std::endl;
         dc << "CMS_vhbb_Wj2b_SF_" << channel_8TeV_1 << "    lnN    -     -     -     -     -     " << scalefactors_lnN[2] << "  -     -     -     -     -     -     -     -     -    " << std::endl;
@@ -1275,10 +1275,10 @@ void MakePlots(const EventsJ14 * ev, TString var_,
         dc << "CMS_vhbb_TTModel_Znn_8TeV            shape  -     -     -     -     -     -     -     -     -     1.00  -     -     -     -     -    " << std::endl;
         dc << "CMS_vhbb_WJSlope_Znn_8TeV            shape  -     -     -     1.00  1.00  1.00  -     -     -     -     -     -     -     -     -    " << std::endl;
         dc << "CMS_vhbb_ZJSlope_Znn_8TeV            shape  -     -     -     -     -     -     1.00  1.00  1.00  -     -     -     -     -     -    " << std::endl;
-        dc << "CMS_vhbb_statZH_SM_" << channel_8TeV << "  shape  1.00  -     -     -     -     -     -     -     -     -     -     -     -     -     -    " << std::endl;
-        dc << "CMS_vhbb_statWH_SM_" << channel_8TeV << "  shape  -     1.00  -     -     -     -     -     -     -     -     -     -     -     -     -    " << std::endl;
+        dc << "CMS_vhbb_statZH_hbb_" << channel_8TeV << " shape  1.00  -     -     -     -     -     -     -     -     -     -     -     -     -     -    " << std::endl;
+        dc << "CMS_vhbb_statWH_hbb_" << channel_8TeV << " shape  -     1.00  -     -     -     -     -     -     -     -     -     -     -     -     -    " << std::endl;
 #ifndef HZZ2L2VNAMES
-        dc << "CMS_vhbb_statZH_" << channel_8TeV << "     shape  -     -     1.00  -     -     -     -     -     -     -     -     -     -     -     -    " << std::endl;
+        dc << "CMS_vhbb_statZH_hinv_" << channel_8TeV << " shape  -     -     1.00  -     -     -     -     -     -     -     -     -     -     -     -    " << std::endl;
 #else
         dc << "CMS_vhbb_statzh1252lmet_" << channel_8TeV << "  shape  -  -   1.00  -     -     -     -     -     -     -     -     -     -     -     -    " << std::endl;
 #endif
@@ -2316,7 +2316,7 @@ void BSMBDTShapeJ14_plot(int nbins=500, long long newnbins=-100, double rebinerr
             MakePlots(ev, "HmassReg", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "m(jj) [GeV]", 15, 30, 255, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");  // don't apply mass veto
             MakePlots(ev, "HptReg", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "p_{T}(jj) [GeV]", 15, 130, 355, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             if (g_regions[ireg] == "WjHF")
-                MakePlots(ev, "min(HptReg,354)+0", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "p_{T}(jj) [GeV] ; Events / 15 GeV", 15, 130, 355, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig:writeStack"); // Jaco's version
+                MakePlots(ev, "min(HptReg,999)+0", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "p_{T}(jj) [GeV] ; Events / 20 GeV", 19, 130, 510, 19, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig:writeStack"); // Jaco's version
             MakePlots(ev, "max(hJet_ptReg[0],hJet_ptReg[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "p_{T}(j_{1}) [GeV]", 15, 60, 285, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "min(hJet_ptReg[0],hJet_ptReg[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "p_{T}(j_{2}) [GeV]", 13, 30, 160, 13, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "deltaR(hJet_eta[0], hJet_phi[0], hJet_eta[1], hJet_phi[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "#Delta R(jj)", 14, 0, 3.5, 14, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");

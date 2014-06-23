@@ -6,7 +6,6 @@ lastbins  = [20, 20, 20]
 rootfilename = "zhinv_Zbb_J14_$CHANNEL_TH1_test.root"
 newrootfilename = "zhinv_Zbb_J14_$CHANNEL_TH1.root"
 
-
 for ic, channel in enumerate(channels):
     rootfile = TFile.Open(rootfilename.replace("$CHANNEL", channel))
     directory = rootfile.Get(channel)
@@ -17,7 +16,6 @@ for ic, channel in enumerate(channels):
             h = directory.Get(key.GetName())
             h.SetName(key.GetName())
             print h.GetName()
-            #if "QCD" in h.GetName(): print "r", h.GetName()
             for b in xrange(1, h.GetNbinsX()+1):
                 if b < firstbins[ic] or b > lastbins[ic]:
                     h.SetBinContent(b, 0)
@@ -28,7 +26,6 @@ for ic, channel in enumerate(channels):
     newrootfile.mkdir(channel)
     newrootfile.cd(channel)
     for h in histograms:
-        #print "w", h.GetName()
         h.Write()
     newrootfile.Close()
 

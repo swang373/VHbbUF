@@ -121,7 +121,7 @@ const TCut    g_cutalldata  = "VtypeWithTau==4 && (!(207883<=EVENT.run && EVENT.
 //const TCut    g_cutalldata  = "(BDTtt_125[0]>-0.5 && BDTvjlf_125[0]>-0.5 && BDTzz_125[0]>-0.3) && VtypeWithTau==4 && (!(207883<=EVENT.run && EVENT.run<=208307))";  // FIXME
 const double  g_xlow        = -1.;
 const double  g_xup         = 1.;
-const bool    g_manyplots   = false;
+const bool    g_manyplots   = true;
 const TString g_wsname      = "zhinv_Zbb_8TeV.root";
 //const TString g_wsname      = "zhinv_Zbb_$CHANNEL_8TeV.root";
 const TString g_dcname      = "zhinv_Zbb_J14_$CHANNEL_8TeV.txt";
@@ -2313,9 +2313,15 @@ void BSMBDTShapeJ14(int nbins=500, long long newnbins=-100, double rebinerrorf=0
             }
             //MakePlots(ev, "HmassReg", cutmc_ctrl*cutmass_ctrl, cutdata_ctrl*cutmass_ctrl, g_systematics[0], g_regions[ireg], "m(jj) [GeV]", 15, 30, 255, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");  // apply mass veto
             MakePlots(ev, "HmassReg", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "m(jj) [GeV]", 15, 30, 255, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");  // don't apply mass veto
+            if (g_regions[ireg] == "VH") {
+                MakePlots(ev, "HmassReg+0", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "m(jj) [GeV] ; Events / 15 GeV", 15, 30, 255, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig:writeStack");  // Jaco's version
+                TCut cutbdt_signallike = (g_var + ">-0.35467").Data();
+                MakePlots(ev, "HmassReg+0+0", cutmc_ctrl*cutbdt_signallike, cutdata_ctrl*cutbdt_signallike, g_systematics[0], g_regions[ireg], "m(jj) [GeV] ; Events / 15 GeV", 15, 30, 255, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig:writeStack");  // Jaco's version
+            }
+
             MakePlots(ev, "HptReg", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "p_{T}(jj) [GeV]", 15, 130, 355, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             if (g_regions[ireg] == "WjHF")
-                MakePlots(ev, "min(HptReg,354)+0", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "p_{T}(jj) [GeV] ; Events / 15 GeV", 15, 130, 355, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig"); // Jaco's version
+                MakePlots(ev, "min(HptReg,999)+0", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "p_{T}(jj) [GeV] ; Events / 20 GeV", 19, 130, 510, 19, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig:writeStack"); // Jaco's version
             MakePlots(ev, "max(hJet_ptReg[0],hJet_ptReg[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "p_{T}(j_{1}) [GeV]", 15, 60, 285, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "min(hJet_ptReg[0],hJet_ptReg[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "p_{T}(j_{2}) [GeV]", 13, 30, 160, 13, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "deltaR(hJet_eta[0], hJet_phi[0], hJet_eta[1], hJet_phi[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "#Delta R(jj)", 14, 0, 3.5, 14, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
@@ -2323,13 +2329,18 @@ void BSMBDTShapeJ14(int nbins=500, long long newnbins=-100, double rebinerrorf=0
             MakePlots(ev, "abs(hJet_eta[0]-hJet_eta[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "|#Delta #eta(jj)|", 14, 0, 3.5, 14, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "min(abs(deltaPullAngle),pi)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "#Delta #theta_{pull}", 16, 0, 3.2, 16, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             if (g_regions[ireg] == "TT")
-                MakePlots(ev, "min(METtype1corr.et,349)+0", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "E_{T}^{miss} [GeV] ; Events / 15 GeV", 12, 170, 350, 12, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig"); // Jaco's version
+                MakePlots(ev, "min(METtype1corr.et,349)+0", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "E_{T}^{miss} [GeV] ; Events / 15 GeV", 12, 170, 350, 12, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig:writeStack"); // Jaco's version
             MakePlots(ev, "METtype1corr.et", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "E_{T}^{miss} [GeV]", 12, 170, 350, 12, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "HMETdPhi", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "#Delta #phi(V,H)", 16, 1.6, 3.2, 16, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "mindPhiMETJet_dPhi", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "min #Delta #phi(E_T^{miss},jet)", 16, 0, 3.2, 16, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "max(hJet_csv_nominal[0],hJet_csv_nominal[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "CSV_{max}", 15, 0.0, 1.05, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             if (g_regions[ireg] == "ZjHF")
-                MakePlots(ev, "min(min(hJet_csv_nominal[0],hJet_csv_nominal[1]),0.999)+0", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "CSV_{min} ; Events / 0.07", 11, 0.23, 1, 11, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig"); // Jaco's version
+                MakePlots(ev, "min(min(hJet_csv_nominal[0],hJet_csv_nominal[1]),0.999)+0", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "CSV_{min} ; Events / 0.07", 11, 0.23, 1, 11, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig:writeStack"); // Jaco's version
+            if (g_regions[ireg] == "VH") {
+                MakePlots(ev, "min(min(hJet_csv_nominal[0],hJet_csv_nominal[1]),0.999)+0", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "CSV_{min} ; Events / 0.07", 11, 0.23, 1, 11, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig:writeStack"); // Jaco's version
+                TCut cutbdt_signallike = (g_var + ">-0.35467").Data();
+                MakePlots(ev, "min(min(hJet_csv_nominal[0],hJet_csv_nominal[1]),0.999)+0+0", cutmc_ctrl*cutbdt_signallike, cutdata_ctrl*cutbdt_signallike, g_systematics[0], g_regions[ireg], "CSV_{min} ; Events / 0.07", 11, 0.23, 1, 11, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig:writeStack"); // Jaco's version
+            }
             MakePlots(ev, "min(hJet_csv_nominal[0],hJet_csv_nominal[1])", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "CSV_{min}", 15, 0.0, 1.05, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
             MakePlots(ev, "naJets_Znn", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "N_{aj}", 8, 0, 8, 8, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:plotData:!plotLog:plotSig");
             MakePlots(ev, "MaxIf$(max(aJet_csv_nominal,0), aJet_pt>20 && abs(aJet_eta)<2.5)", cutmc_ctrl, cutdata_ctrl, g_systematics[0], g_regions[ireg], "maxCSV_{aj}", 15, 0.0, 1.05, 15, errorffirst, errorflast, scalefactors_lnN, "!printStat:!printCard:!writeRoot:plotData:!plotLog:plotSig");
