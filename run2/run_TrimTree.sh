@@ -1,0 +1,7 @@
+root -b -l -q ./TrimTree.C+\(\"ZnnH125\",\"BDT\"\)
+root -b -l -q ./TrimTree.C+\(\"WlnH125\",\"BDT\"\)
+root -b -l -q ./TrimTree.C+\(\"s_Top\",\"BDT\"\)
+root -b -l -q ./TrimTree.C+\(\"WJets\",\"BDT\"\)
+root -b -l -q ./TrimTree.C+\(\"ZJets\",\"BDT\"\)
+root -b -l -q ./TrimTree.C+\(\"TTPythia8\",\"BDT\"\)
+root -b -l -q ./TrimTree.C+\(\"QCD\",\"BDT\"\)
