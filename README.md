@@ -1,8 +1,7 @@
-# VHbbUF********************************
+
 Z(υυ) H(bb) Step by Step
-********************************
 Analysis
-========
+
 .. NOTE::
 All the scripts must be run from the base directory.
 1. Use `copyfromINFNtoFNAL.sh` to transfer Step 2 ntuples from Pisa to FNAL.
@@ -137,18 +136,4 @@ root [0] fomtree->Scan("NTrees:nEventsMin:MaxDepth:COMB_limit:COMB_signif:TMVA_k
 .. code:: bash
 # edit nuisances, processes, soverb if necessary
 python systematica_ZbbHinv.py
-.. HTML generation command: rst2html.py --no-toc-backlinks --stylesheet=style.css < steps.txt > steps.html
-
-    Status
-    API
-    Training
-    Shop
-    Blog
-    About
-
-    © 2015 GitHub, Inc.
-    Terms
-    Privacy
-    Security
-    Contact
 
