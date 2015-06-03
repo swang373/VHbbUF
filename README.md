@@ -5,19 +5,19 @@ Analysis
 .. NOTE::
 All the scripts must be run from the base directory.
 1. Use `copyfromINFNtoFNAL.sh` to transfer Step 2 ntuples from Pisa to FNAL.
-# edit the directories in the script before run.
+ edit the directories in the script before run.
 sh copyfromINFNtoFNAL.sh
 2. Use `Skim.C` to skim the Step 2 ntuples with baseline selection. Make sure `HelperNtuples.h` is updated.
-# in `inputstep2.ini` Section [Skim], edit tagMC, tagData, baseline, mettrigger, metfilter.
-# in `inputstep2.ini` Section [Stitch], edit xxxLHECUT's
-# enable reader.write_HelperNtuples(), disable the rest
+ in `inputstep2.ini` Section [Skim], edit tagMC, tagData, baseline, mettrigger, metfilter.
+ in `inputstep2.ini` Section [Stitch], edit xxxLHECUT's
+ enable reader.write_HelperNtuples(), disable the rest
 python pyhelper.py
-# copy printout to HelperNtuples.h
-# now run the skim
+ copy printout to HelperNtuples.h
+ now run the skim
 source run_Skim.sh
 3. Use `SkimRegression.C` to skim the Step2 ntuples for BDTG regression training. Make sure `HelperNtuples.h` is updated.
-# in `inputstep2.ini` Section [Skim], edit regression, fjregression
-# enable reader.write_HelperNtuples(), disable the rest
+ in `inputstep2.ini` Section [Skim], edit regression, fjregression
+ enable reader.write_HelperNtuples(), disable the rest
 python pyhelper.py
 # copy printout to HelperNtuples.h
 # now run the skim for ak5 regression
