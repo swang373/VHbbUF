@@ -2,12 +2,11 @@ const std::string tagMC        = "root://eoscms//eos/cms//store/user/capalmer/VH
 const std::string tagData      = "root://eoscms//eos/cms//store/user/capalmer/VHBBHeppyNtuples/V7/";
 //const std::string baseline     = "(Vtype==4||Vtype==3||Vtype==2) && met_pt>100 && Sum$(abs(Jet_eta)<2.5 && Jet_pt>20)>1 && Sum$(Jet_btagCSV>0.7)>0";
 //const std::string baseline     = "met_pt>200 &&   (Jet_btagCSV[hJidx[0]]>0.9 ||  Jet_btagCSV[hJidx[1]]>0.9) && (Vtype==4) && Jet_pt[hJidx[0]]>30  && Jet_pt[hJidx[1]] > 30  && abs(Jet_eta[hJidx[0]])<2.4 &&  abs(Jet_eta[hJidx[1]])<2.4" ;
-const std::string baseline     = "(Vtype==4||Vtype==3||Vtype==2) && met_pt>150 && Sum$(abs(Jet_eta)<2.5 && Jet_pt>30 && Jet_btagCSV>0.423)>1" ;
+const std::string baseline     = "" ;
 
 
 
-//const std::string regression   = "(Vtype==4||Vtype==3||Vtype==2) && met_pt>120 && abs(hJet_eta[0])<2.5 && abs(hJet_eta[1])<2.5 && hJet_id[0]==1 && hJet_id[1]==1 && hJet_genPt[0]>10 && hJet_genPt[1]>10 && abs(hJet_flavour[0])==5 && hJet_pt[0]>20 && hJet_pt[1]>20 && hJet_csv[0]>0 && hJet_csv[1]>0";
-const std::string regression   = baseline + "&& ( abs(Jet_mcFlavour[hJCidx[0]])==5  && abs(Jet_mcFlavour[hJCidx[1]])==5 )";
+const std::string regression   = "(Vtype==4||Vtype==3||Vtype==2) && met_pt>120 && abs(hJet_eta[0])<2.5 && abs(hJet_eta[1])<2.5 && hJet_id[0]==1 && hJet_id[1]==1 && hJet_genPt[0]>10 && hJet_genPt[1]>10 && abs(hJet_flavour[0])==5 && hJet_pt[0]>20 && hJet_pt[1]>20 && hJet_csv[0]>0 && hJet_csv[1]>0";
 const std::string fjregression = "(Vtype==4||Vtype==3||Vtype==2) && METtype1corr.et>80 && FatH.FatHiggsFlag==1 && nfathFilterJets>0 && abs(fathFilterJets_eta[0])<2.5 && abs(fathFilterJets_eta[1])<2.5 && fathFilterJets_genPt[0]>10 && fathFilterJets_genPt[1]>10 && abs(fathFilterJets_flavour[0])==5 && fathFilterJets_pt[0]>15 && fathFilterJets_pt[1]>15 && fathFilterJets_csv[0]>0 && fathFilterJets_csv[1]>0";
 const std::string mettrigger   = "1";
 const std::string metfilter    = "1";

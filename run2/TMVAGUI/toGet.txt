@@ -1,8 +1,0 @@
-wget https://raw.githubusercontent.com/kalanand/CMS-StatisticalTools/master/RooStatsRoutines/tmva/mvas.C 
- wget https://raw.githubusercontent.com/kalanand/CMS-StatisticalTools/master/RooStatsRoutines/tmva/mvas.C 
- wget https://raw.githubusercontent.com/kalanand/CMS-StatisticalTools/master/RooStatsRoutines/tmva/mvaeffs.C 
- wget https://raw.githubusercontent.com/kalanand/CMS-StatisticalTools/master/RooStatsRoutines/tmva/efficiencies.C 
- wget https://raw.githubusercontent.com/kalanand/CMS-StatisticalTools/master/RooStatsRoutines/tmva/paracoor.C 
- wget https://raw.githubusercontent.com/kalanand/CMS-StatisticalTools/master/RooStatsRoutines/tmva/probas.C 
- wget https://raw.githubusercontent.com/kalanand/CMS-StatisticalTools/master/RooStatsRoutines/tmva/BDT.C 
- wget https://raw.githubusercontent.com/kalanand/CMS-StatisticalTools/master/RooStatsRoutines/tmva/BDTControlPlots.C 

@@ -249,7 +249,7 @@ class Reader:
         if not hasattr(self, attr):
             raise AttributeError("%s: Failed to find attribute: %s" % (self.__class__.__name__, attr))
         if getattr(self, attr):
-            substitutions["Jet_pt"] = "Jet_ptReg"
+            substitutions["hJet_pt"] = "hJet_ptReg"
             substitutions["H\.pt"] = "HptReg"
             substitutions["H\.mass"] = "HmassReg"
         return substitutions
@@ -343,8 +343,8 @@ class Reader:
             
             expr0 , expr1 = expr, expr
             if not k.startswith("breg_evt"):
-                expr0 = re.sub(r"hJCidx", r"hJCidx[0]", expr)
-                expr1 = re.sub(r"hJCidx", r"hJCidx[1]", expr)
+                expr0 = re.sub(r"hJet_(\w+)", r"hJet_\1[0]", expr)
+                expr1 = re.sub(r"hJet_(\w+)", r"hJet_\1[1]", expr)
             string = "\"{0}\"".format(expr0)
             vstrings0.append((len(vstrings0), string))
             string = "\"{0}\"".format(expr1)
@@ -599,6 +599,6 @@ if __name__ == "__main__":
     reader.read(ini)
 
     # Write codes
-    #reader.write_HelperNtuples()
-    reader.write_HelperTMVA()
+    reader.write_HelperNtuples()
+    #reader.write_HelperTMVA()
 
