@@ -1,0 +1,39 @@
+imax 1 number of channels
+jmax 8 number of processes minus 1 ('*' = automatic)
+kmax * number of nuisance parameters (sources of systematical uncertainties)
+-----------------------------------
+shapes * * znnhbb_HighPt_13TeV.root $PROCESS $PROCESS_$SYSTEMATIC
+-----------------------------------
+bin         ZnnHighPt_8TeV
+#observation 0.000
+prediction 6592.040
+-----------------------------------
+bin         ZnnHighPt_8TeV   ZnnHighPt_8TeV   ZnnHighPt_8TeV   ZnnHighPt_8TeV   ZnnHighPt_8TeV   ZnnHighPt_8TeV   ZnnHighPt_8TeV   ZnnHighPt_8TeV    ZnnHighPt_8TeV   
+process     ZH         WH         WjLF       WjHF       ZjLF       ZjHF       TT         ST         7          
+process     -1         0          1          2          3          4          5          6          7          
+rate            40.261      8.514    952.500    785.736   1270.679   1894.064   1417.197    271.863      0.000
+-----------------------------------
+
+# This datacard is for demonstration purposes only!
+#################################### #####  ZH    WH    WjLF  WjHF  ZjLF  ZjHF  TT    ST    VV    
+lumi_13TeV                            lnN    1.026 1.026 -     -     -     -     -     1.026 1.026 
+pdf_qqbar                            lnN    1.01  1.01  -     -     -     -     -     -     1.01  
+pdf_gg                               lnN    -     -     -     -     -     -     -     1.01  -     
+QCDscale_VH                          lnN    1.04  1.04  -     -     -     -     -     -     -     
+QCDscale_ttbar                       lnN    -     -     -     -     -     -     -     1.06  -     
+QCDscale_VV                          lnN    -     -     -     -     -     -     -     -     1.04  
+QCDscale_QCD                         lnN    -     -     -     -     -     -     -     -     -     
+CMS_vhbb_boost_EWK_8TeV              lnN    1.05  1.10  -     -     -     -     -     -     -     
+CMS_vhbb_boost_QCD_8TeV              lnN    1.10  1.10  -     -     -     -     -     -     -     
+CMS_vhbb_ST                          lnN    -     -     -     -     -     -     -     1.25  -     
+CMS_vhbb_VV                          lnN    -     -     -     -     -     -     -     -     1.25  
+CMS_vhbb_eff_b                       lnN    1.07  1.07  1.07  1.07  1.07  1.07  1.07  1.07  1.07  
+CMS_vhbb_fake_b_8TeV                 lnN    1.03  1.03  1.03  1.03  1.03  1.03  1.03  1.03  1.03  
+CMS_vhbb_res_j                       lnN    1.05  1.05  1.05  1.05  1.05  1.05  1.05  1.05  1.05  
+CMS_vhbb_scale_j                     lnN    1.05  1.05  1.05  1.05  1.05  1.05  1.05  1.05  1.05  
+CMS_vhbb_WjLF_SF_ZnnHighPt_8TeV            lnN    -     -     1.08  -     -     -     -     -     -     
+CMS_vhbb_WjHF_SF_ZnnHighPt_8TeV            lnN    -     -     -     1.20  -     -     -     -     -     
+CMS_vhbb_ZjLF_SF_ZnnHighPt_8TeV            lnN    -     -     -     -     1.08  -     -     -     -     
+CMS_vhbb_ZjHF_SF_ZnnHighPt_8TeV            lnN    -     -     -     -     -     1.20  -     -     -     
+CMS_vhbb_TT_SF_ZnnHighPt_8TeV              lnN    -     -     -     -     -     -     1.07  -     -     
+#################################### #####  ZH    WH    WjLF  WjHF  ZjLF  ZjHF  TT    ST    VV    
