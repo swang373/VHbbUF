@@ -38,7 +38,7 @@ namespace math {
     typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > XYZTLorentzVector;
 }
 
-#define MAXJ 100
+#define MAXJ 130
 #define MAXL 110
 
 //#define CSVSYST
@@ -59,12 +59,12 @@ namespace math {
 
 
 // FIXME: change it to output the delta, not met+delta
-double shift_met_by_Nvtx(double met, double metphi, int Nvtx, int EVENT_run)
+float shift_met_by_Nvtx(float met, float metphi, int Nvtx, int EVENT_run)
 {
     // from http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/CMSSW/JetMETCorrections/Type1MET/python/pfMETsysShiftCorrections_cfi.py?revision=1.6&view=markup
-    double mex = met * cos(metphi);
-    double mey = met * sin(metphi);
-    double px = 0.0, py = 0.0;
+    float mex = met * cos(metphi);
+    float mey = met * sin(metphi);
+    float px = 0.0, py = 0.0;
     if (EVENT_run != 1) {
         //pfMEtSysShiftCorrParameters_2012runABCvsNvtx_data
         px = +0.2661 + 0.3217*Nvtx;
@@ -80,12 +80,12 @@ double shift_met_by_Nvtx(double met, double metphi, int Nvtx, int EVENT_run)
 }
 
 // FIXME: change it to output the delta, not met+delta
-double shift_metphi_by_Nvtx(double met, double metphi, int Nvtx, int EVENT_run)
+float shift_metphi_by_Nvtx(float met, float metphi, int Nvtx, int EVENT_run)
 {
     // from http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/CMSSW/JetMETCorrections/Type1MET/python/pfMETsysShiftCorrections_cfi.py?revision=1.6&view=markup
-    double mex = met * cos(metphi);
-    double mey = met * sin(metphi);
-    double px = 0.0, py = 0.0;
+    float mex = met * cos(metphi);
+    float mey = met * sin(metphi);
+    float px = 0.0, py = 0.0;
     if (EVENT_run != 1) {
         //pfMEtSysShiftCorrParameters_2012runABCvsNvtx_data
         px = +0.2661 + 0.3217 * Nvtx;
@@ -99,8 +99,8 @@ double shift_metphi_by_Nvtx(double met, double metphi, int Nvtx, int EVENT_run)
     mey -= py;
     if (mex == 0.0 && mey == 0.0)
         return 0.0;
-    double phi1 = TMath::ATan2(mey, mex);
-    double phi2 = TMath::ATan2(mey, mex) - 2.0 * M_PI;
+    float phi1 = TMath::ATan2(mey, mex);
+    float phi2 = TMath::ATan2(mey, mex) - 2.0 * M_PI;
     if (TMath::Abs(phi1 - metphi) < TMath::Abs(phi2 - metphi) + 0.5 * M_PI)
         return phi1;
     else
@@ -114,19 +114,6 @@ TLorentzVector makePtEtaPhiE(double ptCor, double pt, double eta, double phi, do
     j.SetPtEtaPhiE(ptCor, eta, phi, (rescaleEnergy ? (e * ptCor / pt) : e));
     return j;
 }
-
-
-TLorentzVector makePtEtaPhiM(double ptCor, double pt, double eta, double phi, double m, 
-                             bool print=false)
-{
-    TLorentzVector j;
-    if (print ) { 
-      std::cout << "evaluating vector with ptCor, pt, eta, phi, m " << ptCor << " , " <<  pt << " , " << eta << " , " << phi << " , " << m << std::endl;
-    }
-    j.SetPtEtaPhiM(ptCor, eta, phi,  m );
-    return j;
-}
-
 
 // Copied from http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/CMSSW/TopQuarkAnalysis/SingleTop/src/TopProducer.cc?revision=1.9&view=markup
 TLorentzVector getNu4Momentum(const TLorentzVector& TLepton, const TLorentzVector& TMET)
@@ -341,33 +328,30 @@ void GrowTree(TString process, std::string regMethod="BDTG", Long64_t beginEntry
     METInfo METtype1diff;
     int Vtype, VtypeWithTau, nPVs;
     int nhJets, naJets;
-    double hJet_pt[MAXJ], hJet_eta[MAXJ], hJet_phi[MAXJ], hJet_e[MAXJ], hJet_m[MAXJ], hJet_ptRaw[MAXJ], 
-        hJet_csv[MAXJ], hJet_csv_nominal[MAXJ], hJet_genPt[MAXJ], hJet_genEta[MAXJ], hJet_genPhi[MAXJ], hJet_flavour[MAXJ], hJet_JECUnc[MAXJ], hJet_puJetIdL[MAXJ];
-    double aJet_pt[MAXJ], aJet_eta[MAXJ], aJet_phi[MAXJ], aJet_e[MAXJ], 
+    float hJet_pt[2], hJet_eta[2], hJet_phi[2], hJet_e[2], hJet_ptRaw[2], 
+        hJet_csv[2], hJet_csv_nominal[2], hJet_genPt[2], hJet_genEta[2], hJet_genPhi[2], hJet_flavour[2], hJet_JECUnc[2], hJet_puJetIdL[2];
+    float aJet_pt[MAXJ], aJet_eta[MAXJ], aJet_phi[MAXJ], aJet_e[MAXJ], 
         aJet_csv[MAXJ], aJet_csv_nominal[MAXJ], aJet_genPt[MAXJ], aJet_flavour[MAXJ], aJet_JECUnc[MAXJ],
         aJet_puJetIdL[MAXJ];
-    int hJCidx[2];
     bool hJet_id[2];
     bool aJet_id[MAXJ]; 
     int nfathFilterJets, naJetsFat;
-    double fathFilterJets_pt[3], fathFilterJets_eta[3], fathFilterJets_phi[3], 
+    float fathFilterJets_pt[3], fathFilterJets_eta[3], fathFilterJets_phi[3], 
         fathFilterJets_e[3], fathFilterJets_ptRaw[3], fathFilterJets_csv[3], 
         fathFilterJets_csvivf[3], fathFilterJets_genPt[3], fathFilterJets_flavour[3], 
         fathFilterJets_JECUnc[3];
-    double aJetFat_pt[MAXJ], aJetFat_eta[MAXJ], aJetFat_phi[MAXJ], aJetFat_e[MAXJ];
-    double metUnc_et[24], metUnc_phi[24];  // could be changed to 12 in the future
+    float aJetFat_pt[MAXJ], aJetFat_eta[MAXJ], aJetFat_phi[MAXJ], aJetFat_e[MAXJ];
+    float metUnc_et[24], metUnc_phi[24];  // could be changed to 12 in the future
     int nvlep, nalep;
-    double vLepton_mass[2], vLepton_pt[2], vLepton_eta[2], vLepton_phi[2], vLepton_pfCombRelIso[2], vLepton_id95[2], vLepton_vbtf[2], vLepton_genPt[2], vLepton_genEta[2], vLepton_genPhi[2];
+    float vLepton_mass[2], vLepton_pt[2], vLepton_eta[2], vLepton_phi[2], vLepton_pfCombRelIso[2], vLepton_id95[2], vLepton_vbtf[2], vLepton_genPt[2], vLepton_genEta[2], vLepton_genPhi[2];
     int vLepton_type[2];
-    double aLepton_mass[MAXL], aLepton_pt[MAXL], aLepton_eta[MAXL], aLepton_phi[MAXL], aLepton_pfCombRelIso[MAXL], aLepton_id95[MAXL], aLepton_vbtf[MAXL];
+    float aLepton_mass[MAXL], aLepton_pt[MAXL], aLepton_eta[MAXL], aLepton_phi[MAXL], aLepton_pfCombRelIso[MAXL], aLepton_id95[MAXL], aLepton_vbtf[MAXL];
     int aLepton_type[MAXL];
-    double HMETdPhi, deltaPullAngle;
+    float HMETdPhi, deltaPullAngle;
 
  
     int naLeptons;
-    double aLeptons_looseIdPOG[MAXL], aLeptons_pt[MAXL], aLeptons_eta[MAXL], aLeptons_phi[MAXL];
-
-    inTree->SetBranchStatus("*", 1);
+    float aLeptons_looseIdPOG[MAXL], aLeptons_pt[MAXL], aLeptons_eta[MAXL], aLeptons_phi[MAXL];
 
     /*    
     inTree->SetBranchAddress("EVENT", &EVENT);
@@ -382,22 +366,14 @@ void GrowTree(TString process, std::string regMethod="BDTG", Long64_t beginEntry
     inTree->SetBranchAddress("nhJets", &nhJets);
     inTree->SetBranchAddress("naJets", &naJets);
     inTree->SetBranchAddress("naJetsFat", &naJetsFat);
-    */
-    inTree->SetBranchStatus("hJCidx",1);
-    inTree->SetBranchStatus("Jet_*",1);
-    inTree->SetBranchAddress("hJCidx", &hJCidx);
-    inTree->SetBranchAddress("Jet_pt", &hJet_pt);
-
-    inTree->SetBranchAddress("Jet_eta", &hJet_eta);
-    inTree->SetBranchAddress("Jet_phi", &hJet_phi);
-    inTree->SetBranchAddress("Jet_mass", &hJet_m);
-    inTree->SetBranchAddress("Jet_rawPt", &hJet_ptRaw);
-    /*
+    inTree->SetBranchAddress("hJet_pt", &hJet_pt);
+    inTree->SetBranchAddress("hJet_eta", &hJet_eta);
+    inTree->SetBranchAddress("hJet_phi", &hJet_phi);
+    inTree->SetBranchAddress("hJet_e", &hJet_e);
+    inTree->SetBranchAddress("hJet_ptRaw", &hJet_ptRaw);
     inTree->SetBranchAddress("hJet_csv", &hJet_csv);
     inTree->SetBranchAddress("hJet_csv_nominal", &hJet_csv_nominal);
-    */
-    inTree->SetBranchAddress("Jet_mcPt", &hJet_genPt);
-    /*
+    inTree->SetBranchAddress("hJet_genPt", &hJet_genPt);
     inTree->SetBranchAddress("hJet_genEta", &hJet_genEta);
     inTree->SetBranchAddress("hJet_genPhi", &hJet_genPhi);
     inTree->SetBranchAddress("hJet_flavour", &hJet_flavour);
@@ -464,7 +440,7 @@ void GrowTree(TString process, std::string regMethod="BDTG", Long64_t beginEntry
     inTree->SetBranchAddress("aLeptons_phi", &aLeptons_phi);
     */
     //   inTree->SetBranchAddress("aLepton_pfCombRelIso", &aLepton_pfCombRelIso);
-    //    inTree->SetBranchAddress("aLepton_looseIdPOG", &aLeptons_looseIdPOG);
+    inTree->SetBranchAddress("aLepton_looseIdPOG", &aLeptons_looseIdPOG);
     //inTree->SetBranchAddress("aLepton_vbtf", &aLepton_vbtf);
     // inTree->SetBranchAddress("aLepton_type", &aLepton_type);
 
@@ -472,7 +448,7 @@ void GrowTree(TString process, std::string regMethod="BDTG", Long64_t beginEntry
 
 
     /// Increase reading speed
-
+    inTree->SetBranchStatus("*", 1);
 
     //inTree->SetBranchStatus("EVENT", 1);
     //inTree->SetBranchStatus("H", 1);
@@ -556,12 +532,11 @@ inTree->SetBranchStatus("SimBs_*", 0);
     outTree->Branch("efflumi_UEPS_up", &efflumi_UEPS_up, "efflumi_UEPS_up/F");
     outTree->Branch("efflumi_UEPS_down", &efflumi_UEPS_down, "efflumi_UEPS_down/F");
     outTree->Branch("hJet_ptReg", &hJet_ptReg, "hJet_ptReg[2]/F");
-    /*
     outTree->Branch("hJet_ptReg_res_j_up", &hJet_ptReg_res_j_up, "hJet_ptReg_res_j_up[2]/F");
     outTree->Branch("hJet_ptReg_res_j_down", &hJet_ptReg_res_j_down, "hJet_ptReg_res_j_down[2]/F");
     outTree->Branch("hJet_ptReg_scale_j_up", &hJet_ptReg_scale_j_up, "hJet_ptReg_scale_j_up[2]/F");
     outTree->Branch("hJet_ptReg_scale_j_down", &hJet_ptReg_scale_j_down, "hJet_ptReg_scale_j_down[2]/F");
-    */
+
 #ifdef CSVSYST
     outTree->Branch("hJet_csv_reshaped", &hJet_csv_reshaped, "hJet_csv_reshaped[2]/F");
     outTree->Branch("hJet_csv_eff_b_up", &hJet_csv_eff_b_up, "hJet_csv_eff_b_up[2]/F");
@@ -569,20 +544,17 @@ inTree->SetBranchStatus("SimBs_*", 0);
     outTree->Branch("hJet_csv_fake_b_up", &hJet_csv_fake_b_up, "hJet_csv_fake_b_up[2]/F");
     outTree->Branch("hJet_csv_fake_b_down", &hJet_csv_fake_b_down, "hJet_csv_fake_b_down[2]/F");
 #endif
-    
+    /*
     outTree->Branch("HptNorm", &HptNorm, "HptNorm/F");
     outTree->Branch("HptGen", &HptGen, "HptGen/F");
     outTree->Branch("HptReg", &HptReg, "HptReg/F");
-    /*
     outTree->Branch("HptReg_res_j_up", &HptReg_res_j_up, "HptReg_res_j_up/F");
     outTree->Branch("HptReg_res_j_down", &HptReg_res_j_down, "HptReg_res_j_down/F");
     outTree->Branch("HptReg_scale_j_up", &HptReg_scale_j_up, "HptReg_scale_j_up/F");
     outTree->Branch("HptReg_scale_j_down", &HptReg_scale_j_down, "HptReg_scale_j_down/F");
-    */
     outTree->Branch("HmassNorm", &HmassNorm, "HmassNorm/F");
     outTree->Branch("HmassGen", &HmassGen, "HmassGen/F");
     outTree->Branch("HmassReg", &HmassReg, "HmassReg/F");
-    /*
     outTree->Branch("HmassReg_res_j_up", &HmassReg_res_j_up, "HmassReg_res_j_up/F");
     outTree->Branch("HmassReg_res_j_down", &HmassReg_res_j_down, "HmassReg_res_j_down/F");
     outTree->Branch("HmassReg_scale_j_up", &HmassReg_scale_j_up, "HmassReg_scale_j_up/F");
@@ -731,7 +703,7 @@ inTree->SetBranchStatus("SimBs_*", 0);
 
     // regression stuff here
 
-    
+    /*
     ///-- Setup TMVA Reader ----------------------------------------------------
     TMVA::Tools::Instance();  //< This loads the library
     TMVA::Reader * reader = new TMVA::Reader("!Color:!Silent");
@@ -743,7 +715,7 @@ inTree->SetBranchStatus("SimBs_*", 0);
    
     Float_t readerVars[nvars];
     int idx_rawpt = -1, idx_pt = -1, idx_et = -1, idx_mt = -1;
-   
+    /*
     for (UInt_t iexpr = 0; iexpr < nvars; iexpr++) {
         const TString& expr = inputExpressionsReg.at(iexpr);
         reader->AddVariable(expr, &readerVars[iexpr]);
@@ -752,8 +724,7 @@ inTree->SetBranchStatus("SimBs_*", 0);
         else if (expr.BeginsWith("breg_et := "))        idx_et = iexpr;
         else if (expr.BeginsWith("breg_mt := "))        idx_mt = iexpr;
     }
-    //    assert(idx_rawpt!=-1 && idx_pt!=-1 && idx_et!=-1 && idx_mt!=-1);
-    assert(idx_rawpt!=-1 && idx_pt!=-1 );
+    assert(idx_rawpt!=-1 && idx_pt!=-1 && idx_et!=-1 && idx_mt!=-1);
 
     /// Setup TMVA regression inputs
     const std::vector < std::string > & inputExpressionsReg0 = GetInputExpressionsReg0();
@@ -766,7 +737,7 @@ inTree->SetBranchStatus("SimBs_*", 0);
     TString weightfile = weightdir + "TMVARegression_" + regMethod + ".testweights.xml";
     reader->BookMVA(regMethod + " method", weightfile);
     
-    /*
+
     ///-- Setup TMVA Reader (filter jets) ---------------------------------------
 
     TMVA::Reader * readerFJ = new TMVA::Reader("!Color:!Silent");
@@ -774,7 +745,7 @@ inTree->SetBranchStatus("SimBs_*", 0);
     /// Get the variables (filter jets)
     const std::vector < std::string > & inputExpressionsFJReg = GetInputExpressionsFJReg();
     const UInt_t nvarsFJ = inputExpressionsFJReg.size();
-    Double_t readerVarsFJ[nvarsFJ];
+    Float_t readerVarsFJ[nvarsFJ];
     int idx_fjrawpt = -1, idx_fjpt = -1, idx_fjet = -1, idx_fjmt = -1;
 
     
@@ -821,7 +792,7 @@ inTree->SetBranchStatus("SimBs_*", 0);
     std::vector < TTreeFormula * > inputFormulasFJReg1;
     std::vector < TTreeFormula * > inputFormulasFJReg2;
 
-    
+    /*
     for (UInt_t iexpr = 0; iexpr < nvars; iexpr++) {
         ttf = new TTreeFormula(Form("ttfreg%i_0", iexpr), inputExpressionsReg0.at(iexpr).c_str(), inTree);
         ttf->SetQuickLoad(1);
@@ -830,8 +801,7 @@ inTree->SetBranchStatus("SimBs_*", 0);
         ttf->SetQuickLoad(1);
         inputFormulasReg1.push_back(ttf);
     }
-    /* 
-   for (UInt_t iexpr = 0; iexpr < nvarsFJ; iexpr++) {
+    for (UInt_t iexpr = 0; iexpr < nvarsFJ; iexpr++) {
         ttf = new TTreeFormula(Form("ttffjreg%i_0", iexpr), inputExpressionsFJReg0.at(iexpr).c_str(), inTree);
         ttf->SetQuickLoad(1);
         inputFormulasFJReg0.push_back(ttf);
@@ -842,8 +812,8 @@ inTree->SetBranchStatus("SimBs_*", 0);
         ttf->SetQuickLoad(1);
         inputFormulasFJReg2.push_back(ttf);
     }
-    */
- 
+   
+ */
 
 #ifdef CSVSYST
     /// Setup b-tagging reshaping
@@ -934,8 +904,9 @@ inTree->SetBranchStatus("SimBs_*", 0);
 
 
 
-             
-	for (Int_t ihj = 0; ihj < 2; ihj++) {
+
+	/*      
+  for (Int_t ihj = 0; ihj < 2; ihj++) {
 
 #ifdef JECFWLite
             hJet_JECUnc[ihj] = uncert(hJet_eta[ihj], hJet_pt[ihj], (EVENT_run == 1), false);
@@ -947,25 +918,15 @@ inTree->SetBranchStatus("SimBs_*", 0);
             for (UInt_t iexpr = 0; iexpr < nvars; iexpr++) {
                 if (ihj==0) {
                     readerVars[iexpr] = inputFormulasReg0.at(iexpr)->EvalInstance();
-
                 } else if (ihj==1) {
                     readerVars[iexpr] = inputFormulasReg1.at(iexpr)->EvalInstance();
                 }
             }
-
-	    //  assert(TMath::AreEqualRel(hJet_pt[hJCidx[ihj]], readerVars[idx_pt], 1.E-12));
+            assert(TMath::AreEqualRel(hJet_pt[ihj], readerVars[idx_pt], 1.E-12));
             const double hJet_ptRawJER    = readerVars[idx_rawpt];  // hJet_ptRaw[ihj] is before smearing
             hJet_ptReg[ihj]               = (reader->EvaluateRegression(regMethod + " method"))[0];
-            if (verbose)  std::cout << readerVars[idx_pt] << " " << readerVars[idx_rawpt] <<  " " << hJet_pt[ihj] << " " << hJet_ptReg[ihj] << " " << hJet_genPt[ihj] << std::endl;
-            //std::cout << readerVars[idx_pt] << " " << readerVars[idx_rawpt] <<  " " << hJet_pt[ihj] << " " << hJet_ptReg[ihj] << " " << hJet_genPt[ihj] << std::endl;
-	    /*	    
-	    for (UInt_t iexpr = 0; iexpr < nvars; iexpr++) {
-	      std::cout << " readerVars[" <<  iexpr << "]" << readerVars[iexpr] << std::endl;   
-	    }
-	    */
+            if (verbose)  std::cout << readerVars[idx_pt] << " " << readerVars[idx_rawpt] << " " << readerVars[idx_et] << " " << readerVars[idx_mt] << " " << hJet_pt[ihj] << " " << hJet_ptReg[ihj] << " " << hJet_genPt[ihj] << std::endl;
 
-	
-	    /*
             // res_j_up
             pt_                           = smear_pt_resErr(hJet_pt[ihj] , hJet_genPt[ihj], hJet_eta[ihj], true);
             rawpt_                        = pt_ / hJet_pt[ihj] * hJet_ptRawJER;
@@ -1018,22 +979,17 @@ inTree->SetBranchStatus("SimBs_*", 0);
             hJet_csv_fake_b_down[ihj] = csvShape_fake_b_down->reshape(hJet_eta[ihj], hJet_ptReg[ihj], hJet_csv[ihj], hJet_flavour[ihj]);
 #endif
         }
-	    */
-        const TLorentzVector p4Zero                     = TLorentzVector(0., 0., 0., 0.);
-	//	int idx =  hJCidx[0] ;
-	//	std::cout << "the regressed pt for jet 0 is " << hJet_ptReg[0] << "; the hJCidx is " << hJCidx[0] << ", hence the origianl pt is " <<  hJet_pt[idx] << std::endl;
 
-	
-       
-        const TLorentzVector& hJet_p4Norm_0             = makePtEtaPhiM(hJet_pt[hJCidx[0]]                , hJet_pt[hJCidx[0]], hJet_eta[hJCidx[0]], hJet_phi[hJCidx[0]], hJet_m[hJCidx[0]]);
-        const TLorentzVector& hJet_p4Norm_1             = makePtEtaPhiM(hJet_pt[hJCidx[1]]                , hJet_pt[hJCidx[1]], hJet_eta[hJCidx[1]], hJet_phi[hJCidx[1]], hJet_m[hJCidx[1]]);
-        const TLorentzVector& hJet_p4Gen_0              = hJet_genPt[hJCidx[0]] > 0 ? 
-                                                          makePtEtaPhiM(hJet_genPt[hJCidx[0]]             , hJet_pt[hJCidx[0]], hJet_eta[hJCidx[0]], hJet_phi[hJCidx[0]], hJet_m[hJCidx[0]]) : p4Zero;
-        const TLorentzVector& hJet_p4Gen_1              = hJet_genPt[hJCidx[1]] > 0 ? 
-                                                          makePtEtaPhiM(hJet_genPt[hJCidx[1]]             , hJet_pt[hJCidx[1]], hJet_eta[hJCidx[1]], hJet_phi[hJCidx[1]], hJet_m[hJCidx[1]]) : p4Zero;
-        const TLorentzVector& hJet_p4Reg_0              = makePtEtaPhiM(hJet_ptReg[0]             , hJet_pt[hJCidx[0]], hJet_eta[hJCidx[0]], hJet_phi[hJCidx[0]], hJet_m[hJCidx[0]]);
-        const TLorentzVector& hJet_p4Reg_1              = makePtEtaPhiM(hJet_ptReg[1]             , hJet_pt[hJCidx[1]], hJet_eta[hJCidx[1]], hJet_phi[hJCidx[1]], hJet_m[hJCidx[1]]);
-	/*
+        const TLorentzVector p4Zero                     = TLorentzVector(0., 0., 0., 0.);
+
+        const TLorentzVector& hJet_p4Norm_0             = makePtEtaPhiE(hJet_pt[0]                , hJet_pt[0], hJet_eta[0], hJet_phi[0], hJet_e[0]);
+        const TLorentzVector& hJet_p4Norm_1             = makePtEtaPhiE(hJet_pt[1]                , hJet_pt[1], hJet_eta[1], hJet_phi[1], hJet_e[1]);
+        const TLorentzVector& hJet_p4Gen_0              = hJet_genPt[0] > 0 ? 
+                                                          makePtEtaPhiE(hJet_genPt[0]             , hJet_pt[0], hJet_eta[0], hJet_phi[0], hJet_e[0]) : p4Zero;
+        const TLorentzVector& hJet_p4Gen_1              = hJet_genPt[1] > 0 ? 
+                                                          makePtEtaPhiE(hJet_genPt[1]             , hJet_pt[1], hJet_eta[1], hJet_phi[1], hJet_e[1]) : p4Zero;
+        const TLorentzVector& hJet_p4Reg_0              = makePtEtaPhiE(hJet_ptReg[0]             , hJet_pt[0], hJet_eta[0], hJet_phi[0], hJet_e[0]);
+        const TLorentzVector& hJet_p4Reg_1              = makePtEtaPhiE(hJet_ptReg[1]             , hJet_pt[1], hJet_eta[1], hJet_phi[1], hJet_e[1]);
         const TLorentzVector& hJet_p4Reg_res_j_up_0     = makePtEtaPhiE(hJet_ptReg_res_j_up[0]    , hJet_pt[0], hJet_eta[0], hJet_phi[0], hJet_e[0]);
         const TLorentzVector& hJet_p4Reg_res_j_up_1     = makePtEtaPhiE(hJet_ptReg_res_j_up[1]    , hJet_pt[1], hJet_eta[1], hJet_phi[1], hJet_e[1]);
         const TLorentzVector& hJet_p4Reg_res_j_down_0   = makePtEtaPhiE(hJet_ptReg_res_j_down[0]  , hJet_pt[0], hJet_eta[0], hJet_phi[0], hJet_e[0]);
@@ -1042,26 +998,23 @@ inTree->SetBranchStatus("SimBs_*", 0);
         const TLorentzVector& hJet_p4Reg_scale_j_up_1   = makePtEtaPhiE(hJet_ptReg_scale_j_up[1]  , hJet_pt[1], hJet_eta[1], hJet_phi[1], hJet_e[1]);
         const TLorentzVector& hJet_p4Reg_scale_j_down_0 = makePtEtaPhiE(hJet_ptReg_scale_j_down[0], hJet_pt[0], hJet_eta[0], hJet_phi[0], hJet_e[0]);
         const TLorentzVector& hJet_p4Reg_scale_j_down_1 = makePtEtaPhiE(hJet_ptReg_scale_j_down[1], hJet_pt[1], hJet_eta[1], hJet_phi[1], hJet_e[1]);
-	*/
+
         HptNorm             = (hJet_p4Norm_0             + hJet_p4Norm_1            ).Pt();
         HptGen              = (hJet_p4Gen_0              + hJet_p4Gen_1             ).Pt();
         HptReg              = (hJet_p4Reg_0              + hJet_p4Reg_1             ).Pt();
-	/*
         HptReg_res_j_up     = (hJet_p4Reg_res_j_up_0     + hJet_p4Reg_res_j_up_1    ).Pt();
         HptReg_res_j_down   = (hJet_p4Reg_res_j_down_0   + hJet_p4Reg_res_j_down_1  ).Pt();
         HptReg_scale_j_up   = (hJet_p4Reg_scale_j_up_0   + hJet_p4Reg_scale_j_up_1  ).Pt();
         HptReg_scale_j_down = (hJet_p4Reg_scale_j_down_0 + hJet_p4Reg_scale_j_down_1).Pt();
-	*/
+
         HmassNorm             = (hJet_p4Norm_0             + hJet_p4Norm_1            ).M();
         HmassGen              = (hJet_p4Gen_0              + hJet_p4Gen_1             ).M();
         HmassReg              = (hJet_p4Reg_0              + hJet_p4Reg_1             ).M();
-	//        std::cout << "HmassReg is " << HmassReg << std::endl; 
-	/*
         HmassReg_res_j_up     = (hJet_p4Reg_res_j_up_0     + hJet_p4Reg_res_j_up_1    ).M();
         HmassReg_res_j_down   = (hJet_p4Reg_res_j_down_0   + hJet_p4Reg_res_j_down_1  ).M();
         HmassReg_scale_j_up   = (hJet_p4Reg_scale_j_up_0   + hJet_p4Reg_scale_j_up_1  ).M();
         HmassReg_scale_j_down = (hJet_p4Reg_scale_j_down_0 + hJet_p4Reg_scale_j_down_1).M();
-	
+
         for (Int_t iaj = 0; iaj < naJets; iaj++) {
 
 #ifdef JECFWLite
@@ -1316,32 +1269,32 @@ inTree->SetBranchStatus("SimBs_*", 0);
         for (Int_t ihj = 0; ihj < 2; ihj++) {
             // min dPhi with central jets
             if (hJet_ptReg[ihj] > 20. && fabs(hJet_eta[ihj]) < 2.5) {
-                double dPhi = fabs(deltaPhi(METtype1corr.phi, hJet_phi[ihj]));
+                float dPhi = fabs(deltaPhi(METtype1corr.phi, hJet_phi[ihj]));
                 if (mindPhiMETCtrJet_dPhi > dPhi) {
                     mindPhiMETCtrJet_dPhi = dPhi;
                     mindPhiMETCtrJet_pt = hJet_ptReg[ihj];
                 }
             }
             if (hJet_ptReg_res_j_up[ihj] > 20. && fabs(hJet_eta[ihj]) < 2.5) {
-                double dPhi = fabs(deltaPhi(METphi_res_j_up, hJet_phi[ihj]));
+                float dPhi = fabs(deltaPhi(METphi_res_j_up, hJet_phi[ihj]));
                 if (mindPhiMETCtrJet_dPhi_res_j_up > dPhi) {
                     mindPhiMETCtrJet_dPhi_res_j_up = dPhi;
                 }
             }
             if (hJet_ptReg_res_j_down[ihj] > 20. && fabs(hJet_eta[ihj]) < 2.5) {
-                double dPhi = fabs(deltaPhi(METphi_res_j_down, hJet_phi[ihj]));
+                float dPhi = fabs(deltaPhi(METphi_res_j_down, hJet_phi[ihj]));
                 if (mindPhiMETCtrJet_dPhi_res_j_down > dPhi) {
                     mindPhiMETCtrJet_dPhi_res_j_down = dPhi;
                 }
             }
             if (hJet_ptReg_scale_j_up[ihj] > 20. && fabs(hJet_eta[ihj]) < 2.5) {
-                double dPhi = fabs(deltaPhi(METphi_scale_j_up, hJet_phi[ihj]));
+                float dPhi = fabs(deltaPhi(METphi_scale_j_up, hJet_phi[ihj]));
                 if (mindPhiMETCtrJet_dPhi_scale_j_up > dPhi) {
                     mindPhiMETCtrJet_dPhi_scale_j_up = dPhi;
                 }
             }
             if (hJet_ptReg_scale_j_down[ihj] > 20. && fabs(hJet_eta[ihj]) < 2.5) {
-                double dPhi = fabs(deltaPhi(METphi_scale_j_down, hJet_phi[ihj]));
+                float dPhi = fabs(deltaPhi(METphi_scale_j_down, hJet_phi[ihj]));
                 if (mindPhiMETCtrJet_dPhi_scale_j_down > dPhi) {
                     mindPhiMETCtrJet_dPhi_scale_j_down = dPhi;
                 }
@@ -1349,32 +1302,32 @@ inTree->SetBranchStatus("SimBs_*", 0);
             
             // min dPhi with all jets
             if (hJet_ptReg[ihj] > 25. && fabs(hJet_eta[ihj]) < 4.5 && hJet_id[ihj] && hJet_puJetIdL[ihj]>0.) {
-                double dPhi = fabs(deltaPhi(METtype1corr.phi, hJet_phi[ihj]));
+                float dPhi = fabs(deltaPhi(METtype1corr.phi, hJet_phi[ihj]));
                 if (mindPhiMETJet_dPhi > dPhi) {
                     mindPhiMETJet_dPhi = dPhi;
                     mindPhiMETJet_pt = hJet_ptReg[ihj];
                 }
             }
             if (hJet_ptReg_res_j_up[ihj] > 25. && fabs(hJet_eta[ihj]) < 4.5 && hJet_id[ihj] && hJet_puJetIdL[ihj]>0.) {
-                double dPhi = fabs(deltaPhi(METphi_res_j_up, hJet_phi[ihj]));
+                float dPhi = fabs(deltaPhi(METphi_res_j_up, hJet_phi[ihj]));
                 if (mindPhiMETJet_dPhi_res_j_up > dPhi) {
                     mindPhiMETJet_dPhi_res_j_up = dPhi;
                 }
             }
             if (hJet_ptReg_res_j_down[ihj] > 25. && fabs(hJet_eta[ihj]) < 4.5 && hJet_id[ihj] && hJet_puJetIdL[ihj]>0.) {
-                double dPhi = fabs(deltaPhi(METphi_res_j_down, hJet_phi[ihj]));
+                float dPhi = fabs(deltaPhi(METphi_res_j_down, hJet_phi[ihj]));
                 if (mindPhiMETJet_dPhi_res_j_down > dPhi) {
                     mindPhiMETJet_dPhi_res_j_down = dPhi;
                 }
             }
             if (hJet_ptReg_scale_j_up[ihj] > 25. && fabs(hJet_eta[ihj]) < 4.5 && hJet_id[ihj] && hJet_puJetIdL[ihj]>0.) {
-                double dPhi = fabs(deltaPhi(METphi_scale_j_up, hJet_phi[ihj]));
+                float dPhi = fabs(deltaPhi(METphi_scale_j_up, hJet_phi[ihj]));
                 if (mindPhiMETJet_dPhi_scale_j_up > dPhi) {
                     mindPhiMETJet_dPhi_scale_j_up = dPhi;
                 }
             }
             if (hJet_ptReg_scale_j_down[ihj] > 25. && fabs(hJet_eta[ihj]) < 4.5 && hJet_id[ihj] && hJet_puJetIdL[ihj]>0.) {
-                double dPhi = fabs(deltaPhi(METphi_scale_j_down, hJet_phi[ihj]));
+                float dPhi = fabs(deltaPhi(METphi_scale_j_down, hJet_phi[ihj]));
                 if (mindPhiMETJet_dPhi_scale_j_down > dPhi) {
                     mindPhiMETJet_dPhi_scale_j_down = dPhi;
                 }
@@ -1386,7 +1339,7 @@ inTree->SetBranchStatus("SimBs_*", 0);
             // min dPhi with central jets
             if (aJet_pt[iaj] > 20. && fabs(aJet_eta[iaj]) < 2.5) {
                 if (aJet_pt[iaj] <= 25.)  naCtrJets_pt20to25_Znn++;
-                double dPhi = fabs(deltaPhi(METtype1corr.phi, aJet_phi[iaj]));
+                float dPhi = fabs(deltaPhi(METtype1corr.phi, aJet_phi[iaj]));
                 if (mindPhiMETCtrJet_dPhi > dPhi) {
                     mindPhiMETCtrJet_dPhi = dPhi;
                     mindPhiMETCtrJet_pt = aJet_pt[iaj];
@@ -1394,28 +1347,28 @@ inTree->SetBranchStatus("SimBs_*", 0);
             }
             if (aJet_pt_res_j_up[iaj] > 20. && fabs(aJet_eta[iaj]) < 2.5) {
                 if (aJet_pt_res_j_up[iaj] <= 25.)  naCtrJets_pt20to25_Znn_res_j_up++;
-                double dPhi = fabs(deltaPhi(METphi_res_j_up, aJet_phi[iaj]));
+                float dPhi = fabs(deltaPhi(METphi_res_j_up, aJet_phi[iaj]));
                 if (mindPhiMETCtrJet_dPhi_res_j_up > dPhi) {
                     mindPhiMETCtrJet_dPhi_res_j_up = dPhi;
                 }
             }
             if (aJet_pt_res_j_down[iaj] > 20. && fabs(aJet_eta[iaj]) < 2.5) {
                 if (aJet_pt_res_j_down[iaj] <= 25.)  naCtrJets_pt20to25_Znn_res_j_down++;
-                double dPhi = fabs(deltaPhi(METphi_res_j_down, aJet_phi[iaj]));
+                float dPhi = fabs(deltaPhi(METphi_res_j_down, aJet_phi[iaj]));
                 if (mindPhiMETCtrJet_dPhi_res_j_down > dPhi) {
                     mindPhiMETCtrJet_dPhi_res_j_down = dPhi;
                 }
             }
             if (aJet_pt_scale_j_up[iaj] > 20. && fabs(aJet_eta[iaj]) < 2.5) {
                 if (aJet_pt_scale_j_up[iaj] <= 25.)  naCtrJets_pt20to25_Znn_scale_j_up++;
-                double dPhi = fabs(deltaPhi(METphi_scale_j_up, aJet_phi[iaj]));
+                float dPhi = fabs(deltaPhi(METphi_scale_j_up, aJet_phi[iaj]));
                 if (mindPhiMETCtrJet_dPhi_scale_j_up > dPhi) {
                     mindPhiMETCtrJet_dPhi_scale_j_up = dPhi;
                 }
             }
             if (aJet_pt_scale_j_down[iaj] > 20. && fabs(aJet_eta[iaj]) < 2.5) {
                 if (aJet_pt_scale_j_down[iaj] <= 25.)  naCtrJets_pt20to25_Znn_scale_j_down++;
-                double dPhi = fabs(deltaPhi(METphi_scale_j_down, aJet_phi[iaj]));
+                float dPhi = fabs(deltaPhi(METphi_scale_j_down, aJet_phi[iaj]));
                 if (mindPhiMETCtrJet_dPhi_scale_j_down > dPhi) {
                     mindPhiMETCtrJet_dPhi_scale_j_down = dPhi;
                 }
@@ -1424,7 +1377,7 @@ inTree->SetBranchStatus("SimBs_*", 0);
             // min dPhi with all jets
             if (aJet_pt[iaj] > 25. && fabs(aJet_eta[iaj]) < 4.5 && aJet_id[iaj] && aJet_puJetIdL[iaj]>0.) {
                 naJets_Znn++;
-                double dPhi = fabs(deltaPhi(METtype1corr.phi, aJet_phi[iaj]));
+                float dPhi = fabs(deltaPhi(METtype1corr.phi, aJet_phi[iaj]));
                 if (mindPhiMETJet_dPhi > dPhi) {
                     mindPhiMETJet_dPhi = dPhi;
                     mindPhiMETJet_pt = aJet_pt[iaj];
@@ -1432,28 +1385,28 @@ inTree->SetBranchStatus("SimBs_*", 0);
             }
             if (aJet_pt_res_j_up[iaj] > 25. && fabs(aJet_eta[iaj]) < 4.5 && aJet_id[iaj] && aJet_puJetIdL[iaj]>0.) {
                 naJets_Znn_res_j_up++;
-                double dPhi = fabs(deltaPhi(METphi_res_j_up, aJet_phi[iaj]));
+                float dPhi = fabs(deltaPhi(METphi_res_j_up, aJet_phi[iaj]));
                 if (mindPhiMETJet_dPhi_res_j_up > dPhi) {
                     mindPhiMETJet_dPhi_res_j_up = dPhi;
                 }
             }
             if (aJet_pt_res_j_down[iaj] > 25. && fabs(aJet_eta[iaj]) < 4.5 && aJet_id[iaj] && aJet_puJetIdL[iaj]>0.) {
                 naJets_Znn_res_j_down++;
-                double dPhi = fabs(deltaPhi(METphi_res_j_down, aJet_phi[iaj]));
+                float dPhi = fabs(deltaPhi(METphi_res_j_down, aJet_phi[iaj]));
                 if (mindPhiMETJet_dPhi_res_j_down > dPhi) {
                     mindPhiMETJet_dPhi_res_j_down = dPhi;
                 }
             }
             if (aJet_pt_scale_j_up[iaj] > 25. && fabs(aJet_eta[iaj]) < 4.5 && aJet_id[iaj] && aJet_puJetIdL[iaj]>0.) {
                 naJets_Znn_scale_j_up++;
-                double dPhi = fabs(deltaPhi(METphi_scale_j_up, aJet_phi[iaj]));
+                float dPhi = fabs(deltaPhi(METphi_scale_j_up, aJet_phi[iaj]));
                 if (mindPhiMETJet_dPhi_scale_j_up > dPhi) {
                     mindPhiMETJet_dPhi_scale_j_up = dPhi;
                 }
             }
             if (aJet_pt_scale_j_down[iaj] > 25. && fabs(aJet_eta[iaj]) < 4.5 && aJet_id[iaj] && aJet_puJetIdL[iaj]>0.) {
                 naJets_Znn_scale_j_down++;
-                double dPhi = fabs(deltaPhi(METphi_scale_j_down, aJet_phi[iaj]));
+                float dPhi = fabs(deltaPhi(METphi_scale_j_down, aJet_phi[iaj]));
                 if (mindPhiMETJet_dPhi_scale_j_down > dPhi) {
                     mindPhiMETJet_dPhi_scale_j_down = dPhi;
                 }
@@ -1461,7 +1414,7 @@ inTree->SetBranchStatus("SimBs_*", 0);
 
             // min dR with additional jets
             if (aJet_pt[iaj] > 25. && fabs(aJet_eta[iaj]) < 4.5 && aJet_id[iaj] && aJet_puJetIdL[iaj]>0.) {
-                double dR = deltaR(aJet_eta[iaj], aJet_phi[iaj], H.eta, H.phi);
+                float dR = deltaR(aJet_eta[iaj], aJet_phi[iaj], H.eta, H.phi);
                 if (mindRHJet_dR > dR) {
                     mindRHJet_dR = dR;
                     mindRHJet_pt = aJet_pt[iaj];
@@ -1469,28 +1422,28 @@ inTree->SetBranchStatus("SimBs_*", 0);
                 }
             }
             if (aJet_pt_res_j_up[iaj] > 25. && fabs(aJet_eta[iaj]) < 4.5 && aJet_id[iaj] && aJet_puJetIdL[iaj]>0.) {
-                double dR = deltaR(aJet_eta[iaj], aJet_phi[iaj], H.eta, H.phi);
+                float dR = deltaR(aJet_eta[iaj], aJet_phi[iaj], H.eta, H.phi);
                 if (mindRHJet_dR_res_j_up > dR) {
                     mindRHJet_dR_res_j_up = dR;
                     mindRHJet_pt_res_j_up = aJet_pt_res_j_up[iaj];
                 }
             }
             if (aJet_pt_res_j_down[iaj] > 25. && fabs(aJet_eta[iaj]) < 4.5 && aJet_id[iaj] && aJet_puJetIdL[iaj]>0.) {
-                double dR = deltaR(aJet_eta[iaj], aJet_phi[iaj], H.eta, H.phi);
+                float dR = deltaR(aJet_eta[iaj], aJet_phi[iaj], H.eta, H.phi);
                 if (mindRHJet_dR_res_j_down > dR) {
                     mindRHJet_dR_res_j_down = dR;
                     mindRHJet_pt_res_j_down = aJet_pt_res_j_down[iaj];
                 }
             }
             if (aJet_pt_scale_j_up[iaj] > 25. && fabs(aJet_eta[iaj]) < 4.5 && aJet_id[iaj] && aJet_puJetIdL[iaj]>0.) {
-                double dR = deltaR(aJet_eta[iaj], aJet_phi[iaj], H.eta, H.phi);
+                float dR = deltaR(aJet_eta[iaj], aJet_phi[iaj], H.eta, H.phi);
                 if (mindRHJet_dR_scale_j_up > dR) {
                     mindRHJet_dR_scale_j_up = dR;
                     mindRHJet_pt_scale_j_up = aJet_pt_scale_j_up[iaj];
                 }
             }
             if (aJet_pt_scale_j_down[iaj] > 25. && fabs(aJet_eta[iaj]) < 4.5 && aJet_id[iaj] && aJet_puJetIdL[iaj]>0.) {
-                double dR = deltaR(aJet_eta[iaj], aJet_phi[iaj], H.eta, H.phi);
+                float dR = deltaR(aJet_eta[iaj], aJet_phi[iaj], H.eta, H.phi);
                 if (mindRHJet_dR_scale_j_down > dR) {
                     mindRHJet_dR_scale_j_down = dR;
                     mindRHJet_pt_scale_j_down = aJet_pt_scale_j_down[iaj];
@@ -1598,13 +1551,13 @@ inTree->SetBranchStatus("SimBs_*", 0);
 
             TVector3 Top_lep_temp;
             Top_lep_temp.SetPtEtaPhi(vLepton_pt[0], vLepton_eta[0], vLepton_phi[0]);
-            double Top_lep_mass = (Vtype==2) ? 0.105 : 0.005;
-            double Top_lep_e = TMath::Sqrt(Top_lep_temp.Mag2() + Top_lep_mass * Top_lep_mass);
+            float Top_lep_mass = (Vtype==2) ? 0.105 : 0.005;
+            float Top_lep_e = TMath::Sqrt(Top_lep_temp.Mag2() + Top_lep_mass * Top_lep_mass);
             Top_lep.SetPtEtaPhiE(vLepton_pt[0], vLepton_eta[0], vLepton_phi[0], Top_lep_e);
             TLorentzVector Top_nu = getNu4Momentum(Top_lep, Top_MET);
             //TLorentzVector Top_W = Top_lep + Top_nu;
 
-            double bestCSVhJet = -9999.;
+            float bestCSVhJet = -9999.;
             int bestCSVhJet_id = -99;
             // Pick the best b-tagged Higgs jet
             for (Int_t ihj = 0; ihj < 2; ihj++) {
@@ -1615,7 +1568,7 @@ inTree->SetBranchStatus("SimBs_*", 0);
                     }
                 }
             }
-            double bestCSVaJet = -9999.;
+            float bestCSVaJet = -9999.;
             int bestCSVaJet_id = -99;
             // Pick the best b-tagged additional jet
             for (Int_t iaj = 0; iaj < naJets; iaj++) {
@@ -1678,13 +1631,13 @@ inTree->SetBranchStatus("SimBs_*", 0);
 
             TVector3 Top_lep_temp;
             Top_lep_temp.SetPtEtaPhi(aLepton_pt[0], aLepton_eta[0], aLepton_phi[0]);
-            double Top_lep_mass = (abs(aLepton_type[0])==13) ? 0.105 : 0.005;
-            double Top_lep_e = TMath::Sqrt(Top_lep_temp.Mag2() + Top_lep_mass * Top_lep_mass);
+            float Top_lep_mass = (abs(aLepton_type[0])==13) ? 0.105 : 0.005;
+            float Top_lep_e = TMath::Sqrt(Top_lep_temp.Mag2() + Top_lep_mass * Top_lep_mass);
             Top_lep.SetPtEtaPhiE(aLepton_pt[0], aLepton_eta[0], aLepton_phi[0], Top_lep_e);
             TLorentzVector Top_nu = getNu4Momentum(Top_lep, Top_MET);
             //TLorentzVector Top_W = Top_lep + Top_nu;
 
-            double bestCSVhJet = -9999.;
+            float bestCSVhJet = -9999.;
             int bestCSVhJet_id = -99;
             // Pick the best b-tagged Higgs jet
             for (Int_t ihj = 0; ihj < 2; ihj++) {
@@ -1695,7 +1648,7 @@ inTree->SetBranchStatus("SimBs_*", 0);
                     }
                 }
             }
-            double bestCSVaJet = -9999.;
+            float bestCSVaJet = -9999.;
             int bestCSVaJet_id = -99;
             // Pick the best b-tagged additional jet
             for (Int_t iaj = 0; iaj < naJets; iaj++) {
@@ -1768,11 +1721,11 @@ inTree->SetBranchStatus("SimBs_*", 0);
         FatTopHad_ptReg = -99.;
         FatTopHad_j3Pt = -99.;
         if (Vtype==2 || Vtype==3 || Vtype==4) {
-            double mindRaJet = TMath::Min(2.0, (2.0 * 173. / H.pt));  // set initial dR to 2.0 or (2 * m_top / pT_top)
+            float mindRaJet = TMath::Min(2.0, (2.0 * 173. / H.pt));  // set initial dR to 2.0 or (2 * m_top / pT_top)
             int mindRaJet_id = -99;
             for (Int_t iaj = 0; iaj < naJets; iaj++) {
                 if (aJet_pt[iaj] > 30. && fabs(aJet_eta[iaj]) < 4.5 && aJet_id[iaj] && aJet_puJetIdL[iaj]>0.) {
-                    double dR = deltaR(aJet_eta[iaj], aJet_phi[iaj], H.eta, H.phi);
+                    float dR = deltaR(aJet_eta[iaj], aJet_phi[iaj], H.eta, H.phi);
                     if (mindRaJet > dR) {
                         mindRaJet = dR;
                         mindRaJet_id = iaj;
@@ -1798,12 +1751,12 @@ inTree->SetBranchStatus("SimBs_*", 0);
             TopHad_j3Pt = Top_3rdjet.Pt();
             
             if (nfathFilterJets>0 && fathFilterJets_pt[0]>0. && fathFilterJets_pt[1]>0.){
-                double mindRaJetFat = TMath::Min(2.0, (2.0 * 173. / FatH.pt));  // set initial dR to 2.0 or (2 * m_top / pT_top)
+                float mindRaJetFat = TMath::Min(2.0, (2.0 * 173. / FatH.pt));  // set initial dR to 2.0 or (2 * m_top / pT_top)
                 int mindRaJetFat_id = -99.;
                 for (Int_t iaj = 0; iaj < naJetsFat; iaj++) {
                     //if (aJetFat_pt[iaj] > 30. && fabs(aJetFat_eta[iaj]) < 4.5 && aJetFat_id[iaj] && aJetFat_puJetIdL[iaj]>0.) {
                     if (aJetFat_pt[iaj] > 30. && fabs(aJetFat_eta[iaj]) < 4.5) {
-                        double dR = deltaR(aJetFat_eta[iaj], aJetFat_phi[iaj], FatH.eta, FatH.phi);
+                        float dR = deltaR(aJetFat_eta[iaj], aJetFat_phi[iaj], FatH.eta, FatH.phi);
                         if (mindRaJetFat > dR) {
                             mindRaJetFat = dR;
                             mindRaJetFat_id = iaj;
@@ -1837,9 +1790,8 @@ inTree->SetBranchStatus("SimBs_*", 0);
                 //if (FatTopHad_j3Pt > 10000.) std::cout << FatTopHad_j3Pt << " " << fathFilterJets_pt[0] << " " << fathFilterJets_pt[1] << " " << fathFilterJets_pt[2] << " " << aJetFat_pt[mindRaJetFat_id] << " " << hJet_pt[0] << " " << mindRaJetFat << std::endl;
             }
 
-	    
+	    }
 	*/
-	}
         outTree->Fill();  // fill it!
     }  // end loop over TTree entries
 
