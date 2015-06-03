@@ -5,11 +5,9 @@ Analysis
 .. NOTE::
 All the scripts must be run from the base directory.
 1. Use `copyfromINFNtoFNAL.sh` to transfer Step 2 ntuples from Pisa to FNAL.
-.. code:: bash
 # edit the directories in the script before run.
 sh copyfromINFNtoFNAL.sh
 2. Use `Skim.C` to skim the Step 2 ntuples with baseline selection. Make sure `HelperNtuples.h` is updated.
-.. code:: bash
 # in `inputstep2.ini` Section [Skim], edit tagMC, tagData, baseline, mettrigger, metfilter.
 # in `inputstep2.ini` Section [Stitch], edit xxxLHECUT's
 # enable reader.write_HelperNtuples(), disable the rest
@@ -18,7 +16,6 @@ python pyhelper.py
 # now run the skim
 source run_Skim.sh
 3. Use `SkimRegression.C` to skim the Step2 ntuples for BDTG regression training. Make sure `HelperNtuples.h` is updated.
-.. code:: bash
 # in `inputstep2.ini` Section [Skim], edit regression, fjregression
 # enable reader.write_HelperNtuples(), disable the rest
 python pyhelper.py
@@ -28,7 +25,6 @@ source run_SkimRegression.sh
 # now run the skim for filter jet regression
 source run_SkimRegressionFJ.sh
 4. Use `TrainRegression.C` and `TrainRegressionFJ.C` to produce the BDT regression .xml files. Make sure `HelperTMVA.h` is updated.
-.. code:: bash
 # in `inputstep2.ini` Section [BDT Regression Variable], edit the variables to use
 # in `inputstep2.ini` Section [BDT Regression FJ Variable], edit the variables to use
 # enable reader.write_HelperTMVA(), disable the rest
@@ -43,7 +39,6 @@ python run_TrainRegressionFJ.py
 cp weights/TMVARegressionFJ_BDTG.weights.xml weights/TMVARegressionFJ_BDTG.testweights.xml
 cp TMVARegFJ.root testTMVARegFJ.root
 5. Update `HelperNtuples.h` to have all the correct numbers.
-.. code:: bash
 # enable skimmer.process(), disable the rest
 python skimmer.py inputstep2.ini
 # copy printout to inputstep2.ini Section [Process]
@@ -54,16 +49,12 @@ python skimmer.py inputstep2.ini
 python pyhelper.py
 # copy printout to HelperNtuples.h
 6. Use `GrowTree.C` to create Step 3's.
-.. code:: bash
 python run_GrowTree.py
 7. Use `SkimClassification.C` to produce the files for BDT classification.
-.. code:: bash
 source run_SkimClassification.sh
 8. Use `TrainBDT.C` to produce the BDT regression .xml files.
-.. code:: bash
 source run_TrainBDT.sh
 9. Use `TrimTree.C` to create Step 4's.
-.. code:: bash
 # in `inputstep2.ini` Section [Weight], edit the MC event weights
 # in `inputstep2.ini` Section [Trigger], edit the Data trigger
 # in `inputstep2.ini` Section [Selection], edit the signal and control regions
@@ -78,6 +69,9 @@ source run_stitch.sh
 cd macros
 root -l -b -q plotHistos_Znn_13TeV_BDT.C++
 source results_Znn.csh
+
+
+later we should do
 10. Use `ScaleFactorJ11.C` and `ScaleFactorWorkspaceJ11.C` to fit scale factors.
 .. code:: bash
 # set the variable indir in the scripts, reset the fitresults arrays, reset the iteration number in calc_scalefactors(...)
