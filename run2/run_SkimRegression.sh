@@ -1,5 +1,5 @@
 # Use 40%
-root -l -b -q SkimRegression.C+\(\"TTMadv2\",1000000\)
+root -l -b -q SkimRegression.C+\(\"TT\",25000\)
 #root -l -b -q SkimRegression.C+\(\"ZnnH110\",96000\)
 #root -l -b -q SkimRegression.C+\(\"ZnnH115\",96000\)
 #root -l -b -q SkimRegression.C+\(\"ZnnH120\",96000\)
