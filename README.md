@@ -4,12 +4,12 @@ Analysis
 
 .. NOTE::
 All the scripts must be run from the base directory.
-1. Use `copyfromINFNtoFNAL.sh` to transfer Step 2 ntuples from Pisa to FNAL.
+1. Use maketier2list.py to transfer Step 2 ntuples from Pisa to FNAL.
  edit the directories in the script before run.
 
-sh copyfromINFNtoFNAL.sh
+python maketier2list.py
 
-2. Use `Skim.C` to skim the Step 2 ntuples with baseline selection. Make sure `HelperNtuples.h` is updated.
+2. Use `Skim.C` or `Skim_backup.C` to skim the Step 2 ntuples with baseline selection. Make sure `HelperNtuples.h` is updated.
  in `inputstep2.ini` Section [Skim], edit tagMC, tagData, baseline, mettrigger, metfilter.
  in `inputstep2.ini` Section [Stitch], edit xxxLHECUT's
  enable reader.write_HelperNtuples(), disable the rest
@@ -45,6 +45,11 @@ cp TMVAReg.root testTMVAReg.root
 python run_TrainRegressionFJ.py
 cp weights/TMVARegressionFJ_BDTG.weights.xml weights/TMVARegressionFJ_BDTG.testweights.xml
 cp TMVARegFJ.root testTMVARegFJ.root
+
+To check the regression performances run
+python ComparePtResolution.py
+python ComparePtOffset.py
+python CompareMass_sig.py
 
 5. Update `HelperNtuples.h` to have all the correct numbers.
 enable skimmer.process(), disable the rest
