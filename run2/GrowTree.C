@@ -305,7 +305,8 @@ void GrowTree(TString process, std::string regMethod="BDTG", Long64_t beginEntry
 
     const TString indir   = "/afs/cern.ch/work/d/degrutto/public/MiniAOD/ZnnHbb_Phys14_PU20bx25/skimV11/";
     //    const TString indir   = "dcache:/pnfs/cms/WAX/resilient/jiafu/ZnunuHbb/skim_ZnnH_baseline/";
-    const TString outdir  = "/afs/cern.ch/work/d/degrutto/public/MiniAOD/ZnnHbb_Phys14_PU20bx25/skimV11/step3/";
+    //const TString outdir  = "/afs/cern.ch/work/d/degrutto/public/MiniAOD/ZnnHbb_Phys14_PU20bx25/skimV11/step3/";
+    const TString outdir  = "/afs/cern.ch/work/s/swang373/private/MiniAOD/ZnnHbb_Phys14_PU20bx25/skimV11/step3/"; // swang373, 30.06.2015
     const TString prefix  = "skim_";
     const TString suffix  = ".root";
 

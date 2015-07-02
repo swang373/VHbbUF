@@ -36,7 +36,8 @@ k = 0
 
 
 for tag in TAGS:
-  inf      = TFile.Open('/afs/cern.ch/work/d/degrutto/public/MiniAOD/ZnnHbb_Phys14_PU20bx25/skimV11/step3/Step3_ZnnH125.root')
+  #inf      = TFile.Open('/afs/cern.ch/work/d/degrutto/public/MiniAOD/ZnnHbb_Phys14_PU20bx25/skimV11/step3/Step3_ZnnH125.root')
+  inf      = TFile.Open('/afs/cern.ch/work/s/swang373/private/MiniAOD/ZnnHbb_Phys14_PU20bx25/skimV11/step3/Step3_ZnnH125.root')
   tree     = inf.Get('tree')
   hRes   = TH1F('hRes_'+tag,'hRes_'+tag,20,0,200)
   if tag == 'baseline':

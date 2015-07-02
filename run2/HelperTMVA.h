@@ -210,8 +210,8 @@ std::vector<std::string> GetSelExpressions(const std::string id) {
         values.resize(6, "");
 	//        values[0] = "ZnunuHighPt_VH := (Vtype==4) && METtype1corr.et>170 && HptReg>130 && max(hJet_pt[0],hJet_pt[1])>60 && min(hJet_pt[0],hJet_pt[1])>30 && max(hJet_csv_nominal[0],hJet_csv_nominal[1])>0.679 && min(hJet_csv_nominal[0],hJet_csv_nominal[1])>0.244 && HmassReg<250 && mindPhiMETJet_dPhi>0.5 && abs(deltaPhi(METtype1corr.phi,METnoPUCh.phi))<0.5 && abs(deltaPhi(H.phi,METtype1corr.phi))>2.0 && nalep_pt5_Znn==0 && hbhe && ecalFlag && cschaloFlag && hcallaserFlag && trackingfailureFlag && eebadscFlag && !isBadHcalEvent && hJet_puJetIdL[0]>0 && hJet_puJetIdL[1]>0 && HmassReg>0";
 	//        values[0] = "ZnunuHighPt_VH := (Vtype==4)"; // <-- leave blank for now
-        values[0] = "ZnunuHighPt_VH := (Vtype==4) && HmassReg<250 &&  met_pt>150 &&  max(Jet_btagCSV[hJCidx[0]],Jet_btagCSV[hJCidx[1]])>0.814 && min(Jet_btagCSV[hJCidx[0]],Jet_btagCSV[hJCidx[1]])>0.423"; // <-- leave blank for now
-
+        //values[0] = "ZnunuHighPt_VH := (Vtype==4) && HmassReg<250 &&  met_pt>150 &&  max(Jet_btagCSV[hJCidx[0]],Jet_btagCSV[hJCidx[1]])>0.814 && min(Jet_btagCSV[hJCidx[0]],Jet_btagCSV[hJCidx[1]])>0.423"; // <-- leave blank for now
+        values[0] = "ZnunuHighPt_VH := (Vtype==4) && HmassReg<250 &&  met_pt>150 &&  max(Jet_btagCSV[hJCidx[0]],Jet_btagCSV[hJCidx[1]])>0.814 && min(Jet_btagCSV[hJCidx[0]],Jet_btagCSV[hJCidx[1]])>0.423"; // swang373, 20.06.2015
         values[1] = "ZnunuHighPt_ZjLF := (Vtype==4) && (Vtype==4) && HmassReg<250 &&  met_pt>150 &&  max(Jet_btagCSV[hJCidx[0]],Jet_btagCSV[hJCidx[1]])>0. && min(Jet_btagCSV[hJCidx[0]],Jet_btagCSV[hJCidx[1]])>0.";
         values[2] = "ZnunuHighPt_ZjHF := (Vtype==4) &&  max(Jet_btagCSV[hJCidx[0]],Jet_btagCSV[hJCidx[1]])>0.814 && min(Jet_btagCSV[hJCidx[0]],Jet_btagCSV[hJCidx[1]])>0.423 && (HmassReg<80 || HmassReg>160)";
         values[3] = "ZnunuHighPt_WjLF := (Vtype==2||Vtype==3) &&  HmassReg<250 &&  met_pt>150 && max(Jet_btagCSV[hJCidx[0]],Jet_btagCSV[hJCidx[1]])>0. && min(Jet_btagCSV[hJCidx[0]],Jet_btagCSV[hJCidx[1]])>0.";

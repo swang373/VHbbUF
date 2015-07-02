@@ -200,7 +200,8 @@ void TrainRegression(TString myMethodList="BDTG")
     TTree *regTrainTree(0), *regTestTree(0);
     
     std::vector<std::string> processes;
-    processes.push_back("TT");
+    //processes.push_back("TT");
+    processes.push_back("ZnnH125"); // swang373, 30.06.2015
     /*    processes.push_back("ZnnH110");
     processes.push_back("ZnnH115");
     processes.push_back("ZnnH120");

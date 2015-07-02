@@ -39,8 +39,10 @@ void SkimClassification(TString process="ZnnH125")
     //TString dijet   = "DiJetPt_";
     //TString dirMC   = "dcache:/pnfs/cms/WAX/resilient/jiafu/ZnunuHbb/" + tagMC + "/";
     //TString dirData = "dcache:/pnfs/cms/WAX/resilient/jiafu/ZnunuHbb/" + tagData + "/";
-    TString indir   = "/afs/cern.ch/work/d/degrutto/public/MiniAOD/ZnnHbb_Phys14_PU20bx25/skimV11/step3/";
-    TString outdir  = "/afs/cern.ch/work/d/degrutto/public/MiniAOD/ZnnHbb_Phys14_PU20bx25/skimV11/step3/skim_ZnnH_classification/";
+    //TString indir   = "/afs/cern.ch/work/d/degrutto/public/MiniAOD/ZnnHbb_Phys14_PU20bx25/skimV11/step3/";
+    TString indir   = "/afs/cern.ch/work/s/swang373/private/MiniAOD/ZnnHbb_Phys14_PU20bx25/skimV11/step3/"; // swang373, 30.06.2015
+    //TString outdir  = "/afs/cern.ch/work/d/degrutto/public/MiniAOD/ZnnHbb_Phys14_PU20bx25/skimV11/step3/skim_ZnnH_classification/";
+    TString outdir  = "/afs/cern.ch/work/s/swang373/private/MiniAOD/ZnnHbb_Phys14_PU20bx25/skimV11/step3/skim_ZnnH_classification/"; // swang373, 30.06.2015
     TString prefix  = "Step3_";
     TString suffix  = ".root";
 
@@ -167,4 +169,3 @@ void SkimClassification(TString process="ZnnH125")
 
 // To run:
 //root -l -b -q SkimClassification.C+\(\"ZnnH125\"\)
-

@@ -5,18 +5,18 @@ kmax * number of nuisance parameters (sources of systematical uncertainties)
 shapes * * znnhbb_HighPt_13TeV.root $PROCESS $PROCESS_$SYSTEMATIC
 -----------------------------------
 bin         ZnnHighPt_8TeV
-#observation 0.000
-prediction 6592.040
+observation 0.000
+#prediction 6531.713
 -----------------------------------
-bin         ZnnHighPt_8TeV   ZnnHighPt_8TeV   ZnnHighPt_8TeV   ZnnHighPt_8TeV   ZnnHighPt_8TeV   ZnnHighPt_8TeV   ZnnHighPt_8TeV   ZnnHighPt_8TeV    ZnnHighPt_8TeV   
-process     ZH         WH         WjLF       WjHF       ZjLF       ZjHF       TT         ST         7          
+bin         ZnnHighPt_8TeV   ZnnHighPt_8TeV   ZnnHighPt_8TeV   ZnnHighPt_8TeV   ZnnHighPt_8TeV   ZnnHighPt_8TeV   ZnnHighPt_8TeV   ZnnHighPt_8TeV   ZnnHighPt_8TeV   
+process     ZH         WH         WjLF       WjHF       ZjLF       ZjHF       TT         ST         VV         
 process     -1         0          1          2          3          4          5          6          7          
-rate            40.261      8.514    952.500    785.736   1270.679   1894.064   1417.197    271.863      0.000
+rate            40.221      8.514    947.600    786.326   1264.856   1870.643   1395.561    266.727      0.000
 -----------------------------------
 
 # This datacard is for demonstration purposes only!
 #################################### #####  ZH    WH    WjLF  WjHF  ZjLF  ZjHF  TT    ST    VV    
-lumi_13TeV                            lnN    1.026 1.026 -     -     -     -     -     1.026 1.026 
+lumi_8TeV                            lnN    1.026 1.026 -     -     -     -     -     1.026 1.026 
 pdf_qqbar                            lnN    1.01  1.01  -     -     -     -     -     -     1.01  
 pdf_gg                               lnN    -     -     -     -     -     -     -     1.01  -     
 QCDscale_VH                          lnN    1.04  1.04  -     -     -     -     -     -     -     

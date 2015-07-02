@@ -45,8 +45,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 //const TString indir       = "dcache:/pnfs/cms/WAX/resilient/jiafu//ZnunuHbb/Step3_20130314/";
-const TString indir       = "/afs/cern.ch/work/d/degrutto/public/MiniAOD/ZnnHbb_Phys14_PU20bx25/skimV11/step3/";
-const TString outdir      = "/afs/cern.ch/work/d/degrutto/public/MiniAOD/ZnnHbb_Phys14_PU20bx25/skimV11/step3/skim_ZnnH_classification/step4/";
+//const TString indir       = "/afs/cern.ch/work/d/degrutto/public/MiniAOD/ZnnHbb_Phys14_PU20bx25/skimV11/step3/";
+//const TString outdir      = "/afs/cern.ch/work/d/degrutto/public/MiniAOD/ZnnHbb_Phys14_PU20bx25/skimV11/step3/skim_ZnnH_classification/step4/";
+const TString indir       = "/afs/cern.ch/work/s/swang373/private/MiniAOD/ZnnHbb_Phys14_PU20bx25/skimV11/step3/";
+const TString outdir      = "/afs/cern.ch/work/s/swang373/private/MiniAOD/ZnnHbb_Phys14_PU20bx25/skimV11/step3/skim_ZnnH_classification/step4/";
+// swang373, 30.06.2015
 const TString prefix      = "Step3_";
 const TString suffix      = ".root";
 const TString indirStep4  = "/uscms_data/d3/lpchbb/jiafu/ZnnH_postHCP/Step4_20130404/stitch/";

@@ -1019,7 +1019,8 @@ void Events::read( TCut cutmc_all, TCut cutdata_all, TString processes , TString
     //TString indir = "/uscms_data/d2/jiafu/CMSDAS2014/VHbbAnalysis/skim/";
     //TString indir = "/eos/uscms/store/user/cmsdas/2014/Hbb/Step2/";
   //    TString indir = "/afs/cern.ch/work/d/degrutto/public/MiniAOD/ZnnHbb_Phys14_PU20bx25/skimV11/step3/";
-    TString indir = "/afs/cern.ch/work/d/degrutto/public/MiniAOD/ZnnHbb_Phys14_PU20bx25/skimV11/step3/skim_ZnnH_classification/step4/"; //Step4_ZnnH125.root
+    //TString indir = "/afs/cern.ch/work/d/degrutto/public/MiniAOD/ZnnHbb_Phys14_PU20bx25/skimV11/step3/skim_ZnnH_classification/step4/"; //Step4_ZnnH125.root
+    TString indir = "/afs/cern.ch/work/s/swang373/private/MiniAOD/ZnnHbb_Phys14_PU20bx25/skimV11/step3/skim_ZnnH_classification/step4/"; // swang373 01.07.2015
 
     TString prefix = "Step4_";
     TString suffix = ".root";

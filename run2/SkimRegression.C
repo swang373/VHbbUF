@@ -77,7 +77,8 @@ void SkimRegression(TString process="ZnnH125", Long64_t skimentries=1000000000)
         fname = dirMC + dijet + "ZH_ZToNuNu_HToBB_M-120_8TeV-powheg-herwigpp" + suffix;
         chain->Add(fname);
     } else if (process == "ZnnH125") {
-        fname = dirMC + dijet + "ZH_ZToNuNu_HToBB_M-125_8TeV-powheg-herwigpp" + suffix;
+        //fname = dirMC + dijet + "ZH_ZToNuNu_HToBB_M-125_8TeV-powheg-herwigpp" + suffix;
+        fname = dirMC + dijet + prefix + process + suffix; // swang373, 30.06.2015
         chain->Add(fname);
     } else if (process == "ZnnH130") {
         fname = dirMC + dijet + "ZH_ZToNuNu_HToBB_M-130_8TeV-powheg-herwigpp" + suffix;
