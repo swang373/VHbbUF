@@ -1,85 +1,119 @@
+Z(nn)H(bb) Analysis, Step by Step
+NOTE: All the scripts must be run from the base directory.
 
-Z(υυ) H(bb) Step by Step
-Analysis
-
-.. NOTE::
-All the scripts must be run from the base directory.
 1. Use maketier2list.py to transfer Step 2 ntuples from Pisa to FNAL.
- edit the directories in the script before run.
+   Edit the directories in the script before running.
+   '''
+   python maketier2list.py
+   '''
 
-python maketier2list.py
+2. Use `Skim.C` or `Skim_backup.C` to skim the Step 2 ntuples with baseline selection. 
 
-2. Use `Skim.C` or `Skim_backup.C` to skim the Step 2 ntuples with baseline selection. Make sure `HelperNtuples.h` is updated.
- in `inputstep2.ini` Section [Skim], edit tagMC, tagData, baseline, mettrigger, metfilter.
- in `inputstep2.ini` Section [Stitch], edit xxxLHECUT's
- enable reader.write_HelperNtuples(), disable the rest
-python pyhelper.py
- copy printout to HelperNtuples.h
- now run the skim
+   Update `HelperNtuples.h`. In `inputstep2.ini`,
+   - Section [Skim], edit tagMC, tagData, baseline, mettrigger, metfilter.
+   - Section [Stitch], edit xxxLHECUTs.
+   In `pyhelper.py`, enable reader.write_HelperNtuples() and disable the rest.
+   '''
+   python pyhelper.py > HelperNtuples.h
+   '''
+   To run the skim,
+   '''
+   source run_Skim.sh
+   '''
 
-source run_Skim.sh
+3. Use `SkimRegression.C` to skim the Step 2 ntuples for BDTG regression training. 
 
-3. Use `SkimRegression.C` to skim the Step2 ntuples for BDTG regression training. Make sure `HelperNtuples.h` is updated.
- in `inputstep2.ini` Section [Skim], edit regression, fjregression
- enable reader.write_HelperNtuples(), disable the rest
+   Update `HelperNtuples.h`. In `inputstep2.ini`,
+   - Section [Skim], edit regression, fjregression.
+   In `pyhelper.py`, enable reader.write_HelperNtuples() and disable the rest.
+   '''
+   python pyhelper.py > HelperNtuples.h
+   '''
+   To run the skim for ak5 jet regression,
+   '''
+   source run_SkimRegression.sh
+   '''
+   To run the skim for filter jet regression,
+   '''
+   source run_SkimRegressionFJ.sh
+   '''
 
-python pyhelper.py
- copy printout to HelperNtuples.h
- now run the skim for ak5 regression
+4. Use `TrainRegression.C` and `TrainRegressionFJ.C` to produce the BDT regression .xml weight files. 
 
-source run_SkimRegression.sh
- now run the skim for filter jet regression
-source run_SkimRegressionFJ.sh
+   Update `HelperTMVA.h`. In `inputstep2.ini`,
+   - Section [BDT Regression Variable], edit the variables to use.
+   - Section [BDT Regression FJ Variable], edit the variables to use.
+   In `pyhelper.py`, enable reader.write_HelperTMVA() and disable the rest.
+   '''
+   python pyhelper.py > HelperTMVA.h
+   '''
+   To run the BDT regression and copy the TMVA output and weight files,
+   '''
+   python run_TrainRegression.py && cp weights/TMVARegression_BDTG.weights.xml weights/TMVARegression_BDTG.testweights.xml && cp TMVAReg.root testTMVAReg.root
+   '''
+   To run the BDT regression for FJ,
+   '''
+   python run_TrainRegressionFJ.py && cp weights/TMVARegressionFJ_BDTG.weights.xml weights/TMVARegressionFJ_BDTG.testweights.xml && cp TMVARegFJ.root testTMVARegFJ.root
+   '''
+   Run the following scripts to assess regression performance,
+   '''
+   python ComparePtResolution.py
+   python ComparePtOffset.py
+   python CompareMass_sig.py
+   '''
 
-4. Use `TrainRegression.C` and `TrainRegressionFJ.C` to produce the BDT regression .xml files. Make sure `HelperTMVA.h` is updated.
- in `inputstep2.ini` Section [BDT Regression Variable], edit the variables to use
- in `inputstep2.ini` Section [BDT Regression FJ Variable], edit the variables to use
- enable reader.write_HelperTMVA(), disable the rest
-python pyhelper.py
-copy printout to HelperTMVA.h
- now run the BDT regression
-python run_TrainRegression.py
-cp weights/TMVARegression_BDTG.weights.xml weights/TMVARegression_BDTG.testweights.xml
-cp TMVAReg.root testTMVAReg.root
- now run the BDT regression for FJ
-python run_TrainRegressionFJ.py
-cp weights/TMVARegressionFJ_BDTG.weights.xml weights/TMVARegressionFJ_BDTG.testweights.xml
-cp TMVARegFJ.root testTMVARegFJ.root
+5. Update `HelperNtuples.h`
+   In `skimmer.py`, enable skimmer.process() and disable the rest.
+   '''
+   python skimmer.py inputstep2.ini
+   '''
+   Copy the output to Section [Process] in `inputstep2.ini`.
+   In `skimmer.py`, enable skimmer.stitch() and disable the rest.
+   '''
+   python skimmer.py inputstep2.ini
+   '''
+   Copy the output to Section [Stitch] in `inputstep2.ini`.
+   In `pyhelper.py`, enable reader.write_HelperNtuples() and disable the rest.
+   '''
+   python pyhelper.py > HelperNtuples.h
+   '''
 
-To check the regression performances run
-python ComparePtResolution.py
-python ComparePtOffset.py
-python CompareMass_sig.py
+6. Use `GrowTree.C` to create the Step 3 ntuples.
+   '''
+   python run_GrowTree.py
+   '''
+   Currently, I issue instead the following command.
+   '''
+   source runGrowTree.sh
+   '''
 
-5. Update `HelperNtuples.h` to have all the correct numbers.
-enable skimmer.process(), disable the rest
-python skimmer.py inputstep2.ini
- copy printout to inputstep2.ini Section [Process]
- enable skimmer.stitch(), disable the rest
-python skimmer.py inputstep2.ini
- copy printout to inputstep2.ini Section [Stitch]
- enable reader.write_HelperNtuples(), disable the rest
-python pyhelper.py
- copy printout to HelperNtuples.h
+7. Use `SkimClassification.C` to skim the Step 3 ntuples for BDT classification.
+   This is currently bugged. For now, remove the string "ZnunuHighPt_VH:= " in `HelperTMVA.h`.
+   '''
+   source run_SkimClassification.sh
+   '''
 
-6. Use `GrowTree.C` to create Step 3's.
-python run_GrowTree.py
+8. Use `TrainBDT.C` to produce the BDT classification .xml weight files.
+   '''
+   source run_TrainBDT.sh
+   '''
 
-7. Use `SkimClassification.C` to produce the files for BDT classification.
-source run_SkimClassification.sh
+9. Use `TrimTree.C` to create the Step 4 ntuples.
+   
+   In `inputstep2.ini`,
+   - Section [Weight], edit the MC event weights.
+   - Section [Trigger], edit the Data trigger.
+   - Section [Selection], edit the signal and control regions.
+   In `pyhelper.py`, enable reader.write_HelperTMVA() and disable the rest.
+   '''
+   python pyhelper.py > HelperTMVA.h
+   '''
 
-8. Use `TrainBDT.C` to produce the BDT regression .xml files.
-source run_TrainBDT.sh
+   In `TrimTree.C`, edit the BDT .xml weight files to load.
+   '''
+   python run_TrimTree.py
+   '''
 
-9. Use `TrimTree.C` to create Step 4's.
- in `inputstep2.ini` Section [Weight], edit the MC event weights
- in `inputstep2.ini` Section [Trigger], edit the Data trigger
- in `inputstep2.ini` Section [Selection], edit the signal and control regions
- enable reader.write_HelperTMVA(), disable the rest
-python pyhelper.py
- copy printout to HelperTMVA.h
- in `TrimTree.C`, edit the BDT .xml files to load, then run
-python run_TrimTree.py
  stitch the Step 4's (remember to edit $DIR in the script)
 source run_stitch.sh
 
