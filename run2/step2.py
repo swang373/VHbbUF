@@ -5,6 +5,7 @@ from functools import partial
 import glob
 import multiprocessing as mp
 import subprocess as sp
+import tempfile as tf
 
 import numpy as np
 import ROOT
@@ -92,11 +93,8 @@ class Step2(object):
         label : str
                 A minimally descriptive name used to distinguish the ntuple.
         """
-
-        # Set ROOT to batch mode.
-        ROOT.gROOT.SetBatch(1)
-
-        print '\n[Run Step2 for {}]'.format(label)
+ 
+        print '\n[{}]'.format(label)
         self.label = label
 
     def find_subtuples(self, eos_dir = ''):
@@ -107,6 +105,8 @@ class Step2(object):
         eos_dir : str
                   The eos path to the ntuple directory.
         """
+
+        print 'Searching EOS path {}'.format(eos_dir)
 
         # Retrieve the alias for eos command. Inspired by amaltaro.
         with open('/afs/cern.ch/project/eos/installation/cms/etc/setup.sh', 'r') as f:
@@ -122,7 +122,7 @@ class Step2(object):
             eos_ls = sp.Popen([eos, 'ls', eos_dir], stdout = sp.PIPE, stderr = sp.PIPE)
             out, err = eos_ls.communicate()
 
-        subtuples = [x for x in out.rstrip().split('\n') if '.root' in x]
+        subtuples = [_ for _ in out.rstrip().split('\n') if '.root' in _]
 
         # Set subtuple attributes.
         self.eos_dir = eos_dir
@@ -146,18 +146,23 @@ class Step2(object):
                     Flag whether the subtuples should be combined into a single file.
                     Default is True.
         """
-         
-        # Create a temporary working directory for tidiness.
-        tmpdir = outdir + self.label + '/'
-        if (ROOT.gSystem.AccessPathName(tmpdir)):
-            ROOT.gSystem.mkdir(tmpdir)
-
-        # Make an instance-specific wrapping for parallelizing an external function.
+        
+        if selection:
+            print 'Skimming with selection {}'.format(selection)
+        
+        # Collect named arguments for the external function copy_and_skim.
         inst_args = {'indir': self.eos_dir,
-                     'outdir': tmpdir,
+                     'outdir': outdir,
                      'overwrite': overwrite,
                      'selection': selection}
 
+        if hadd:
+            # Use a temporary directory instead.
+            tmpdir = tf.mkdtemp(prefix = self.label + '_', dir = outdir)
+            inst_args['outdir'] = tmpdir + '/'
+
+        # Make an instance-specific wrapping of the external function
+        # copy_and_skim such that it may be pickled for parallelization.
         partial_copy_and_skim = partial(copy_and_skim, **inst_args)
 
         # Copy and skim the subtuples asynchronously.
@@ -167,17 +172,26 @@ class Step2(object):
         pool.join()
 
         # Report any failed jobs.
-        self.failures = [x for x in results.get() if x is not None]
-        for x in self.failures:
-            print '--- Failed to get {}'.format(x)
+        self.failures = [_ for _ in results.get() if _ is not None]
+        for fail in self.failures:
+            print '--- Failed to get {}'.format(fail)
 
         # hadd the separate subtuples into a single ntuple.
         if hadd:
-            inputfiles = glob.glob(tmpdir + '*.root')
-            outputfile = outdir + self.label + '.root'
-            sp.check_call(['hadd', '-f', outputfile] + inputfiles, stdout = sp.PIPE, stderr = sp.PIPE)
-            sp.check_call(['rm', '-r', tmpdir])
 
+            inputfiles = glob.glob(tmpdir + '/*.root')
+            outputfile = outdir + self.label + '.root'
+            
+            # Redirecting the output of hadd to sp.PIPE causes it to hang.
+            # "Subprocess Hanging: PIPE is your enemy" - anders pearson
+            # To get around this, store the output into a temporary file.
+            hadd_log = tf.TemporaryFile(dir = outdir)
+
+            sp.check_call(['hadd', '-f', outputfile] + inputfiles, stdout = hadd_log, stderr = hadd_log)
+            
+            # It is the users responsibility to delete the temporary directory.
+            sp.check_call(['rm', '-r', tmpdir])
+                    
 
 if __name__ == '__main__':
 
@@ -186,15 +200,12 @@ if __name__ == '__main__':
     #############################
 
     # Step2 Ntuple Directory Path
-
     step2_dir = '/afs/cern.ch/work/s/swang373/private/V14/'
 
     # Skimming Selection
-
     selection = '(Vtype>0 && met_pt>150)'
 
-    # Step1 Ntuple Labels and EOS Paths
-
+    # Labels and EOS Paths for the Step1 Ntuples
     ntuples = {
     # Datasets
     'MET_RunC'       : '/store/group/phys_higgs/hbb/ntuples/V15/MET/VHBB_HEPPY_V15_MET__Run2015C_25ns-05Oct2015-v1',
@@ -241,18 +252,35 @@ if __name__ == '__main__':
     'ZZ': '/store/group/phys_higgs/hbb/ntuples/V14/ZZ_TuneCUETP8M1_13TeV-pythia8',
     }
 
+    ##########################
+    # Command Line Arguments #
+    ##########################
+
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('labels', nargs = '*', default = [_ for _ in ntuples], 
+                        help = 'The label(s) specifying which Step1 ntuples to process.')
+    args = parser.parse_args()
 
     ######################
     # Main Step2 Program #
     ######################
 
+    print "Launching Step2..."
+
+    # Set ROOT to run in batch mode. 
+    ROOT.gROOT.SetBatch(1)
+ 
     # Create the Step2 ntuple directory if one doesn't exist.
     if (ROOT.gSystem.AccessPathName(step2_dir)):
         ROOT.gSystem.mkdir(step2_dir)
 
-    task = Step2('MET_2015D_PromptReco')
-    task.find_subtuples('/store/group/phys_higgs/hbb/ntuples/V15/MET/VHBB_HEPPY_V15_MET__Run2015D-PromptReco-v4')
-    task.get_subtuples(step2_dir, selection)
-   
+    # Process the given samples.
+    for label in args.labels:
+        task = Step2(label)
+        task.find_subtuples(ntuples[label])
+        task.get_subtuples(step2_dir, selection) 
+
     print "\nJob's done!" 
- 
+
