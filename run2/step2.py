@@ -118,6 +118,12 @@ class Step2(object):
         out = ''    
 
         while '.root' not in out:
+
+            # It may be that the path to the subtuple is not unique.
+            # If so, you'll have to specify the path to use,
+            # e.g. the path to the more recent crab job.
+            assert (out.count('\n') <= 1), 'Branching search path.'
+            
             eos_dir += out.rstrip() + '/'
             eos_ls = sp.Popen([eos, 'ls', eos_dir], stdout = sp.PIPE, stderr = sp.PIPE)
             out, err = eos_ls.communicate()
@@ -249,7 +255,7 @@ if __name__ == '__main__':
     # Diboson
     'WW': '/store/group/phys_higgs/hbb/ntuples/V14/WW_TuneCUETP8M1_13TeV-pythia8',
     'WZ': '/store/group/phys_higgs/hbb/ntuples/V14/WZ_TuneCUETP8M1_13TeV-pythia8',
-    'ZZ': '/store/group/phys_higgs/hbb/ntuples/V14/ZZ_TuneCUETP8M1_13TeV-pythia8',
+    'ZZ': '/store/group/phys_higgs/hbb/ntuples/V14/ZZ_TuneCUETP8M1_13TeV-pythia8/VHBB_HEPPY_V14_ZZ_TuneCUETP8M1_13TeV-pythia8__RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/151025_083230',
     }
 
     ##########################
