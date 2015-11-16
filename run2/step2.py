@@ -1,7 +1,6 @@
 # sean-jiun.wang@cern.ch
 # Proverbs 22:29
 
-from functools import partial
 import glob
 import multiprocessing as mp
 import subprocess as sp
@@ -78,6 +77,8 @@ def copy_and_skim(subtuple = '', indir = '', outdir = '', overwrite = False, sel
             sp.check_call(['rm', outdir + subtuple])
 
             print '--- {} copied and skimmed from {!s} to {!s} entries.'.format(subtuple, n_tree, n_skim_tree)
+
+            return (n_tree, n_skim_tree)
     
 class Step2(object):
 
@@ -156,7 +157,7 @@ class Step2(object):
         if selection:
             print 'Skimming with selection {}'.format(selection)
         
-        # Collect named arguments for the external function copy_and_skim.
+        # Collect kwargs for the external function copy_and_skim.
         inst_args = {'indir': self.eos_dir,
                      'outdir': outdir,
                      'overwrite': overwrite,
@@ -167,21 +168,25 @@ class Step2(object):
             tmpdir = tf.mkdtemp(prefix = self.label + '_', dir = outdir)
             inst_args['outdir'] = tmpdir + '/'
 
-        # Make an instance-specific wrapping of the external function
-        # copy_and_skim such that it may be pickled for parallelization.
-        partial_copy_and_skim = partial(copy_and_skim, **inst_args)
-
-        # Copy and skim the subtuples asynchronously.
+        # Copy and skim the trees in parallel.
         pool = mp.Pool(processes = 4)
-        results = pool.map_async(partial_copy_and_skim, self.subtuples)
+        results = [pool.apply_async(copy_and_skim, (_,), inst_args).get() for _ in self.subtuples]
         pool.close()
         pool.join()
 
-        # Report any failed jobs.
-        self.failures = [_ for _ in results.get() if _ is not None]
+        # Report any failures.
+        self.failures = [_ for _ in results if '.root' in _]
         for fail in self.failures:
             print '--- Failed to get {}'.format(fail)
 
+        # Report a total sum before and after skimming.
+        if selection:
+            total, skim_total = 0, 0
+            for result in results:
+                total += result[0]
+                skim_total += result[1]
+            print 'Total Number of Entries after Skim (before Skim): {!s} ({!s})'.format(skim_total, total)
+       
         # hadd the separate subtuples into a single ntuple.
         if hadd:
 
