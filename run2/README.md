@@ -1,66 +1,45 @@
-Z(nn)H(bb) Analysis, Step by Step
-NOTE: All the scripts must be run from the base directory.
+##ZnnHbb Analysis
+---
 
-1. Use maketier2list.py to transfer Step 2 ntuples from Pisa to FNAL.
-   Edit the directories in the script before running.
-   '''
-   python maketier2list.py
-   '''
+Currently this code is being developed and run on lxplus. The hope is to eventually port it within an IPython notebook in some sort of packaged distribution so that the code is stable and the results easily reproducible.
 
-2. Use `Skim.C` or `Skim_backup.C` to skim the Step 2 ntuples with baseline selection. 
+1. **Installation**
 
-   Update `HelperNtuples.h`. In `inputstep2.ini`,
-   - Section [Skim], edit tagMC, tagData, baseline, mettrigger, metfilter.
-   - Section [Stitch], edit xxxLHECUTs.
-   In `pyhelper.py`, enable reader.write_HelperNtuples() and disable the rest.
-   '''
-   python pyhelper.py > HelperNtuples.h
-   '''
-   To run the skim,
-   '''
-   source run_Skim.sh
-   '''
+  ```bash
+  export SCRAM_ARCH=slc6_amd64_gcc481
+  cmsrel CMSSW_7_2_2
+  # eventually forward port to newer CMSSW releases
+  cd CMSSW_7_2_2/src; cmsenv
+  git clone <http or ssh link to this remote>
+  ```
+2. **Make the Step2 Ntuples** 
 
-3. Use `SkimRegression.C` to skim the Step 2 ntuples for BDTG regression training. 
+   Step1 ntuples are generated from MiniAOD files (MC or data) using the VHbb Heppy code. They are then stored at a variety of locations. I prefer to access them from the CERN T3 storage area of the Hbb group.
+   
+   ```bash
+   # Check which ntuples are present like so
+   eos ls store/group/phys_higgs/hbb/ntuples/
+   ```
+   
+   A full set of the Step1 ntuples for every signal and background process necessary is still quite large in memory. To reduce the file size such that the analysis stands a chance of being performed locally, preliminary cuts discarding events which will never be considered are made (appropriately called skimming). These skimmed ntuples are known as Step2 ntuples.
+   
+   The code which locates, copies, and skims the ntuples is in `step2.py`. The configuration options are in `vhbb_config.py`. There, you can set the path to where the Step2 ntuples will be stored, the cuts for skimming, and create a dictionary associating a nickname for a given process to its matching Step1 ntuple's path on EOS. The following bash script handles the call to the code.
+   
+   ```bash
+   ./run_step2.sh
+   ```
 
-   Update `HelperNtuples.h`. In `inputstep2.ini`,
-   - Section [Skim], edit regression, fjregression.
-   In `pyhelper.py`, enable reader.write_HelperNtuples() and disable the rest.
-   '''
-   python pyhelper.py > HelperNtuples.h
-   '''
-   To run the skim for ak5 jet regression,
-   '''
-   source run_SkimRegression.sh
-   '''
-   To run the skim for filter jet regression,
-   '''
-   source run_SkimRegressionFJ.sh
-   '''
+3. Normally, this is where the b-jet energy regression would take place, but I screwed myself out of time to work on it so it's skipped for now.
 
-4. Use `TrainRegression.C` and `TrainRegressionFJ.C` to produce the BDT regression .xml weight files. 
 
-   Update `HelperTMVA.h`. In `inputstep2.ini`,
-   - Section [BDT Regression Variable], edit the variables to use.
-   - Section [BDT Regression FJ Variable], edit the variables to use.
-   In `pyhelper.py`, enable reader.write_HelperTMVA() and disable the rest.
-   '''
-   python pyhelper.py > HelperTMVA.h
-   '''
-   To run the BDT regression and copy the TMVA output and weight files,
-   '''
-   python run_TrainRegression.py && cp weights/TMVARegression_BDTG.weights.xml weights/TMVARegression_BDTG.testweights.xml && cp TMVAReg.root testTMVAReg.root
-   '''
-   To run the BDT regression for FJ,
-   '''
-   python run_TrainRegressionFJ.py && cp weights/TMVARegressionFJ_BDTG.weights.xml weights/TMVARegressionFJ_BDTG.testweights.xml && cp TMVARegFJ.root testTMVARegFJ.root
-   '''
-   Run the following scripts to assess regression performance,
-   '''
-   python ComparePtResolution.py
-   python ComparePtOffset.py
-   python CompareMass_sig.py
-   '''
+NEED TO DO
+grow_tree
+skim_classification
+do_classification
+trim_tree
+make_plots
+
+
 
 5. Update `HelperNtuples.h`
    In `skimmer.py`, enable skimmer.process() and disable the rest.
