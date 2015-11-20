@@ -1,2 +1,9 @@
+# Ignore compiled C/C++ objects
+*.so
+*.d
+
 # Ignore compiled Python bytecode
 *.pyc
+
+# Ignore log files
+*.log

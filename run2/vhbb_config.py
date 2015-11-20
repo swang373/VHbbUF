@@ -59,7 +59,5 @@ step1_ntuples = {
 step2_dir = '/afs/cern.ch/work/s/swang373/private/V14/'
 
 # Step2 Selection
-step2_selection = '(Vtype>0 && met_pt>150)'
-
-
+step2_selection = '(Vtype>=0 && met_pt>150)'
 

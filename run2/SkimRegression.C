@@ -25,8 +25,8 @@ void SkimRegression(TString process="ZnnH125", Long64_t skimentries=1000000000)
     TString dijet   = "";
 
 
-    TString dirMC  = "/afs/cern.ch/work/d/degrutto/public/MiniAOD/ZnnHbb_Phys14_PU20bx25/skimV11/";
-    TString prefix  = "skim_";
+    TString dirMC  = "/afs/cern.ch/work/s/swang373/private/V14/";
+    TString prefix  = "";
     TString suffix  = ".root";
     TString outdir  = "skim_regression/";                                                                                                                                                       
 
@@ -77,7 +77,7 @@ void SkimRegression(TString process="ZnnH125", Long64_t skimentries=1000000000)
         fname = dirMC + dijet + "ZH_ZToNuNu_HToBB_M-120_8TeV-powheg-herwigpp" + suffix;
         chain->Add(fname);
     } else if (process == "ZnnH125") {
-        fname = dirMC + dijet + "ZH_ZToNuNu_HToBB_M-125_8TeV-powheg-herwigpp" + suffix;
+        fname = dirMC + dijet + process + suffix;
         chain->Add(fname);
     } else if (process == "ZnnH130") {
         fname = dirMC + dijet + "ZH_ZToNuNu_HToBB_M-130_8TeV-powheg-herwigpp" + suffix;
