@@ -164,7 +164,7 @@ class Step2(object):
                   'selection': selection}
 
         if hadd:
-            # Use a temporary directory instead.
+            # Use a temporary directory.
             tmpdir = tf.mkdtemp(prefix = self.label + '_', dir = outdir)
             kwargs['outdir'] = tmpdir + '/'
 
