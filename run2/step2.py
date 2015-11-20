@@ -158,26 +158,27 @@ class Step2(object):
             print 'Skimming with selection {}'.format(selection)
         
         # Collect kwargs for the external function copy_and_skim.
-        inst_args = {'indir': self.eos_dir,
-                     'outdir': outdir,
-                     'overwrite': overwrite,
-                     'selection': selection}
+        kwargs = {'indir': self.eos_dir,
+                  'outdir': outdir,
+                  'overwrite': overwrite,
+                  'selection': selection}
 
         if hadd:
             # Use a temporary directory instead.
             tmpdir = tf.mkdtemp(prefix = self.label + '_', dir = outdir)
-            inst_args['outdir'] = tmpdir + '/'
+            kwargs['outdir'] = tmpdir + '/'
 
         # Copy and skim the trees in parallel.
         pool = mp.Pool(processes = 4)
-        results = [pool.apply_async(copy_and_skim, (_,), inst_args).get() for _ in self.subtuples]
+        results = [pool.apply_async(copy_and_skim, (_,), kwargs).get() for _ in self.subtuples]
         pool.close()
         pool.join()
 
         # Report any failures.
-        self.failures = [_ for _ in results if '.root' in _]
-        for fail in self.failures:
+        failures = [_ for _ in results if '.root' in _]
+        for fail in failures:
             print '--- Failed to get {}'.format(fail)
+            results.remove(fail)
 
         # Report a total sum before and after skimming.
         if selection:
