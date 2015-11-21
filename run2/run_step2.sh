@@ -11,5 +11,5 @@ labels=(MET_RunC MET_RunD MET_RunD_Prompt
 (for label in "${labels[@]}"
 do
     echo "$label"
-done )| parallel -j4 python step2.py >> Step2.log
+done )| parallel -j2 python step2.py >> step2.log 2>&1
 
