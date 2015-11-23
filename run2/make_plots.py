@@ -68,24 +68,26 @@ class TChainSaw(object):
         print '--- Created TTree {} with {!s} entries'.format(name, getattr(self, name).GetEntries())
             
 
-def make_plot(name = '', tchainsaw = None, expression = '', n_xbins = None, x_min = None, x_max = None):
+def make_plot(tchainsaw = None, expression = '', x_title = '', n_xbins = None, x_min = None, x_max = None, filename = ''):
    
     """
     Parameters
     ----------
-    name       : str
-                 The string used to prefix the plot's name.
     tchainsaw  : TChainSaw
                  The object managing the selected TTrees.
     expression : str
                  A TTreeFormula style string defining the expression to be passed to
                  TTree::Project(). Refer to TTree::Draw() documentation for examples.
+    x_title    : str
+                 The title of the x-axis.
     n_xbins    : int
                  The number of bins along the x-axis.
     x_min      : float
                  The lower bound of the x-axis.
     x_max      : float
                  The upper bound of the x-axis.
+    filename   : str
+                 The name used to save the plot.
     """
 
     hist = {}
@@ -218,24 +220,117 @@ def make_plot(name = '', tchainsaw = None, expression = '', n_xbins = None, x_mi
             bin_error = sqrt(sq_bin_error)
             hist['ratio_syst'].SetBinError(i, bin_error / hist['mc_exp'].GetBinContent(i))
 
+    # Setup legends
+    legend_1 = ROOT.TLegend(0.50, 0.68, 0.72, 0.92)
+    legend_1.SetFillColor(0)
+    legend_1.SetLineColor(0)
+    legend_1.SetShadowColor(0)
+    legend_1.SetTextFont(62)
+    legend_1.SetTextSize(0.03)
+    legend_1.SetBorderSize(1)
+    legend_1.AddEntry(hist['data'], 'Data', 'p')
+    legend_1.AddEntry(hist['VH'], 'VH', 'l')
+    legend_1.AddEntry(hist['TT'], 't#bar{T}', 'f')
+    legend_1.AddEntry(hist['VV'], 'VV', 'f')
+   
+    legend_2 = ROOT.TLegend(0.72, 0.68, 0.94, 0.92)
+    legend_2.SetFillColor(0)
+    legend_2.SetLineColor(0)
+    legend_2.SetShadowColor(0)
+    legend_2.SetTextFont(62)
+    legend_2.SetTextSize(0.03)
+    legend_2.SetBorderSize(1)
+    legend_2.AddEntry(hist['WjHF'], 'W+HF', 'f')
+    legend_2.AddEntry(hist['WjLF'], 'W+LF', 'f')
+    legend_2.AddEntry(hist['ZjHF'], 'Z+HF', 'f')
+    legend_2.AddEntry(hist['ZjLF'], 'Z+LF', 'f')
+    legend_2.AddEntry(hist['QCD'], 'QCD', 'f') 
+    legend_2.AddEntry(hist['stat_unc'], 'MC Unc. (Stat)', 'f')
     
+    ratio_legend_1 = ROOT.TLegend(0.72, 0.88, 0.94, 0.96)
+    ratio_legend_1.SetFillColor(0)
+    ratio_legend_1.SetLineColor(0)
+    ratio_legend_1.SetShadowColor(0)
+    ratio_legend_1.SetTextFont(62)
+    ratio_legend_1.SetTextSize(0.07)
+    ratio_legend_1.SetBorderSize(1)
+    ratio_legend_1.AddEntry(hist['ratio_stat'], 'MC Unc. (Stat)', 'f')
+    
+    ratio_legend_2 = ROOT.TLegend(0.50, 0.88, 0.72, 0.96)
+    ratio_legend_2.SetFillColor(0)
+    ratio_legend_2.SetLineColor(0)
+    ratio_legend_2.SetShadowColor(0)
+    ratio_legend_2.SetTextFont(62)
+    ratio_legend_2.SetTextSize(0.07)
+    ratio_legend_2.SetBorderSize(1)
+    ratio_legend_2.AddEntry(hist['ratio_syst'], 'MC Unc. (Syst)', 'f')
+
+    # Draw stuff.
+    hstack.Draw('hist')
+    hstack.GetXaxis().SetLabelSize(0)
+    hstack.GetYaxis().SetTitle('Events / {:.3f}'.format((x_max - x_min) / n_xbins))
+
+    hist['stat_unc'].Draw('e2 same')
+
+    hist['VH'].SetLineColor(2)
+    hist['VH'].SetLineWidth(3)
+    hist['VH'].SetFillColor(0)
+    hist['VH'].Draw('hist same')
+
+    hist['data'].Draw('e1 same')
+
+    legend_1.Draw()
+    legend_2.Draw()
+
+    latex = ROOT.TLatex()
+    latex.SetNDC()
+    latex.SetTextAlign(12)
+    latex.SetTextFont(62)
+    latex.SetTextSize(0.04)
+    latex.DrawLatex(0.19, 0.89, 'CMS Simulation 2015')
+    latex.DrawLatex(0.19, 0.84, '#sqrt{s} = 13 TeV, L = 1.28 fb^{-1}')
+    latex.DrawLatex(0.19, 0.79, 'Z#nu#bar{#nu}Hb#bar{b}')
+
+    lower_pad.cd()
+    lower)pad.SetGridy(0)
+    hist['ratio_stat').Draw('e2')
+    hist['ratio_syst').Draw('e2 same')
+    hist['ratio_stat').Draw('e2 same')
+
+    ratio_unity.Draw()
+    hist['ratio'].Draw('e1 same')
+    ratio_legend_1.Draw()
+    ratio_legend_2.Draw()
+
+    pave = ROOT.TPaveText(0.18, 0.86, 0.28, 0.96, 'brNDC')
+    pave.SetLineColor(0)
+    pave.SetFillColor(0)
+    pave.SetShadowColor(0)
+    pave.SetBorderSize(1)
+    chi_sq = hist['data'].Chi2Test(hist['mc_exp'], 'UWCHI2/NDF')
+    text = pave.AddText('#chi_{#nu}^{2} = {:.3f}'.format(chi_sq))
+    text.SetTextFont(62)
+    text.SetTextSize(0.07)
+    pave.Draw()
+
+    upper_pad.cd()
+    upper_pad.RedrawAxis()
+    upper_pad.Modified()
+    upper_pad.Update()
+    lower_pad.cd()
+    lower_pad.RedrawAxis()
+    lower_pad.Modified()
+    lower_pad.Update()
+    canvas.cd()
 
 
+    canvas.SaveAs('plots/{}.png'.format(filename))
+    canvas.SaveAs('plots/{}.pdf'.format(filename))
 
-"""
+
 if __name__ == '__main__':
 
-    step2_dir = '/afs/cern.ch/work/s/swang373/private/V14/'
+    ROOT.gROOT.SetBatch(1)
 
-    categories = {}
-    categories['ZH'] = step2_dir + 'ZnnH125.root'
-    categories['WH'] = step2_dir + 'WlnH125.root'
-
-    #ROOT.gROOT.SetBatch(1)
-
-    t = TreeKeeper(categories)
-
-
-    print dir(t)
-
-"""
+    test = TChainSaw()
+    test.add_process('ZH', 
