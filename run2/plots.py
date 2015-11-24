@@ -30,17 +30,15 @@ class TChainSaw(object):
         """
             
         # Add the process.
-        print 'Adding {} as process {}...'.format(ntuple, name)
         self.processes[name] = ROOT.TChain('tree')
         self.processes[name].Add(ntuple)
+        print 'Added "{}" as process "{}"'.format(ntuple, name)
         
         if selection:
             # Set the TTree which passes the selection to be a named attribute. 
             setattr(self, name, self.processes[name].CopyTree(selection))
             self.trees.append(name)
             print '--- Created TTree {} with {!s} entries'.format(name, getattr(self, name).GetEntries())
-        else:
-            print '--- Loaded TChain'
         
     def add_subprocess(self, name = '', parent = '', selection = ''):
 
@@ -59,8 +57,8 @@ class TChainSaw(object):
         assert parent in self.processes, 'Invalid parent process!'
  
         # Add the subprocess.
-        print 'Adding {} as subprocess of {}...'.format(name, parent)
         self.processes[name] = parent
+        print 'Added "{}" as subprocess of "{}"'.format(name, parent)
 
         # Set the TTree which passes the selection to be a named attribute.
         setattr(self, name, self.processes[parent].CopyTree(selection))
@@ -146,7 +144,7 @@ def make_plot(tchainsaw = None, expression = '', x_title = '', n_xbins = None, x
         color = {'WjLF': 814, 'WjHF': 820, 'ZjLF': 401, 'ZjHF': 5,
                  'TT': 596, 'ST': 840, 'VV': 922, 'QCD': 616}
 
-        if (h == 'VH' or h = 'ZH', or h = 'WH'):
+        if (h == 'VH' or h == 'ZH' or h == 'WH'):
             hist[h].SetFillColor(2)
             hist[h].SetMarkerColor(2)
         elif (h == 'data'):
@@ -292,10 +290,10 @@ def make_plot(tchainsaw = None, expression = '', x_title = '', n_xbins = None, x
     latex.DrawLatex(0.19, 0.79, 'Z#nu#bar{#nu}Hb#bar{b}')
 
     lower_pad.cd()
-    lower)pad.SetGridy(0)
-    hist['ratio_stat').Draw('e2')
-    hist['ratio_syst').Draw('e2 same')
-    hist['ratio_stat').Draw('e2 same')
+    lower_pad.SetGridy(0)
+    hist['ratio_stat'].Draw('e2')
+    hist['ratio_syst'].Draw('e2 same')
+    hist['ratio_stat'].Draw('e2 same')
 
     ratio_unity.Draw()
     hist['ratio'].Draw('e1 same')
@@ -332,5 +330,29 @@ if __name__ == '__main__':
 
     ROOT.gROOT.SetBatch(1)
 
+    step2_dir = '/afs/cern.ch/work/s/swang373/private/V14/'
+    test_cut = 'json==1'
+
+    """
+    #categories: ZH, ggZH, WH, WjLF, WjHF, ZjLF, ZjHF, TT, ST, VV, QCD, data
+
     test = TChainSaw()
-    test.add_process('ZH', 
+    test.add_process('data', step2_dir + 'MET_RunC.root', test_cut)
+    test.add_process('ZH', step2_dir + 'ZnnH125.root', test_cut)
+    test.add_process('ggZH', step2_dir + 'ggZH125.root', test_cut)
+    test.add_process('WH', step2_dir + 'WlnH125.root', test_cut)
+    test.add_process('WJets', step2_dir + 'WJetsIncl.root')
+    test.add_subprocess('WjLF', 'WJets', test_cut)
+    test.add_subprocess('WjHF', 'WJets', test_cut)
+    test.add_process('ZJets', step2_dir + 'ZJetsHT400.root')
+    test.add_subprocess('ZjLF', 'ZJets', test_cut)
+    test.add_subprocess('ZjHF', 'ZJets', test_cut)
+    test.add_process('TT', step2_dir + 'TTPow.root', test_cut)
+    test.add_process('ST', step2_dir + 'T_s_comb_lep.root', test_cut)
+    test.add_process('VV', step2_dir + 'ZZ.root', test_cut)
+    test.add_process('QCD', step2_dir + 'QCDHT700.root', test_cut)
+
+    print test.processes
+    print test.trees
+    print dir(test)
+    """

@@ -316,38 +316,8 @@ void GrowTree(TString process, std::string regMethod="BDTG", Long64_t beginEntry
 
     ///-- Set branch addresses -------------------------------------------------
     EventInfo EVENT;
-    HiggsInfo H;
-    FatHiggsInfo FatH;
-    VInfo V;
-    METInfo METtype1corr;
-    METInfo METtype1diff;
-    int Vtype, VtypeWithTau, nPVs;
-    int nhJets, naJets;
-    double hJet_pt[MAXJ], hJet_eta[MAXJ], hJet_phi[MAXJ], hJet_e[MAXJ], hJet_m[MAXJ], hJet_ptRaw[MAXJ], 
-        hJet_csv[MAXJ], hJet_csv_nominal[MAXJ], hJet_genPt[MAXJ], hJet_genEta[MAXJ], hJet_genPhi[MAXJ], hJet_flavour[MAXJ], hJet_JECUnc[MAXJ], hJet_puJetIdL[MAXJ];
-    double aJet_pt[MAXJ], aJet_eta[MAXJ], aJet_phi[MAXJ], aJet_e[MAXJ], 
-        aJet_csv[MAXJ], aJet_csv_nominal[MAXJ], aJet_genPt[MAXJ], aJet_flavour[MAXJ], aJet_JECUnc[MAXJ],
-        aJet_puJetIdL[MAXJ];
+    double hJet_pt[MAXJ], hJet_eta[MAXJ], hJet_phi[MAXJ], hJet_m[MAXJ], hJet_ptRaw[MAXJ], hJet_genPt[MAXJ];
     int hJCidx[2];
-    bool hJet_id[2];
-    bool aJet_id[MAXJ]; 
-    int nfathFilterJets, naJetsFat;
-    double fathFilterJets_pt[3], fathFilterJets_eta[3], fathFilterJets_phi[3], 
-        fathFilterJets_e[3], fathFilterJets_ptRaw[3], fathFilterJets_csv[3], 
-        fathFilterJets_csvivf[3], fathFilterJets_genPt[3], fathFilterJets_flavour[3], 
-        fathFilterJets_JECUnc[3];
-    double aJetFat_pt[MAXJ], aJetFat_eta[MAXJ], aJetFat_phi[MAXJ], aJetFat_e[MAXJ];
-    double metUnc_et[24], metUnc_phi[24];  // could be changed to 12 in the future
-    int nvlep, nalep;
-    double vLepton_mass[2], vLepton_pt[2], vLepton_eta[2], vLepton_phi[2], vLepton_pfCombRelIso[2], vLepton_id95[2], vLepton_vbtf[2], vLepton_genPt[2], vLepton_genEta[2], vLepton_genPhi[2];
-    int vLepton_type[2];
-    double aLepton_mass[MAXL], aLepton_pt[MAXL], aLepton_eta[MAXL], aLepton_phi[MAXL], aLepton_pfCombRelIso[MAXL], aLepton_id95[MAXL], aLepton_vbtf[MAXL];
-    int aLepton_type[MAXL];
-    double HMETdPhi, deltaPullAngle;
-
- 
-    int naLeptons;
-    double aLeptons_looseIdPOG[MAXL], aLeptons_pt[MAXL], aLeptons_eta[MAXL], aLeptons_phi[MAXL];
 
     inTree->SetBranchStatus("*", 1);
 
@@ -368,48 +338,9 @@ void GrowTree(TString process, std::string regMethod="BDTG", Long64_t beginEntry
     int EVENT_run, EVENT_event;  // set these as TTree index?
     float lumi_ = lumi, efflumi, efflumi_old, 
         efflumi_UEPS_up, efflumi_UEPS_down;
-    float hJet_ptReg[2], 
-        hJet_ptReg_res_j_up[2], hJet_ptReg_res_j_down[2], hJet_ptReg_scale_j_up[2], hJet_ptReg_scale_j_down[2];
-    float HptNorm, HptGen, HptReg,
-        HptReg_res_j_up, HptReg_res_j_down, HptReg_scale_j_up, HptReg_scale_j_down;
-    float HmassNorm, HmassGen, HmassReg,
-        HmassReg_res_j_up, HmassReg_res_j_down, HmassReg_scale_j_up, HmassReg_scale_j_down;
-    float aJet_pt_res_j_up[MAXJ], aJet_pt_res_j_down[MAXJ], aJet_pt_scale_j_up[MAXJ], aJet_pt_scale_j_down[MAXJ];
-    float fathFilterJets_ptReg[3], 
-        fathFilterJets_ptReg_res_j_up[3], fathFilterJets_ptReg_res_j_down[3], fathFilterJets_ptReg_scale_j_up[3], fathFilterJets_ptReg_scale_j_down[3];
-    float FatHptNorm, FatHptGen, FatHptReg,
-        FatHptReg_res_j_up, FatHptReg_res_j_down, FatHptReg_scale_j_up, FatHptReg_scale_j_down;
-    float FatHmassNorm, FatHmassGen, FatHmassReg,
-        FatHmassReg_res_j_up, FatHmassReg_res_j_down, FatHmassReg_scale_j_up, FatHmassReg_scale_j_down;
-    float MET_xyshift,
-        MET_res_j_up, MET_res_j_down, MET_scale_j_up, MET_scale_j_down;
-    float METphi_xyshift,
-        METphi_res_j_up, METphi_res_j_down, METphi_scale_j_up, METphi_scale_j_down;
-    float HTeta25, HTeta45;
-    
-    int nalep_Znn, nalep_pt10_Znn; 
-    int naJets_Znn, 
-        naJets_Znn_res_j_up, naJets_Znn_res_j_down, naJets_Znn_scale_j_up, naJets_Znn_scale_j_down; 
-    int naCtrJets_pt20to25_Znn, 
-        naCtrJets_pt20to25_Znn_res_j_up, naCtrJets_pt20to25_Znn_res_j_down, naCtrJets_pt20to25_Znn_scale_j_up, naCtrJets_pt20to25_Znn_scale_j_down;
-    float mindPhiMETJet_pt;
-    float mindPhiMETJet_dPhi, // absolute values
-        mindPhiMETJet_dPhi_res_j_up, mindPhiMETJet_dPhi_res_j_down, mindPhiMETJet_dPhi_scale_j_up, mindPhiMETJet_dPhi_scale_j_down;
-    float mindPhiMETCtrJet_pt;
-    float mindPhiMETCtrJet_dPhi, // absolute values
-        mindPhiMETCtrJet_dPhi_res_j_up, mindPhiMETCtrJet_dPhi_res_j_down, mindPhiMETCtrJet_dPhi_scale_j_up, mindPhiMETCtrJet_dPhi_scale_j_down;
-    float mindRHJet_pt, 
-        mindRHJet_pt_res_j_up, mindRHJet_pt_res_j_down, mindRHJet_pt_scale_j_up, mindRHJet_pt_scale_j_down;
-    float mindRHJet_dR, 
-        mindRHJet_dR_res_j_up, mindRHJet_dR_res_j_down, mindRHJet_dR_scale_j_up, mindRHJet_dR_scale_j_down;
-    float mindRHJet_csv_nominal;
-    float weightTrigMu, weightTrigDLP_ElecMay10, weightTrigDLP_Elec;
-    float TopLep_mass, TopLep_pt, TopLep_eta, TopLep_phi, TopLep_massReg, TopLep_ptReg, TopLep_jetPt, TopLep_csv_nominal;  // FIXME: add systematic vars?
-    float TopLep_nuPt, TopLep_nuEta, TopLep_nuPhi;
-    float TopHad_mass, TopHad_pt, TopHad_eta, TopHad_phi, TopHad_massReg, TopHad_ptReg, TopHad_j3Pt;  // FIXME: add systematic vars?
-    float FatTopHad_mass, FatTopHad_pt, FatTopHad_eta, FatTopHad_phi, FatTopHad_massReg, FatTopHad_ptReg, FatTopHad_j3Pt;
-
-
+    float hJet_ptReg[2];
+    float HptNorm, HptGen, HptReg;
+    float HmassNorm, HmassGen, HmassReg;
 
     outTree->Branch("EVENT_run", &EVENT_run, "EVENT_run/I");
     outTree->Branch("EVENT_event", &EVENT_event, "EVENT_event/I");
@@ -580,11 +511,7 @@ void GrowTree(TString process, std::string regMethod="BDTG", Long64_t beginEntry
 #endif
     
         bool verbose = false;
-        double rawpt_ = 0., pt_ = 0., e_ = 0.;
-
-
-
-             
+ 
 	for (Int_t ihj = 0; ihj < 2; ihj++) {
 
    
@@ -598,9 +525,7 @@ void GrowTree(TString process, std::string regMethod="BDTG", Long64_t beginEntry
                 }
             }
 
-	    //  assert(TMath::AreEqualRel(hJet_pt[hJCidx[ihj]], readerVars[idx_pt], 1.E-12));
-            const double hJet_ptRawJER    = readerVars[idx_rawpt];  // hJet_ptRaw[ihj] is before smearing
-            hJet_ptReg[ihj]               = (reader->EvaluateRegression(regMethod + " method"))[0];
+	    hJet_ptReg[ihj]               = (reader->EvaluateRegression(regMethod + " method"))[0];
             if (verbose)  std::cout << readerVars[idx_pt] << " " << readerVars[idx_rawpt] <<  " " << hJet_pt[ihj] << " " << hJet_ptReg[ihj] << " " << hJet_genPt[ihj] << std::endl;
         const TLorentzVector p4Zero                     = TLorentzVector(0., 0., 0., 0.);
 	//	int idx =  hJCidx[0] ;

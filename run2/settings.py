@@ -4,11 +4,10 @@ Analysis Configuration
 The analysis script settings are maintained centrally within this file.
 """
 
-#############
-#-- Step2 --#
-#############
+#####################################
+# Step1 Ntuple Labels and EOS Paths #
+#####################################
 
-# Labels and EOS Paths for the Step1 Ntuples
 step1_ntuples = {
 # Datasets
 'MET_RunC'       : '/store/group/phys_higgs/hbb/ntuples/V15/MET/VHBB_HEPPY_V15_MET__Run2015C_25ns-05Oct2015-v1',
@@ -52,12 +51,68 @@ step1_ntuples = {
 # Diboson
 'WW': '/store/group/phys_higgs/hbb/ntuples/V14/WW_TuneCUETP8M1_13TeV-pythia8',
 'WZ': '/store/group/phys_higgs/hbb/ntuples/V14/WZ_TuneCUETP8M1_13TeV-pythia8',
-'ZZ': '/store/group/phys_higgs/hbb/ntuples/V14/ZZ_TuneCUETP8M1_13TeV-pythia8/VHBB_HEPPY_V14_ZZ_TuneCUETP8M1_13TeV-pythia8__RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/151025_083230',
-}
+'ZZ': '/store/group/phys_higgs/hbb/ntuples/V14/ZZ_TuneCUETP8M1_13TeV-pythia8/VHBB_HEPPY_V14_ZZ_TuneCUETP8M1_13TeV-pythia8__RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/151025_083230',}
 
-# Step2 Directory
+###################
+# Step2 Directory #
+###################
+
 step2_dir = '/afs/cern.ch/work/s/swang373/private/V14/'
 
-# Step2 Selection
+###################
+# Step2 Selection #
+###################
+
 step2_selection = '(Vtype>=0 && met_pt>150)'
+
+########################################################
+# Production Cross-Sections in units of picobarns (pb) #
+########################################################
+
+# Obtained from PDG reference pages and the following links
+# https://twiki.cern.ch/twiki/bin/viewauth/CMS/SummaryTable1G25ns
+# https://twiki.cern.ch/twiki/bin/view/LHCPhysics/CERNYellowReportPageAt1314TeV#s_13_0_TeV
+# https://twiki.cern.ch/twiki/bin/view/LHCPhysics/SingleTopRefXsec
+
+xsec = {
+# Signals
+'ZnnH125': (0.8696 - 0.1057) * 0.577 * 0.2,
+'ggZH125': 2 * 0.1057 * 0.577 * 0.2,
+'WlnH125': 1.380 * 0.577 * 0.1080 * 3,
+# W+Jets
+'WJetsHT100': 1.21 * 1345,
+'WJetsHT200': 1.21 * 359.7,
+'WJetsHT400': 1.21 * 48.91,
+'WJetsHT600': 1.21 * 18.77,
+'WJetsIncl' : 61526.7,
+# Z+Jets
+'ZJetsHT100': 1.23 * 280.47,
+'ZJetsHT200': 1.23 * 78.36,
+'ZJetsHT400': 1.23 * 10.94,
+'ZJetsHT600': 1.23 * 4.20,
+# TT
+'TTPow': 831.76,
+# Single Top s-channel
+# Single Top t-channel
+# Single Top Wt-channel
+'T_tW'   : 35.6,
+'Tbar_tW': 35.6,
+# Single Top Leptonic
+'T_s_comb_lep': 10.32 * 0.1080 * 3,
+'T_t_lep'     : 136.02 * 0.1080 * 3,
+'Tbar_t_lep'  : 80.95 * 0.1080 * 3, 
+# QCD
+'QCDHT100' : 27850000,
+'QCDHT200' : 1717000,
+'QCDHT300' : 351300,
+'QCDHT500' : 31630,
+'QCDHT700' : 6802,
+'QCDHT1000': 1206,
+'QCDHT1500': 120.4,
+'QCDHT2000': 25.24,
+# Diboson
+'WW': 118.7, # couldn't verify this one
+'WZ': 47.13,
+'ZZ': 16.523,
+}
 
