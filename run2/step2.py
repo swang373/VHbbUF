@@ -193,7 +193,7 @@ def step2(label = '', eos_path = '', step2_dir = '', step2_selection = '', overw
  
 if __name__ == '__main__':
 
-    from vhbb_config import *
+    from settings import *
  
     ##########################
     # Command Line Arguments #

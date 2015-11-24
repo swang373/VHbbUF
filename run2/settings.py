@@ -1,7 +1,7 @@
-"""
-Analysis Configuration
+import TCutOperators as tco
 
-The analysis script settings are maintained centrally within this file.
+"""
+Analysis Settings
 """
 
 #####################################
@@ -10,9 +10,9 @@ The analysis script settings are maintained centrally within this file.
 
 step1_ntuples = {
 # Datasets
-'MET_RunC'       : '/store/group/phys_higgs/hbb/ntuples/V15/MET/VHBB_HEPPY_V15_MET__Run2015C_25ns-05Oct2015-v1',
-'MET_RunD'       : '/store/group/phys_higgs/hbb/ntuples/V15/MET/VHBB_HEPPY_V15_MET__Run2015D-05Oct2015-v1',
-'MET_RunD_Prompt': '/store/group/phys_higgs/hbb/ntuples/V15/MET/VHBB_HEPPY_V15_MET__Run2015D-PromptReco-v4',
+'Data_MET_C' : '/store/group/phys_higgs/hbb/ntuples/V15/MET/VHBB_HEPPY_V15_MET__Run2015C_25ns-05Oct2015-v1',
+'Data_MET_D' : '/store/group/phys_higgs/hbb/ntuples/V15/MET/VHBB_HEPPY_V15_MET__Run2015D-05Oct2015-v1',
+'Data_MET_DP': '/store/group/phys_higgs/hbb/ntuples/V15/MET/VHBB_HEPPY_V15_MET__Run2015D-PromptReco-v4',
 # Signals
 'ZnnH125': '/store/group/phys_higgs/hbb/ntuples/V14/ZH_HToBB_ZToNuNu_M125_13TeV_amcatnloFXFX_madspin_pythia8',
 'ggZH125': '/store/group/phys_higgs/hbb/ntuples/V14/ggZH_HToBB_ZToNuNu_M125_13TeV_amcatnlo_pythia8',
@@ -65,9 +65,9 @@ step2_dir = '/afs/cern.ch/work/s/swang373/private/V14/'
 
 step2_selection = '(Vtype>=0 && met_pt>150)'
 
-########################################################
-# Production Cross-Sections in units of picobarns (pb) #
-########################################################
+##############################################
+# Process Cross-Sections (in picobarns [pb]) #
+##############################################
 
 # Obtained from PDG reference pages and the following links
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/SummaryTable1G25ns
@@ -115,4 +115,24 @@ xsec = {
 'WZ': 47.13,
 'ZZ': 16.523,
 }
+
+###############################
+# Cuts and Region Definitions #
+###############################
+
+# Data Luminosity (in inverse picobarns [pb-1])
+target_lumi = 1280
+
+# General
+preselection = tco.add('json', 'HCSV_reg_pt>150', 'Jet_btagCSV[hJCidx[1]]>0.2', 'abs(TVector2::Phi_mpi_pi(HCSV_reg_phi - met_phi))>1.5', 
+                        'min(Jet_pt[hJCidx[0]], Jet_pt[hJCidx[1]])>30', 'HCSV_reg_mass<300', 'HCSV_mass>0')
+filters = tco.add('Flag_METFilters', 'Flag_HBHENoiseFilter')
+antiQCD = 
+
+# Data Only
+data_trigger = 'HLT_PFMET90_PFMHT90_IDTight_v'
+
+# MC Only
+mc_weight = tco.multiply('sign(genWeight)', target_lumi, '1./sample_lumi')
+mc_trigger = 'HLT_PFMET90_PFMHT90_IDLoose_v'
 
