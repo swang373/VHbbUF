@@ -7666,3 +7666,123 @@ Skimming with selection (Vtype>=0 && met_pt>150)
 Total Number of Entries after Skim (before Skim): 261859 (1824001)
 
 Job's done!
+
+Launching Step2...
+
+Writing Sample Luminosity Branch for WJetsHT100
+Cross Section: 1627.45 pb
+Sample Luminosity: 5862.26 pb-1
+
+Writing Sample Luminosity Branch for T_tW
+Cross Section: 35.6 pb
+Sample Luminosity: 26601.1 pb-1
+
+Writing Sample Luminosity Branch for QCDHT1000
+Cross Section: 1206 pb
+Sample Luminosity: 4116.0 pb-1
+
+Writing Sample Luminosity Branch for QCDHT700
+Cross Section: 6802 pb
+Sample Luminosity: 2202.69 pb-1
+
+Writing Sample Luminosity Branch for WW
+Cross Section: 118.7 pb
+Sample Luminosity: 8135.33 pb-1
+
+Writing Sample Luminosity Branch for ggZH125
+Cross Section: 0.02439556 pb
+Sample Luminosity: 4.66962e+07 pb-1
+
+Writing Sample Luminosity Branch for ZnnH125
+Cross Section: 0.08815406 pb
+Sample Luminosity: 1.3798e+07 pb-1
+
+Writing Sample Luminosity Branch for WlnH125
+Cross Section: 0.25798824 pb
+Sample Luminosity: 4.78313e+06 pb-1
+
+Writing Sample Luminosity Branch for T_t_lep
+Cross Section: 44.07048 pb
+Sample Luminosity: 73001.2 pb-1
+
+Writing Sample Luminosity Branch for QCDHT500
+Cross Section: 31630 pb
+Sample Luminosity: 605.357 pb-1
+
+Writing Sample Luminosity Branch for ZJetsHT100
+Cross Section: 344.9781 pb
+Sample Luminosity: 13880.5 pb-1
+
+Writing Sample Luminosity Branch for QCDHT300
+Cross Section: 351300 pb
+Sample Luminosity: 55.2755 pb-1
+
+Writing Sample Luminosity Branch for WJetsHT600
+Cross Section: 22.7117 pb
+Sample Luminosity: 41754.9 pb-1
+
+Writing Sample Luminosity Branch for WZ
+Cross Section: 47.13 pb
+Sample Luminosity: 20484.6 pb-1
+
+Writing Sample Luminosity Branch for WJetsIncl
+Cross Section: 61526.7 pb
+Sample Luminosity: 1110.1 pb-1
+
+Writing Sample Luminosity Branch for QCDHT2000
+Cross Section: 25.24 pb
+Sample Luminosity: 72278.8 pb-1
+
+Writing Sample Luminosity Branch for T_s_comb_lep
+Cross Section: 3.34368 pb
+Sample Luminosity: 183446.0 pb-1
+
+Writing Sample Luminosity Branch for WJetsHT400
+Cross Section: 59.1811 pb
+Sample Luminosity: 25435.4 pb-1
+
+Writing Sample Luminosity Branch for WJetsHT200
+Cross Section: 435.237 pb
+Sample Luminosity: 10569.5 pb-1
+
+Writing Sample Luminosity Branch for QCDHT1500
+Cross Section: 120.4 pb
+Sample Luminosity: 30660.3 pb-1
+
+Writing Sample Luminosity Branch for QCDHT200
+Cross Section: 1717000 pb
+Sample Luminosity: 10.9021 pb-1
+
+Writing Sample Luminosity Branch for ZZ
+Cross Section: 16.523 pb
+Sample Luminosity: 60336.7 pb-1
+
+Writing Sample Luminosity Branch for QCDHT100
+Cross Section: 27850000 pb
+Sample Luminosity: 2.92862 pb-1
+
+Writing Sample Luminosity Branch for ZJetsHT200
+Cross Section: 96.3828 pb
+Sample Luminosity: 50838.1 pb-1
+
+Writing Sample Luminosity Branch for Tbar_t_lep
+Cross Section: 26.2278 pb
+Sample Luminosity: 60805.7 pb-1
+
+Writing Sample Luminosity Branch for ZJetsHT400
+Cross Section: 13.4562 pb
+Sample Luminosity: 75718.4 pb-1
+
+Writing Sample Luminosity Branch for Tbar_tW
+Cross Section: 35.6 pb
+Sample Luminosity: 21193.8 pb-1
+
+Writing Sample Luminosity Branch for TTPow
+Cross Section: 831.76 pb
+Sample Luminosity: 23753.5 pb-1
+
+Writing Sample Luminosity Branch for ZJetsHT600
+Cross Section: 5.166 pb
+Sample Luminosity: 177539.0 pb-1
+
+Job's done!

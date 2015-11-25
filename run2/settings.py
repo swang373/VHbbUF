@@ -124,15 +124,93 @@ xsec = {
 target_lumi = 1280
 
 # General
-preselection = tco.add('json', 'HCSV_reg_pt>150', 'Jet_btagCSV[hJCidx[1]]>0.2', 'abs(TVector2::Phi_mpi_pi(HCSV_reg_phi - met_phi))>1.5', 
-                        'min(Jet_pt[hJCidx[0]], Jet_pt[hJCidx[1]])>30', 'HCSV_reg_mass<300', 'HCSV_mass>0')
-filters = tco.add('Flag_METFilters', 'Flag_HBHENoiseFilter')
-antiQCD = 
+minimal = tco.add('Vtype==2 || Vtype==3 || Vtype==4', 
+                  'HCSV_pt>150', 
+                  'met_pt>150', 
+                  'Jet_btagCSV[hJCidx[1]]>0.3', 
+                  'min(Jet_pt[hJCidx[0]], Jet_pt[hJCidx[1]])>30', 
+                  'HCSV_mass<300')
 
-# Data Only
-data_trigger = 'HLT_PFMET90_PFMHT90_IDTight_v'
+antiQCD = tco.add('HCSV_pt>150',
+                  'met_pt>150',
+                  'MinIf$(abs(TVector2::Phi_mpi_pi(met_phi - Jet_phi)), Jet_pt>30 && Jet_puId && abs(Jet_eta)<4.5)>0.7',
+                  'abs(TVector2::Phi_mpi_pi(met_phi - tkMet_phi))<0.7',
+                  'tkMet_pt>30',
+                  'Jet_btagCSV[hJCidx[1]]>0.3',
+                  'min(Jet_pt[hJCidx[0]],Jet_pt[hJCidx[1]])>30')
 
-# MC Only
-mc_weight = tco.multiply('sign(genWeight)', target_lumi, '1./sample_lumi')
-mc_trigger = 'HLT_PFMET90_PFMHT90_IDLoose_v'
+addCenJet30m0 = '(Sum$(Jet_pt>30 && Jet_puId && abs(Jet_eta)<4.5)-2)>0'
+addCenJet30e0 = '(Sum$(Jet_pt>30 && Jet_puId && abs(Jet_eta)<4.5)-2)==0'
+addCenJet30e1 = '(Sum$(Jet_pt>30 && Jet_puId && abs(Jet_eta)<4.5)-2)<=1'
+
+naddGoodLeptons10e0 = '(Sum$(aLeptons_pt>10 && (aLeptons_jetBTagCSV<0.25 || aLeptons_relIso03<0.4 || aLeptons_looseIdSusy!=0 || aLeptons_jetDR>0.3)) + Sum$(vLeptons_pt>10 && (vLeptons_jetBTagCSV<0.25 || vLeptons_relIso03<0.4 || vLeptons_looseIdSusy!=0 || vLeptons_jetDR>0.3)))==0'
+
+naddGoodTaus20e0 = 'Sum$(TauGood_idDecayMode>=1 && TauGood_idCI3hit>=1 && TauGood_pt>20 && abs(TauGood_eta)<2.3)==0'
+
+heavy_flavour = 'abs(Jet_mcFlavour[hJCidx[0]])==5 || abs(Jet_mcFlavour[hJCidx[1]])==5'
+light_flavour = 'abs(Jet_mcFlavour[hJCidx[0]])!=5 && abs(Jet_mcFlavour[hJCidx[1]])!=5'
+
+# Signal Region
+signal_loose = tco.add('Vtype==4',
+                       'min(Jet_pt[hJCidx[0]], Jet_pt[hJCidx[1]])>30',
+                       'Jet_btagCSV[hJCidx[1]]>0.605',
+                       'HCSV_mass<100 || HCSV_mass>140',
+                       naddGoodLeptons10e0,
+                       naddGoodTaus20e0)
+
+signal_tight = tco.add('Vtype==4',
+                       'min(Jet_pt[hJCidx[0]], Jet_pt[hJCidx[1]])>30',
+                       'Jet_btagCSV[hJCidx[1]]>0.8',
+                       naddGoodLeptons10e0,
+                       naddGoodTaus20e0,
+                       addCenJet30e1)
+
+# TTbar Control Region
+TTbar = tco.add('Vtype==2 || Vtype==3',
+                'vLeptons_pt>30',
+                addCenJet30m0,
+                'Jet_btagCSV[hJCidx[0]]>0.97',
+                'Jet_btagCSV[hJCidx[1]]<0.97')
+
+# Z+Jets Control Regions
+Zlight = tco.add('Vtype==4',
+                 addCenJet30e0,
+                 naddGoodLeptons10e0,
+                 'Jet_btagCSV[hJCidx[0]]<0.97')
+
+Zbb = tco.add('Vtype==4',
+              'HCSV_mass<100 || HCSV_mass>140',
+              addCenJet30e0,
+              naddGoodLeptons10e0,
+              'Jet_btagCSV[hJCidx[1]]>0.8')
+
+# W+Jets Control Regions
+Wlight = tco.add('Vtype==2 || Vtype==3',
+                 'vLeptons_pt>30',
+                 addCenJet30e0,
+                 'Jet_btagCSV[hJCidx[0]]<0.97')
+
+Wbb = tco.add('Vtype==2 || Vtype==3',
+              'vLeptons_pt>30',
+              addCenJet30e0,
+              'Jet_btagCSV[hJCidx[1]]>0.8')
+
+# QCD Control Region
+QCD = tco.add('HCSV_pt>150', 
+              'met_pt>150', 
+              'MinIf$(abs(TVector2::Phi_mpi_pi(met_phi - Jet_phi)), Jet_pt>30 && Jet_puId && abs(Jet_eta)<4.5)<0.7', 
+              'abs(TVector2::Phi_mpi_pi(met_phi - tkMet_phi))>0.7', 
+              'Jet_btagCSV[hJCidx[1]]>0.3', 
+              'min(Jet_pt[hJCidx[0]],Jet_pt[hJCidx[1]])>30',
+              'tkMet_pt<30')
+
+# Data Event Weight
+data_weight = tco.mult('json', 
+                       'HLT_BIT_HLT_PFMET90_PFMHT90_IDTight_v')
+
+# MC Event Weight
+mc_weight = tco.mult('sign(genWeight)', 
+                     target_lumi, 
+                     '1./sample_lumi',
+                     'HLT_BIT_HLT_PFMET90_PFMHT90_IDLoose_v')
 

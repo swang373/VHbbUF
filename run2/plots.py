@@ -1,6 +1,5 @@
 import ROOT
 
-
 class TChainSaw(object):
 
     """
@@ -328,31 +327,33 @@ def make_plot(tchainsaw = None, expression = '', x_title = '', n_xbins = None, x
 
 if __name__ == '__main__':
 
+    from settings import *
+    import TCutOperators as tco
+
     ROOT.gROOT.SetBatch(1)
 
     step2_dir = '/afs/cern.ch/work/s/swang373/private/V14/'
-    test_cut = 'json==1'
 
-    """
     #categories: ZH, ggZH, WH, WjLF, WjHF, ZjLF, ZjHF, TT, ST, VV, QCD, data
 
+    print tco.add(antiQCD, signal_loose)
+
     test = TChainSaw()
-    test.add_process('data', step2_dir + 'MET_RunC.root', test_cut)
-    test.add_process('ZH', step2_dir + 'ZnnH125.root', test_cut)
-    test.add_process('ggZH', step2_dir + 'ggZH125.root', test_cut)
-    test.add_process('WH', step2_dir + 'WlnH125.root', test_cut)
-    test.add_process('WJets', step2_dir + 'WJetsIncl.root')
-    test.add_subprocess('WjLF', 'WJets', test_cut)
-    test.add_subprocess('WjHF', 'WJets', test_cut)
-    test.add_process('ZJets', step2_dir + 'ZJetsHT400.root')
-    test.add_subprocess('ZjLF', 'ZJets', test_cut)
-    test.add_subprocess('ZjHF', 'ZJets', test_cut)
-    test.add_process('TT', step2_dir + 'TTPow.root', test_cut)
-    test.add_process('ST', step2_dir + 'T_s_comb_lep.root', test_cut)
-    test.add_process('VV', step2_dir + 'ZZ.root', test_cut)
-    test.add_process('QCD', step2_dir + 'QCDHT700.root', test_cut)
+    test.add_process('data', step2_dir + 'Data_MET.root', tco.add(antiQCD, signal_loose))
+    test.add_process('ZH', step2_dir + 'ZnnH125.root', tco.add(antiQCD, signal_loose))
+    test.add_process('ggZH', step2_dir + 'ggZH125.root', tco.add(antiQCD, signal_loose))
+    test.add_process('WH', step2_dir + 'WlnH125.root', tco.add(antiQCD, signal_loose))
+    test.add_process('WJets', step2_dir + 'WJets.root')
+    test.add_subprocess('WjLF', 'WJets', tco.add(antiQCD, signal_loose, light_flavour))
+    test.add_subprocess('WjHF', 'WJets', tco.add(antiQCD, signal_loose, heavy_flavour))
+    test.add_process('ZJets', step2_dir + 'ZJets.root')
+    test.add_subprocess('ZjLF', 'ZJets', tco.add(antiQCD, signal_loose, light_flavour))
+    test.add_subprocess('ZjHF', 'ZJets', tco.add(antiQCD, signal_loose, heavy_flavour))
+    test.add_process('TT', step2_dir + 'TTPow.root', tco.add(antiQCD, signal_loose))
+    test.add_process('ST', step2_dir + 's_Top.root', tco.add(antiQCD, signal_loose))
+    test.add_process('VV', step2_dir + 'VV.root', tco.add(antiQCD, signal_loose))
+    test.add_process('QCD', step2_dir + 'QCD.root', tco.add(antiQCD, signal_loose))
 
     print test.processes
     print test.trees
     print dir(test)
-    """

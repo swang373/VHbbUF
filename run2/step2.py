@@ -6,6 +6,7 @@ import multiprocessing as mp
 import subprocess as sp
 import tempfile as tf
 
+import numpy as np
 import ROOT
 
 
@@ -190,6 +191,37 @@ def step2(label = '', eos_path = '', step2_dir = '', step2_selection = '', overw
         # It is the users responsibility to delete the temporary directory.
         sp.check_call(['rm', '-r', tmpdir])
   
+def write_sample_lumi(label = '', step2_dir = '', xsec = None):
+    
+    print '\nWriting Sample Luminosity Branch for {}'.format(label)
+    print 'Cross Section: {} pb'.format(xsec)
+    
+    ntuple = ROOT.TFile('{}{}.root'.format(step2_dir, label), 'update')
+    tree = ntuple.Get('tree')
+    n_entries = tree.GetEntriesFast()
+
+    # Create the new sample luminosity branch.
+    sample_lumi_address = np.array([-999], np.float32)
+    sample_lumi_branch = tree.Branch('sample_lumi', sample_lumi_address, 'sample_lumi/F')
+
+    # Calculate the sample luminosity.
+    CountPosWeight = ntuple.Get('CountPosWeight')
+    CountNegWeight = ntuple.Get('CountNegWeight')
+
+    n_pos = CountPosWeight.GetBinContent(1)
+    n_neg = CountNegWeight.GetBinContent(1)
+
+    sample_lumi_address[0] = (n_pos - n_neg) / xsec
+    print 'Sample Luminosity: {} pb-1'.format(sample_lumi_address[0])
+
+    # Fill and save the new branch.
+    for i in range(0, n_entries):
+        tree.GetEntry(i)
+        sample_lumi_branch.Fill()
+
+    tree.Write()
+    ntuple.Close()    
+
  
 if __name__ == '__main__':
 
@@ -218,7 +250,8 @@ if __name__ == '__main__':
     # Create the Step2 ntuple directory if one doesn't exist.
     if (ROOT.gSystem.AccessPathName(step2_dir)):
         ROOT.gSystem.mkdir(step2_dir)
-
+    
+    """
     # Process the Step1 ntuples.
     step2_kwargs = {'step2_dir': step2_dir, 
                     'step2_selection': step2_selection}
@@ -227,6 +260,11 @@ if __name__ == '__main__':
         step2_kwargs['label'] = label
         step2_kwargs['eos_path'] = step1_ntuples[label]
         step2(**step2_kwargs)
+
+    """
+
+    for label in [_ for _ in xsec if _ in step1_ntuples]:
+        write_sample_lumi(label, step2_dir, xsec[label])
 
     print "\nJob's done!" 
 
