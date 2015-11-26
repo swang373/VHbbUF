@@ -1,6 +1,6 @@
 """
-These functions substitute the overloaded TCut
-operators which are not supported within PyROOT.
+These functions emulate the overloaded TCut
+operators which are not supported by PyROOT.
 """
 
 def add(*cuts):

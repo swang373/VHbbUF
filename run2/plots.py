@@ -8,14 +8,13 @@ class ControlRegion(object):
 
         self.name = name
         self.cuts = cuts
-        self.n_cuts = len(cuts)
         self.outfile = ROOT.TFile('{}{}.root'.format(outdir, name), 'recreate')
 
         print 'Control Region [{}]'.format(self.name)
 
     def add_tree(self, name = '', ntuple = '', *add_cuts):
 
-        print 'Creating TTree named "{}" from {}'.format(name, ntuple)
+        print 'Adding TTree named "{}" from {}'.format(name, ntuple)
 
         # Access the input file and TTree.
         infile = ROOT.TFile(ntuple, 'read')
@@ -25,7 +24,7 @@ class ControlRegion(object):
         self.outfile.cd()
     
         # Perform the control region cuts.
-        if (self.n_cuts <= 1):
+        if (len(self.cuts) <= 1):
             if not self.cuts:
                 CR_tree = tree.CopyTree('')
             else:
@@ -48,7 +47,7 @@ class ControlRegion(object):
         infile.Close()
 
     def close(self):
-        # Clean up extraneous TTrees.
+        # Clean up extraneous TTrees and then properly close.
         self.outfile.cd()
         ROOT.gDirectory.Delete('tree;*')
         self.outfile.Close()
