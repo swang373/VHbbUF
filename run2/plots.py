@@ -1,5 +1,56 @@
 import ROOT
 
+class ControlRegion(object):
+
+    def __init__(self, name = '', outdir = '', *cuts):
+
+        self.name = name
+        self.cuts = cuts
+        self.n_cuts = len(cuts)
+        self.outfile = ROOT.TFile('{}{}.root'.format(outdir, name), 'recreate')
+
+        print 'Control Region [{}]'.format(self.name)
+
+    def add_tree(self, name = '', ntuple = '', *add_cuts):
+
+        print 'Creating TTree named "{}" from {}'.format(name, ntuple)
+
+        # Access the input file and TTree.
+        infile = ROOT.TFile(ntuple, 'read')
+        tree = infile.Get('tree')
+
+        # Change directory to the output file.
+        self.outfile.cd()
+    
+        # Perform the control region cuts.
+        if (self.n_cuts <= 1):
+            if not self.cuts:
+                CR_tree = tree.CopyTree('')
+            else:
+                CR_tree = tree.CopyTree(self.cuts[0])
+        else:
+            CR_tree = tree.CopyTree(self.cuts[0])
+            for cut in self.cuts[1:]:
+                CR_tree = CR_tree.CopyTree(cut)
+        
+        # Perform any addtional cuts provided.
+        if add_cuts:
+            for cut in add_cuts:
+                CR_tree = CR_tree.CopyTree(cut)
+
+        print '--- Selected {!s} out of {!s} entries'.format(CR_tree.GetEntriesFast(), tree.GetEntriesFast())
+        
+        # Save the control region tree.
+        CR_tree.SetName(name)
+        CR_tree.Write()    
+        infile.Close()
+
+    def close(self):
+        # Clean up extraneous TTrees.
+        self.outfile.cd()
+        ROOT.gDirectory.Delete('tree;*')
+        self.outfile.Close()
+        
 class TChainSaw(object):
 
     """
@@ -31,6 +82,7 @@ class TChainSaw(object):
         # Add the process.
         self.processes[name] = ROOT.TChain('tree')
         self.processes[name].Add(ntuple)
+        ROOT.gROOT.cd()
         print 'Added "{}" as process "{}"'.format(ntuple, name)
         
         if selection:
@@ -336,24 +388,43 @@ if __name__ == '__main__':
 
     #categories: ZH, ggZH, WH, WjLF, WjHF, ZjLF, ZjHF, TT, ST, VV, QCD, data
 
-    print tco.add(antiQCD, signal_loose)
-
+    region = tco.add(antiQCD, signal_loose)
+    regionHF = tco.add(region, heavy_flavour)
+    regionLF = tco.add(region, light_flavour)
+    """
     test = TChainSaw()
-    test.add_process('data', step2_dir + 'Data_MET.root', tco.add(antiQCD, signal_loose))
-    test.add_process('ZH', step2_dir + 'ZnnH125.root', tco.add(antiQCD, signal_loose))
-    test.add_process('ggZH', step2_dir + 'ggZH125.root', tco.add(antiQCD, signal_loose))
-    test.add_process('WH', step2_dir + 'WlnH125.root', tco.add(antiQCD, signal_loose))
+    test.add_process('data', step2_dir + 'Data_MET.root', region)
+    test.add_process('ZH', step2_dir + 'ZnnH125.root', region)
+    test.add_process('ggZH', step2_dir + 'ggZH125.root', region)
+    test.add_process('WH', step2_dir + 'WlnH125.root', region)
     test.add_process('WJets', step2_dir + 'WJets.root')
-    test.add_subprocess('WjLF', 'WJets', tco.add(antiQCD, signal_loose, light_flavour))
-    test.add_subprocess('WjHF', 'WJets', tco.add(antiQCD, signal_loose, heavy_flavour))
+    test.add_subprocess('WjLF', 'WJets', regionLF)
+    test.add_subprocess('WjHF', 'WJets', regionHF)
     test.add_process('ZJets', step2_dir + 'ZJets.root')
-    test.add_subprocess('ZjLF', 'ZJets', tco.add(antiQCD, signal_loose, light_flavour))
-    test.add_subprocess('ZjHF', 'ZJets', tco.add(antiQCD, signal_loose, heavy_flavour))
-    test.add_process('TT', step2_dir + 'TTPow.root', tco.add(antiQCD, signal_loose))
-    test.add_process('ST', step2_dir + 's_Top.root', tco.add(antiQCD, signal_loose))
-    test.add_process('VV', step2_dir + 'VV.root', tco.add(antiQCD, signal_loose))
-    test.add_process('QCD', step2_dir + 'QCD.root', tco.add(antiQCD, signal_loose))
+    test.add_subprocess('ZjLF', 'ZJets', regionLF)
+    test.add_subprocess('ZjHF', 'ZJets', regionHF)
+    test.add_process('TT', step2_dir + 'TTPow.root', region)
+    test.add_process('ST', step2_dir + 's_Top.root', region)
+    test.add_process('VV', step2_dir + 'VV.root', region)
+    test.add_process('QCD', step2_dir + 'QCD.root', region)
 
     print test.processes
     print test.trees
     print dir(test)
+    """
+ 
+    CR = ControlRegion('CR_Signal_Loose', '/afs/cern.ch/work/s/swang373/private/V14/', antiQCD, signal_loose)
+    CR.add_tree('Data', '/afs/cern.ch/work/s/swang373/private/V14/Data_MET.root')
+    CR.add_tree('ZH', '/afs/cern.ch/work/s/swang373/private/V14/ZnnH125.root')
+    CR.add_tree('ggZH', '/afs/cern.ch/work/s/swang373/private/V14/ggZH125.root')
+    CR.add_tree('WH', '/afs/cern.ch/work/s/swang373/private/V14/WlnH125.root')
+    CR.add_tree('WjLF', '/afs/cern.ch/work/s/swang373/private/V14/WJets.root', light_flavour)
+    CR.add_tree('WjHF', '/afs/cern.ch/work/s/swang373/private/V14/WJets.root', heavy_flavour)
+    CR.add_tree('ZjLF', '/afs/cern.ch/work/s/swang373/private/V14/ZJets.root', light_flavour)
+    CR.add_tree('ZjHF', '/afs/cern.ch/work/s/swang373/private/V14/ZJets.root', heavy_flavour)
+    CR.add_tree('TT', '/afs/cern.ch/work/s/swang373/private/V14/TTPow.root')
+    CR.add_tree('ST', '/afs/cern.ch/work/s/swang373/private/V14/s_Top.root')
+    CR.add_tree('VV', '/afs/cern.ch/work/s/swang373/private/V14/VV.root')
+    CR.add_tree('QCD', '/afs/cern.ch/work/s/swang373/private/V14/QCD.root')
+    CR.close()
+
