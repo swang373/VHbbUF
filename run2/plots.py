@@ -2,55 +2,6 @@ import math
 
 import ROOT
 
-class ControlRegion(object):
-
-    def __init__(self, name = '', outdir = '', *cuts):
-
-        self.name = name
-        self.cuts = cuts
-        self.outfile = ROOT.TFile('{}{}.root'.format(outdir, name), 'recreate')
-
-        print 'Control Region [{}]'.format(self.name)
-
-    def add_tree(self, name = '', ntuple = '', *add_cuts):
-
-        print 'Adding TTree named "{}" from {}'.format(name, ntuple)
-
-        # Access the input file and TTree.
-        infile = ROOT.TFile(ntuple, 'read')
-        tree = infile.Get('tree')
-
-        # Change directory to the output file.
-        self.outfile.cd()
-    
-        # Perform the control region cuts.
-        if (len(self.cuts) <= 1):
-            if not self.cuts:
-                CR_tree = tree.CopyTree('')
-            else:
-                CR_tree = tree.CopyTree(self.cuts[0])
-        else:
-            CR_tree = tree.CopyTree(self.cuts[0])
-            for cut in self.cuts[1:]:
-                CR_tree = CR_tree.CopyTree(cut)
-        
-        # Perform any addtional cuts provided.
-        if add_cuts:
-            for cut in add_cuts:
-                CR_tree = CR_tree.CopyTree(cut)
-
-        print '--- Selected {!s} out of {!s} entries'.format(CR_tree.GetEntriesFast(), tree.GetEntriesFast())
-        
-        # Save the control region tree.
-        CR_tree.SetName(name)
-        CR_tree.Write()    
-        infile.Close()
-
-    def close(self):
-        # Clean up extraneous TTrees and then properly close.
-        self.outfile.cd()
-        ROOT.gDirectory.Delete('tree;*')
-        self.outfile.Close()
 
 def make_plot(CR_ntuple = '', expression = '', data_weight = '', mc_weight = '', x_title = '', n_xbins = None, x_min = None, x_max = None, filename = ''):
    
@@ -329,23 +280,6 @@ if __name__ == '__main__':
     ROOT.gROOT.SetBatch(1)
 
     tdrstyle.set_tdrStyle()
-
-    #categories: ZH, ggZH, WH, WjLF, WjHF, ZjLF, ZjHF, TT, ST, VV, QCD, data
- 
-    #CR = ControlRegion('CR_Signal_Loose', step2_dir + 'CR/', antiQCD, signal_loose)
-    #CR.add_tree('Data', step2_dir + 'Data_MET.root')
-    #CR.add_tree('ZH', step2_dir + 'ZnnH125.root')
-    #CR.add_tree('ggZH', step2_dir + 'ggZH125.root')
-    #CR.add_tree('WH', step2_Dir + 'WlnH125.root')
-    #CR.add_tree('WjLF', step2_Dir + 'WJets.root', light_flavour)
-    #CR.add_tree('WjHF', step2_Dir + 'WJets.root', heavy_flavour)
-    #CR.add_tree('ZjLF', step2_Dir + 'ZJets.root', light_flavour)
-    #CR.add_tree('ZjHF', step2_Dir + 'ZJets.root', heavy_flavour)
-    #CR.add_tree('TT', step2_Dir + 'TTPow.root')
-    #CR.add_tree('ST', step2_Dir + 's_Top.root')
-    #CR.add_tree('VV', step2_Dir + 'VV.root')
-    #CR.add_tree('QCD', step2_Dir + 'QCD.root')
-    #CR.close()
 
     make_plot(step2_dir + 'CR_Signal_Loose.root', 'HCSV_mass', data_weight, mc_weight, 'm_{jj} [GeV]', 25, 0, 250, 'test')
 

@@ -247,7 +247,7 @@ if __name__ == '__main__':
     # Set ROOT to run in batch mode. 
     ROOT.gROOT.SetBatch(1)
  
-    # Create the Step2 ntuple directory if one doesn't exist.
+    # Create the Step2 ntuple directory if it doesn't exist.
     if (ROOT.gSystem.AccessPathName(step2_dir)):
         ROOT.gSystem.mkdir(step2_dir)
     
