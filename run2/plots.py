@@ -184,7 +184,7 @@ def make_plot(CR_ntuple = '', expression = '', data_weight = '', mc_weight = '',
             bin_error = hist['mc_exp'].GetBinError(i) / hist['mc_exp'].GetBinContent(i)
             hist['ratio_stat'].SetBinError(i, bin_error)
         else:
-            hist['ratio_stat'].SetBinError(i, 999.)
+            hist['ratio_stat'].SetBinError(i, 0)
 
     ratio_unity = ROOT.TLine(x_min, 1, x_max, 1)
     ratio_unity.SetLineStyle(2)
@@ -221,6 +221,7 @@ def make_plot(CR_ntuple = '', expression = '', data_weight = '', mc_weight = '',
     legend_1.AddEntry(hist['Data'], 'Data', 'p')
     legend_1.AddEntry(hist['VH'], 'VH', 'l')
     legend_1.AddEntry(hist['TT'], 't#bar{t}', 'f')
+    legend_1.AddEntry(hist['ST'], 'Single Top', 'f')
     legend_1.AddEntry(hist['VV'], 'VV', 'f')
     
     legend_2 = ROOT.TLegend(0.72, 0.68, 0.94, 0.92)
