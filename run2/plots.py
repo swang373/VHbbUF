@@ -224,7 +224,7 @@ def make_plot(CR = '', plot = '', expression = '', x_title = '', n_bins = None, 
     latex.SetTextAlign(12)
     latex.SetTextFont(62)
     latex.SetTextSize(0.04)
-    latex.DrawLatex(0.19, 0.89, 'CMS Simulation 2015')
+    latex.DrawLatex(0.19, 0.89, 'CMS Preliminary 2015')
     latex.DrawLatex(0.19, 0.84, '#sqrt{s} = 13 TeV, L = 1.28 fb^{-1}')
     latex.DrawLatex(0.19, 0.79, 'Z(#nu#bar{#nu})H(b#bar{b})')
     
@@ -281,12 +281,12 @@ if __name__ == '__main__':
     if (ROOT.gSystem.AccessPathName(PLOT_DIR)):
         ROOT.gSystem.mkdir(PLOT_DIR)
     
-    CR = 'signal_loose'
+    for CR in CONTROL_REGIONS:
 
-    # Create the control region subdirectory if it doesn't exist.
-    if (ROOT.gSystem.AccessPathName(PLOT_DIR + CR)):
-        ROOT.gSystem.mkdir(PLOT_DIR + CR)
+        # Create the control region subdirectory if it doesn't exist.
+        if (ROOT.gSystem.AccessPathName(PLOT_DIR + CR)):
+            ROOT.gSystem.mkdir(PLOT_DIR + CR)
 
-    for plot, options in PLOTS.iteritems():
-        make_plot(CR, plot, **options)
+        for plot, options in PLOTS.iteritems():
+            make_plot(CR, plot, **options)
 
