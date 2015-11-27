@@ -81,37 +81,37 @@ def copy_and_skim(subtuple = '', indir = '', outdir = '', overwrite = False, sel
             return (n_skim_tree, n_tree)
 
 
-def step2(label = '', eos_path = '', step2_dir = '', step2_selection = '', overwrite = False, hadd = True):
+def step2(sample = '', eos_dir = '', step2_dir = '', step2_cut = '', overwrite = False, hadd = True):
 
     """
     Retrieve and process a Step1 ntuple.
 
     Parameters
     ----------
-    label           : str
-                      A minimally descriptive name used to distinguish the ntuple.
-    eos_path        : str
-                      The EOS path to the Step1 ntuple directory.
-    step2_dir       : str
-                      The path to the directory storing the Step2 ntuples.
-    step2_selection : str
-                      A TCut style string defining a preliminary cut on the Step1 
-                      ntuple to reduce the file size of the Step2 ntuple.
-    overwrite       : bool
-                      Flag whether the ntuple is forcibly copied by cmsStage.
-                      The default is False.
-    hadd            : bool
-                      Flag whether the ntuples should be combined into a single file.
-                      The default is True.
+    sample    : str
+                A minimally descriptive name used to distinguish the ntuple.
+    eos_dir   : str
+                The Step1 ntuple's EOS directory path.
+    step2_dir : str
+                The path to the directory storing the Step2 ntuples.
+    step2_cut : str
+                A TCut style string defining a preliminary cut on the Step1 
+                ntuple to reduce the file size of the Step2 ntuple.
+    overwrite : bool
+                Flag whether the ntuple is forcibly copied by cmsStage.
+                The default is False.
+    hadd      : bool
+                Flag whether the ntuples should be combined into a single file.
+                The default is True.
     """
 
-    print '\n[{}]'.format(label)
+    print '\n[{}]'.format(sample)
 
     ###################
     #-- Find Ntuple --#
     ###################
 
-    print 'Searching EOS path {}'.format(eos_path)
+    print 'Searching EOS directory "{}"'.format(eos_dir)
 
     # Retrieve the alias for eos command. Inspired by amaltaro.
     with open('/afs/cern.ch/project/eos/installation/cms/etc/setup.sh', 'r') as f:
@@ -129,9 +129,9 @@ def step2(label = '', eos_path = '', step2_dir = '', step2_selection = '', overw
         assert (out.count('\n') <= 1), 'Failed to find a unique EOS path.'
 
         # Modify the depth of the EOS path.
-        eos_path += out.rstrip() + '/'
+        eos_dir += out.rstrip() + '/'
 
-        eos_ls = sp.Popen([eos, 'ls', eos_path], stdout = sp.PIPE, stderr = sp.PIPE)
+        eos_ls = sp.Popen([eos, 'ls', eos_dir], stdout = sp.PIPE, stderr = sp.PIPE)
         out, err = eos_ls.communicate()
 
     # Collect the ntuple. This works even if it is split across multiple files.
@@ -141,18 +141,18 @@ def step2(label = '', eos_path = '', step2_dir = '', step2_selection = '', overw
     #-- Get Ntuple --#
     ##################
         
-    if step2_selection:
-        print 'Skimming with selection {}'.format(step2_selection)
+    if step2_cut:
+        print 'Skimming with selection "{}"'.format(step2_cut)
         
     # Collect kwargs for the external function copy_and_skim.
-    cas_kwargs = {'indir'    : eos_path,
+    cas_kwargs = {'indir'    : eos_dir,
                   'outdir'   : step2_dir,
-                  'selection': step2_selection,
+                  'selection': step2_cut,
                   'overwrite': overwrite}
 
     if hadd:
         # Use a temporary directory to handle multiple files.
-        tmpdir = tf.mkdtemp(prefix = label + '_', dir = step2_dir)
+        tmpdir = tf.mkdtemp(prefix = sample + '_', dir = step2_dir)
         cas_kwargs['outdir'] = tmpdir + '/'
 
     # Copy and skim the ntuple in parallel.
@@ -168,7 +168,7 @@ def step2(label = '', eos_path = '', step2_dir = '', step2_selection = '', overw
         results.remove(fail)
 
     # Report a total sum before and after skimming.
-    if step2_selection:
+    if step2_cut:
         skim_total, total = 0, 0
         for result in results:
             skim_total += result[0]
@@ -179,7 +179,7 @@ def step2(label = '', eos_path = '', step2_dir = '', step2_selection = '', overw
     if hadd:
 
         inputfiles = glob.glob(tmpdir + '/*.root')
-        outputfile = step2_dir + label + '.root'
+        outputfile = '{}{}.root'.format(step2_dir, sample)
             
         # Redirecting more output than sp.PIPE's buffer causes it to hang.
         # See "Subprocess Hanging: PIPE is your enemy" by Anders Pearson.
@@ -191,12 +191,12 @@ def step2(label = '', eos_path = '', step2_dir = '', step2_selection = '', overw
         # It is the users responsibility to delete the temporary directory.
         sp.check_call(['rm', '-r', tmpdir])
   
-def write_sample_lumi(label = '', step2_dir = '', xsec = None):
+def write_sample_lumi(sample = '', step2_dir = '', xsec = None):
     
-    print '\nWriting Sample Luminosity Branch for {}'.format(label)
+    print '\nWriting Sample Luminosity Branch for {}'.format(sample)
     print 'Cross Section: {} pb'.format(xsec)
     
-    ntuple = ROOT.TFile('{}{}.root'.format(step2_dir, label), 'update')
+    ntuple = ROOT.TFile('{}{}.root'.format(step2_dir, sample), 'update')
     tree = ntuple.Get('tree')
     n_entries = tree.GetEntriesFast()
 
@@ -234,8 +234,8 @@ if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('labels', nargs = '*', default = [_ for _ in step1_ntuples], 
-                        help = 'The label(s) specifying which Step1 ntuples to process. See vhbb_config.py.')
+    parser.add_argument('samples', nargs = '*', default = [s for s in SAMPLES], 
+                        help = 'The samples for which to generate Step2 ntuples.')
     args = parser.parse_args()
 
     #########################
@@ -248,23 +248,17 @@ if __name__ == '__main__':
     ROOT.gROOT.SetBatch(1)
  
     # Create the Step2 ntuple directory if it doesn't exist.
-    if (ROOT.gSystem.AccessPathName(step2_dir)):
-        ROOT.gSystem.mkdir(step2_dir)
+    if (ROOT.gSystem.AccessPathName(STEP2_DIR)):
+        ROOT.gSystem.mkdir(STEP2_DIR)
     
-    """
-    # Process the Step1 ntuples.
-    step2_kwargs = {'step2_dir': step2_dir, 
-                    'step2_selection': step2_selection}
-
-    for label in args.labels:
-        step2_kwargs['label'] = label
-        step2_kwargs['eos_path'] = step1_ntuples[label]
-        step2(**step2_kwargs)
-
-    """
-
-    for label in [_ for _ in xsec if _ in step1_ntuples]:
-        write_sample_lumi(label, step2_dir, xsec[label])
-
+    # Generate the Step2 ntuples.
+    for sample, properties in SAMPLES.iteritems():
+    
+        if sample in args.samples:
+            step2(sample, properties['EOS_DIR'], STEP2_DIR, STEP2_CUT)
+    
+            if 'XSEC' in properties:
+                write_sample_lumi(sample, STEP2_DIR, properties['XSEC'])
+    
     print "\nJob's done!" 
-
+    
