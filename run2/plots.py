@@ -281,12 +281,12 @@ if __name__ == '__main__':
     if (ROOT.gSystem.AccessPathName(PLOT_DIR)):
         ROOT.gSystem.mkdir(PLOT_DIR)
     
-    CR = 'signal_loose'
+    for CR in CONTROL_REGIONS:
 
-    # Create the control region subdirectory if it doesn't exist.
-    if (ROOT.gSystem.AccessPathName(PLOT_DIR + CR)):
-        ROOT.gSystem.mkdir(PLOT_DIR + CR)
+        # Create the control region subdirectory if it doesn't exist.
+        if (ROOT.gSystem.AccessPathName(PLOT_DIR + CR)):
+            ROOT.gSystem.mkdir(PLOT_DIR + CR)
 
-    for plot, options in PLOTS.iteritems():
-        make_plot(CR, plot, **options)
+        for plot, options in PLOTS.iteritems():
+            make_plot(CR, plot, **options)
 
