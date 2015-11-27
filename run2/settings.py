@@ -351,8 +351,126 @@ DATA_WEIGHT = tco.mult('json', 'HLT_BIT_HLT_PFMET90_PFMHT90_IDTight_v')
 
 MC_WEIGHT = tco.mult('sign(genWeight)', TARGET_LUMI, '1./sample_lumi', 'HLT_BIT_HLT_PFMET90_PFMHT90_IDLoose_v')
 
+PLOT_DIR = 'plots/'
 
 
+# Plots to print
+
+PLOTS = {
+
+    'H_mass': {
+        'expression': 'HCSV_mass',
+        'x_title': 'm_{H} [GeV]',
+        'n_bins': 30,
+        'x_min': 0,
+        'x_max': 300,
+    },
+
+    'HCSV_pt': {
+        'expression': 'HCSV_pt',
+        'x_title': 'H p_{T} [GeV]',
+        'n_bins': 20,
+        'x_min': 150,
+        'x_max': 450, 
+    },
+
+    'nAddJets': {
+        'expression': 'Sum$(Jet_pt>30 && Jet_puId &&  abs(Jet_eta)<4.5)',
+        'x_title': '# Add. Jets',
+        'n_bins': 8,                                                          
+        'x_min': 0,
+        'x_max': 8,
+    },
+
+    'min_dPhi_MET_hJ': {
+        'expression': 'min(abs(TVector2::Phi_mpi_pi(met_phi - Jet_phi[hJCidx[0]])), abs(TVector2::Phi_mpi_pi(met_phi - Jet_phi[hJCidx[1]])))',
+        'x_title': 'Min #||{#Delta#phi(#slash{E}_{T}, H Jet)}',
+        'n_bins': 32, 
+        'x_min': 0,
+        'x_max': 3.2,
+    },
+
+    'min_dPhi_MET_J': {
+        'expression': 'MinIf$(abs(TVector2::Phi_mpi_pi(met_phi - Jet_phi)), Jet_pt>30 && Jet_puId && abs(Jet_eta)<4.5)',
+        'x_title': 'Min #||{#Delta#phi(#slash{E}_{T}, Jet)}',
+        'n_bins': 32,
+        'x_min': 0,
+        'x_max': 3.2,
+    },
+
+    'ht30': {
+        'expression': 'htJet30',
+        'x_title': 'HT [GeV]',
+        'n_bins': 25,
+        'x_min': 0,
+        'x_max': 500,
+    },
+
+    'hj_maxpt': {
+        'expression': 'max(Jet_pt[hJCidx[0]], Jet_pt[hJCidx[1]])',
+        'x_title': 'Max H Jet p_{T} [GeV]',
+        'n_bins': 15,
+        'x_min': 0,
+        'x_max': 300,
+    },
+
+    'hj_minpt': {
+        'expression': 'min(Jet_pt[hJCidx[0]], Jet_pt[hJCidx[1]])',
+        'x_title': 'Min H Jet p_{T} [GeV]',
+        'n_bins': 15,
+        'x_min': 0,
+        'x_max': 300,
+    },
+
+    'CSV1': {
+        'expression': 'Jet_btagCSV[hJCidx[0]]',
+        'x_title': 'H Jet 1 CSV',
+        'n_bins': 20,
+        'x_min': 0,
+        'x_max': 1,
+    },
+
+    'CSV2': {
+        'expression': 'Jet_btagCSV[hJCidx[1]]',
+        'x_title': 'H Jet 2 CSV',
+        'n_bins': 20,
+        'x_min': 0,
+        'x_max': 1,
+    },
+
+    'MET_pt': {
+        'expression': 'met_pt',
+        'x_title': '#slash{E}_{T} [GeV]',
+        'n_bins': 30,
+        'x_min': 150,
+        'x_max': 450,
+    },
+    
+    'nPV': {
+        'expression': 'nPVs',
+        'x_title': '# Primary Vertices',
+        'n_bins': 30,
+        'x_min': 0,
+        'x_max': 30,
+    },
+
+    'tkMet': {
+        'expression': 'tkMet_pt',
+        'x_title': 'Tracker #slash{E}_{T} [GeV]',
+        'n_bins': 30,
+        'x_min': 0,
+        'x_max': 300,
+    },
+
+    'dPhi_MET_tkMET': {
+        'expression': 'abs(TVector2::Phi_mpi_pi(met_phi - tkMet_phi))',
+        'x_title': '#||{#Delta#phi(#slash{E}_{T}, Tracker #slash{E}_{T})}',
+        'n_bins': 32,
+        'x_min': 0,
+        'x_max': 3.2,
+    },
+
+}
 
 
 

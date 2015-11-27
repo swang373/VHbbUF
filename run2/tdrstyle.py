@@ -63,8 +63,7 @@ def set_tdrStyle():
     tdrStyle.SetPadTopMargin(0.05)
     tdrStyle.SetPadBottomMargin(0.13)
     tdrStyle.SetPadLeftMargin(0.15)
-    #tdrStyle.SetPadRightMargin(0.03)
-    tdrStyle.SetPadRightMargin(0.04)
+    tdrStyle.SetPadRightMargin(0.03)
 
     # Global Title
     tdrStyle.SetOptTitle(0)
@@ -77,19 +76,15 @@ def set_tdrStyle():
     # Axis Titles
     tdrStyle.SetTitleColor(1, 'XYZ')
     tdrStyle.SetTitleFont(42, 'XYZ')
-    #tdrStyle.SetTitleSize(0.06, 'XYZ')
-    tdrStyle.SetTitleSize(0.05, 'XYZ')
-    #tdrStyle.SetTitleXOffset(0.9)
-    tdrStyle.SetTitleXOffset(1.05)
-    #tdrStyle.SetTitleYOffset(1.25)
-    tdrStyle.SetTitleYOffset(1.45)
-    
+    tdrStyle.SetTitleSize(0.06, 'XYZ')
+    tdrStyle.SetTitleXOffset(0.9)
+    tdrStyle.SetTitleYOffset(1.25)
+       
     # Axis Labels
     tdrStyle.SetLabelColor(1, 'XYZ')
     tdrStyle.SetLabelFont(42, 'XYZ')
     tdrStyle.SetLabelOffset(0.007, 'XYZ')
-    #tdrStyle.SetLabelSize(0.05, 'XYZ')
-    tdrStyle.SetLabelSize(0.035, 'XYZ')
+    tdrStyle.SetLabelSize(0.05, 'XYZ')
     
     # Axis
     tdrStyle.SetAxisColor(1, 'XYZ')

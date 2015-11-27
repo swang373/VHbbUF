@@ -2,62 +2,40 @@ import math
 
 import ROOT
 
+from settings import *
 
-def make_plot(CR_ntuple = '', expression = '', data_weight = '', mc_weight = '', x_title = '', n_xbins = None, x_min = None, x_max = None, filename = ''):
-   
-    """
-    Parameters
-    ----------
-    CR_ntuple  : str
-                 The path to the control region ntuple.
-    expression : str
-                 A TTreeFormula style string defining the expression to be passed to
-                 TTree::Project(). Refer to TTree::Draw() documentation for examples.
-    x_title    : str
-                 The title of the x-axis.
-    n_xbins    : int
-                 The number of bins along the x-axis.
-    x_min      : float
-                 The lower bound of the x-axis.
-    x_max      : float
-                 The upper bound of the x-axis.
-    filename   : str
-                 The name used to save the plot.
-    """
 
-    CR_file = ROOT.TFile(CR_ntuple, 'read')
+def make_plot(CR = '', plot = '', expression = '', x_title = '', n_bins = None, x_min = None, x_max = None):
+    
+    infile = ROOT.TFile('{}{}.root'.format(CONTROL_REGION_DIR, CR), 'read')
 
     hist = {}
 
-    #categories: ZH, ggZH, WH, WjLF, WjHF, ZjLF, ZjHF, TT, ST, VV, QCD, data
-
-    # Book histograms and project the TTrees.
-    for name in ['Data', 'ZH', 'ggZH', 'WH', 'WjLF', 'WjHF', 'ZjLF', 'ZjHF', 'TT', 'ST', 'VV', 'QCD']:
-        hist[name] = ROOT.TH1F('h_' + name, '', n_xbins, x_min, x_max)
-        if name == 'Data':
-            CR_file.Get(name).Project('h_' + name, expression, data_weight)
+    # Make histograms for each category.
+    for c in CATEGORIES:
+        hist[c] = ROOT.TH1F('h_{}'.format(c), '', n_bins, x_min, x_max)
+        if (c == 'Data'):
+            infile.Get(c).Project('h_{}'.format(c), expression, DATA_WEIGHT)
         else:
-            CR_file.Get(name).Project('h_' + name, expression, mc_weight)
+            infile.Get(c).Project('h_{}'.format(c), expression, MC_WEIGHT)
      
-    # Book any additional histograms.
-    hist['VH'] = ROOT.TH1F('VH', '', n_xbins, x_min, x_max)
-    hist['mc_exp'] = ROOT.TH1F('mc_exp', '', n_xbins, x_min, x_max)
-    
-    # Combine the two VH plots.
+    # Make additional histogram combining all signals.
+    hist['VH'] = ROOT.TH1F('VH', '', n_bins, x_min, x_max)
     hist['VH'].Add(hist['ZH'])
     hist['VH'].Add(hist['WH'])
-    
-    # Combine all the backgrounds.
-    hist['mc_exp'].Add(hist['WjLF'])
-    hist['mc_exp'].Add(hist['WjHF'])
+
+    # Make additional histogram combining all backgrounds.
+    hist['mc_exp'] = ROOT.TH1F('mc_exp', '', n_bins, x_min, x_max)
+    hist['mc_exp'].Add(hist['ST'])
+    hist['mc_exp'].Add(hist['TT'])
     hist['mc_exp'].Add(hist['ZjLF'])
     hist['mc_exp'].Add(hist['ZjHF'])
-    hist['mc_exp'].Add(hist['TT'])
-    hist['mc_exp'].Add(hist['ST'])
+    hist['mc_exp'].Add(hist['WjLF'])
+    hist['mc_exp'].Add(hist['WjHF'])
     hist['mc_exp'].Add(hist['VV'])
     hist['mc_exp'].Add(hist['QCD'])
     
-    # Make the histogram stack.
+    # Make histogram stack for all signals and backgrounds.
     hstack = ROOT.THStack('hstack','')
     hstack.Add(hist['ST'])
     hstack.Add(hist['TT'])
@@ -99,21 +77,24 @@ def make_plot(CR_ntuple = '', expression = '', data_weight = '', mc_weight = '',
         else:
             continue
 
-    # Setup auxiliary histograms.
+    # Statistical uncertainty of all backgrounds.
     hist['stat_unc'] = hist['mc_exp'].Clone('stat_unc')
     hist['stat_unc'].Sumw2()
     hist['stat_unc'].SetFillColor(ROOT.kGray+3)
     hist['stat_unc'].SetMarkerSize(0)
     hist['stat_unc'].SetFillStyle(3013)
     
+    # Data to MC ratio.
     hist['ratio'] = hist['Data'].Clone('ratio')
     hist['ratio'].Sumw2()
     hist['ratio'].SetMarkerSize(0.8)
     hist['ratio'].Divide(hist['Data'], hist['mc_exp'], 1., 1., '')
     
+    # Statistical uncertainty of data to MC ratio.
     hist['ratio_stat'] = hist['mc_exp'].Clone('ratio_stat')
     hist['ratio_stat'].Sumw2()
     hist['ratio_stat'].SetStats(0)
+    hist['ratio_stat'].GetXaxis().SetTitle(x_title)
     hist['ratio_stat'].GetYaxis().SetTitle('Data/MC')
     hist['ratio_stat'].SetMaximum(2.2)
     hist['ratio_stat'].SetMinimum(0.0)
@@ -128,7 +109,7 @@ def make_plot(CR_ntuple = '', expression = '', data_weight = '', mc_weight = '',
     hist['ratio_stat'].GetYaxis().SetTitleOffset(0.6)
     hist['ratio_stat'].GetYaxis().SetNdivisions(505)
 
-    for i in range(1, n_xbins+1):
+    for i in range(1, n_bins + 1):
         hist['ratio_stat'].SetBinContent(i, 1.0)
         if (hist['mc_exp'].GetBinContent(i) > 0):
             bin_error = hist['mc_exp'].GetBinError(i) / hist['mc_exp'].GetBinContent(i)
@@ -136,16 +117,17 @@ def make_plot(CR_ntuple = '', expression = '', data_weight = '', mc_weight = '',
         else:
             hist['ratio_stat'].SetBinError(i, 0)
 
+    # Unity reference line for ratio.
     ratio_unity = ROOT.TLine(x_min, 1, x_max, 1)
     ratio_unity.SetLineStyle(2)
     
+    # Systematic uncertainty of data to MC ratio.
     hist['ratio_syst'] = hist['ratio_stat'].Clone('ratio_syst')
-    #hist['ratio_syst'].Sumw2()
     hist['ratio_syst'].SetMarkerSize(0)
     hist['ratio_syst'].SetFillColor(ROOT.kYellow-4)
     hist['ratio_syst'].SetFillStyle(1001)
     
-    for i in range(1, n_xbins+1):
+    for i in range(1, n_bins + 1):
         if (hist['mc_exp'].GetBinContent(i) > 0):
 	    sq_bin_error = pow(hist['mc_exp'].GetBinError(i), 2)
 	    sq_bin_error += pow(0.08 * hist['WjLF'].GetBinContent(i), 2)
@@ -160,7 +142,7 @@ def make_plot(CR_ntuple = '', expression = '', data_weight = '', mc_weight = '',
             bin_error = math.sqrt(sq_bin_error)
             hist['ratio_syst'].SetBinError(i, bin_error / hist['mc_exp'].GetBinContent(i))
 
-    # Setup legends
+    # Setup legends.
     legend_1 = ROOT.TLegend(0.50, 0.68, 0.72, 0.92)
     legend_1.SetFillColor(0)
     legend_1.SetLineColor(0)
@@ -206,10 +188,10 @@ def make_plot(CR_ntuple = '', expression = '', data_weight = '', mc_weight = '',
     ratio_legend_2.SetBorderSize(1)
     ratio_legend_2.AddEntry(hist['ratio_syst'], 'MC Unc. (Syst)', 'f')
     
-    # Draw stuff.
+    # Draw all the things.
     hstack.Draw('hist')
     hstack.GetXaxis().SetLabelSize(0)
-    hstack.GetYaxis().SetTitle('Events / {:.3f}'.format((x_max - x_min) / n_xbins))
+    hstack.GetYaxis().SetTitle('Events / {:3.3f}'.format((float(x_max) - float(x_min)) / float(n_bins)))
     
     hist['stat_unc'].Draw('e2 same')
     
@@ -222,7 +204,7 @@ def make_plot(CR_ntuple = '', expression = '', data_weight = '', mc_weight = '',
     
     legend_1.Draw()
     legend_2.Draw()
-    
+   
     latex = ROOT.TLatex()
     latex.SetNDC()
     latex.SetTextAlign(12)
@@ -230,7 +212,7 @@ def make_plot(CR_ntuple = '', expression = '', data_weight = '', mc_weight = '',
     latex.SetTextSize(0.04)
     latex.DrawLatex(0.19, 0.89, 'CMS Simulation 2015')
     latex.DrawLatex(0.19, 0.84, '#sqrt{s} = 13 TeV, L = 1.28 fb^{-1}')
-    latex.DrawLatex(0.19, 0.79, 'Z#nu#bar{#nu}Hb#bar{b}')
+    latex.DrawLatex(0.19, 0.79, 'Z(#nu#bar{#nu})H(b#bar{b})')
     
     lower_pad.cd()
     lower_pad.SetGridy(0)
@@ -249,7 +231,6 @@ def make_plot(CR_ntuple = '', expression = '', data_weight = '', mc_weight = '',
     pave.SetShadowColor(0)
     pave.SetBorderSize(1)
     chi_sq = hist['Data'].Chi2Test(hist['mc_exp'], 'UWCHI2/NDF')
-    print chi_sq
     text = pave.AddText('#chi_{{#nu}}^{{2}} = {:.3f}'.format(chi_sq))
     text.SetTextFont(62)
     text.SetTextSize(0.07)
@@ -265,21 +246,33 @@ def make_plot(CR_ntuple = '', expression = '', data_weight = '', mc_weight = '',
     lower_pad.Update()
     canvas.cd()
     
-    canvas.SaveAs('plots/{}.png'.format(filename))
-    canvas.SaveAs('plots/{}.pdf'.format(filename))
+    canvas.SaveAs('{}{}/{}.png'.format(PLOT_DIR, CR, plot))
+    canvas.SaveAs('{}{}/{}.pdf'.format(PLOT_DIR, CR, plot))
     
     canvas.IsA().Destructor(canvas)
     
-    CR_file.Close()
+    infile.Close()
  
 if __name__ == '__main__':
 
-    from settings import *
     import tdrstyle
 
+    # Set ROOT to run in batch mode.
     ROOT.gROOT.SetBatch(1)
 
+    # Change ROOT global styles to TDR style.
     tdrstyle.set_tdrStyle()
 
-    make_plot(step2_dir + 'CR_Signal_Loose.root', 'HCSV_mass', data_weight, mc_weight, 'm_{jj} [GeV]', 25, 0, 250, 'test')
+    # Create the plot directory if it doesn't exist.
+    if (ROOT.gSystem.AccessPathName(PLOT_DIR)):
+        ROOT.gSystem.mkdir(PLOT_DIR)
+    
+    CR = 'signal_loose'
+
+    # Create the control region subdirectory if it doesn't exist.
+    if (ROOT.gSystem.AccessPathName(PLOT_DIR + CR)):
+        ROOT.gSystem.mkdir(PLOT_DIR + CR)
+
+    for plot, options in PLOTS.iteritems():
+        make_plot(CR, plot, **options)
 
