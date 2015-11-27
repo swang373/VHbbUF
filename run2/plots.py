@@ -18,7 +18,7 @@ def make_plot(CR = '', plot = '', expression = '', x_title = '', n_bins = None, 
             infile.Get(c).Project('h_{}'.format(c), expression, DATA_WEIGHT)
         else:
             infile.Get(c).Project('h_{}'.format(c), expression, MC_WEIGHT)
-     
+    
     # Make additional histogram combining all signals.
     hist['VH'] = ROOT.TH1F('VH', '', n_bins, x_min, x_max)
     hist['VH'].Add(hist['ZH'])
@@ -46,6 +46,7 @@ def make_plot(CR = '', plot = '', expression = '', x_title = '', n_bins = None, 
     hstack.Add(hist['VV'])
     hstack.Add(hist['QCD'])
     hstack.Add(hist['VH'])
+    hstack.Add(hist['ggZH'])
     
     # Canvas and pads.
     canvas = ROOT.TCanvas('canvas', '', 700, 700)
@@ -67,6 +68,9 @@ def make_plot(CR = '', plot = '', expression = '', x_title = '', n_bins = None, 
         if (h == 'VH' or h == 'ZH' or h == 'WH'):
             hist[h].SetFillColor(2)
             hist[h].SetMarkerColor(2)
+        elif (h == 'ggZH'):
+            hist[h].SetFillColor(ROOT.kOrange-2)
+            hist[h].SetMarkerColor(ROOT.kOrange-2)
         elif (h == 'Data'):
             hist[h].SetMarkerSize(0.8)
             hist[h].SetMarkerStyle(20)
@@ -152,6 +156,7 @@ def make_plot(CR = '', plot = '', expression = '', x_title = '', n_bins = None, 
     legend_1.SetBorderSize(1)
     legend_1.AddEntry(hist['Data'], 'Data', 'p')
     legend_1.AddEntry(hist['VH'], 'VH', 'l')
+    legend_1.AddEntry(hist['ggZH'], 'ggZH', 'l')
     legend_1.AddEntry(hist['TT'], 't#bar{t}', 'f')
     legend_1.AddEntry(hist['ST'], 'Single Top', 'f')
     legend_1.AddEntry(hist['VV'], 'VV', 'f')
@@ -188,6 +193,10 @@ def make_plot(CR = '', plot = '', expression = '', x_title = '', n_bins = None, 
     ratio_legend_2.SetBorderSize(1)
     ratio_legend_2.AddEntry(hist['ratio_syst'], 'MC Unc. (Syst)', 'f')
     
+    # Scale the y-axis for viewing.
+    y_max = max(hist['Data'].GetMaximum(), hstack.GetMaximum())
+    hstack.SetMaximum(y_max * 1.7) 
+
     # Draw all the things.
     hstack.Draw('hist')
     hstack.GetXaxis().SetLabelSize(0)
@@ -199,6 +208,11 @@ def make_plot(CR = '', plot = '', expression = '', x_title = '', n_bins = None, 
     hist['VH'].SetLineWidth(3)
     hist['VH'].SetFillColor(0)
     hist['VH'].Draw('hist same')
+
+    hist['ggZH'].SetLineColor(ROOT.kOrange-2)
+    hist['ggZH'].SetLineWidth(3)
+    hist['ggZH'].SetFillColor(0)
+    hist['ggZH'].Draw('hist same')
     
     hist['Data'].Draw('e1 same')
     
