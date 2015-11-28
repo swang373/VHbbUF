@@ -1,6 +1,17 @@
-#!/bin/bash
+# Combine Data Ntuples
+hadd -f Data_MET.root Data_MET_*.root
 
-hadd -f Step3_QCD.root   Step3_QCDHT100.root   Step3_QCDHT250.root   Step3_QCDHT500.root   Step3_QCDHT1000.root 
-hadd -f Step3_s_Top.root Step3_T_s.root        Step3_Tbar_s.root     Step3_T_t.root        Step3_Tbar_t.root   Step3_T_tW.root Step3_Tbar_tW.root
-hadd -f Step3_WJets.root Step3_WJetsHT100.root Step3_WJetsHT200.root Step3_WJetsHT400.root Step3_WJetsHT600.root
-hadd -f Step3_ZJets.root Step3_ZJetsHT100.root Step3_ZJetsHT200.root Step3_ZJetsHT400.root Step3_ZJetsHT600.root
+# Combine QCD Ntuples
+hadd -f QCD.root QCDHT*.root
+
+# Combine Single Top Ntuples
+hadd -f s_Top.root T_s_comb_lep.root T_t_lep.root Tbar_t_lep.root T_tW.root Tbar_tW.root
+
+# Combine Z+Jets Ntuples
+hadd -f ZJets.root ZJetsHT*.root
+
+# Combine Diboson Ntuples
+hadd -f VV.root WW.root WZ.root ZZ.root
+
+# Combine W+Jets Ntuples (skim the inclusive sample first if using it)
+hadd -f WJets.root skim_WJetsIncl.root WJetsHT*.root
