@@ -15,10 +15,18 @@ https://twiki.cern.ch/twiki/bin/view/LHCPhysics/CERNYellowReportPageAt1314TeV#s_
 https://twiki.cern.ch/twiki/bin/view/LHCPhysics/SingleTopRefXsec
 """
 
-################################
-# Step1 Ntuples and Properties #
-################################
 
+###########################
+#-- Step2 Configuration --#
+###########################
+
+# Output directory for the Step2 ntuples.
+STEP2_DIR = '/afs/cern.ch/work/s/swang373/private/V14/'
+
+# The selection used to skim the Step1 ntuples.
+STEP2_CUT = 'Vtype>=0 && met_pt>150'
+
+# The Step1 ntuples and their properties.
 SAMPLES = {
     
     # Datasets
@@ -188,12 +196,13 @@ SAMPLES = {
 
 }
 
-####################
-# Step2 Parameters #
-####################
 
-STEP2_DIR = '/afs/cern.ch/work/s/swang373/private/V14/'
-STEP2_CUT = 'Vtype>=0 && met_pt>150'
+###########################
+#-- Step3 Configuration --#
+###########################
+
+
+
 
 
 ##############################
@@ -341,21 +350,23 @@ CATEGORIES = {
 }
 
 
-#######################
-# Plotting Parameters #
-#######################
+##########################
+#-- Plot Configuration --#
+##########################
 
-TARGET_LUMI = 1280
-
-DATA_WEIGHT = tco.mult('json', 'HLT_BIT_HLT_PFMET90_PFMHT90_IDTight_v')
-
-MC_WEIGHT = tco.mult('sign(genWeight)', TARGET_LUMI, '1./sample_lumi', 'HLT_BIT_HLT_PFMET90_PFMHT90_IDLoose_v')
-
+# Output directory for the plots.
 PLOT_DIR = 'plots/'
 
+# Target luminosity of the data in inverse picobarns (pb-1).
+TARGET_LUMI = 1280
 
-# Plots to print
+# The weights to apply to the data samples.
+DATA_WEIGHT = tco.mult('json', 'HLT_BIT_HLT_PFMET90_PFMHT90_IDTight_v')
 
+# The weights to apply to the MC samples.
+MC_WEIGHT = tco.mult('sign(genWeight)', TARGET_LUMI, '1./sample_lumi', 'HLT_BIT_HLT_PFMET90_PFMHT90_IDLoose_v')
+
+# The plots to draw and their properties.
 PLOTS = {
 
     'H_mass': {

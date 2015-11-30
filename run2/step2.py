@@ -12,53 +12,53 @@ import ROOT
 from settings import *
 
 
-def copy_and_skim(subtuple = '', indir = '', outdir = '', overwrite = False):
+def copy_and_skim(ntuple = '', indir = '', outdir = '', overwrite = False):
     
     """
-    Copy a Step1 subtuple from EOS and skim the events in tree.
+    Copy a Step1 ntuple from EOS and skim the events with the Step2 cut.
 
     Parameters
     ----------
-    subtuple  : str
-                The name of the subtuple. This argument is positioned first 
-                for the multiprocessing.Pool.apply_async() method to work.
+    ntuple    : str
+                The file name of the ntuple. This argument is positioned first 
+                to conform with the usage of multiprocessing.Pool.apply_async().
     indir     : str
                 The path to the parent directory of the input file.
     outdir    : str
                 The path to the output directory.
     overwrite : bool
-                Flag whether the input file is forcibly copied.
+                Flag whether to forcibly copy the subtuple.
                 Default is False.
     """
 
-    # Copy the subtuple.
+    # Copy the ntuple.
     if overwrite:
-        cmsStage = ['cmsStage', '-f', indir + subtuple, outdir]
+        cmsStage = ['cmsStage', '-f', indir + ntuple, outdir]
     else:
-        cmsStage = ['cmsStage', indir + subtuple, outdir]
+        cmsStage = ['cmsStage', indir + ntuple, outdir]
 
     return_code = sp.call(cmsStage, stdout = sp.PIPE, stderr = sp.PIPE)
 
-    # Catch failed copies and skim the subtuple if a cut is specified.
+    # Catch failed copies.
     if return_code:
-        return subtuple
+        return ntuple
+    # Skim the ntuple if a cut is specified.
     else:
         if not STEP2_CUT:
-            print '--- {} copied.'.format(subtuple)
+            print '--- {} copied.'.format(ntuple)
         else:
-                
-            # Open the subtuple, accessing the tree and count histograms.
-            pre_skim = ROOT.TFile(outdir + subtuple, 'read')
-            tree = pre_skim.Get('tree')
+            # Open the ntuple and access the tree and count histograms.
+            infile = ROOT.TFile(outdir + ntuple, 'read')
+            tree = infile.Get('tree')
             n_tree = tree.GetEntriesFast()
 
-            Count = pre_skim.Get('Count')
-            CountWeighted = pre_skim.Get('CountWeighted')
-            CountPosWeight = pre_skim.Get('CountPosWeight')
-            CountNegWeight = pre_skim.Get('CountNegWeight')
+            Count = infile.Get('Count')
+            CountWeighted = infile.Get('CountWeighted')
+            CountPosWeight = infile.Get('CountPosWeight')
+            CountNegWeight = infile.Get('CountNegWeight')
 
-            # Create an output file storing the skimmed tree and histograms.
-            post_skim = ROOT.TFile(outdir + 'skim_' + subtuple, 'recreate')
+            # Create an output file to store the skimmed tree and histograms.
+            outfile = ROOT.TFile(outdir + 'skim_' + ntuple, 'recreate')
             skim_tree = tree.CopyTree(STEP2_CUT)
             n_skim_tree = skim_tree.GetEntriesFast()
 
@@ -68,99 +68,90 @@ def copy_and_skim(subtuple = '', indir = '', outdir = '', overwrite = False):
             CountPosWeight.Write()
             CountNegWeight.Write()
         
-            # Closing the files ensures the objects in memory are properly saved.
-            post_skim.Close()
-            pre_skim.Close()
+            # Close the files to ensure objects in memory are properly saved.
+            outfile.Close()
+            infile.Close()
 
-            # Delete the original subtuple.
-            sp.check_call(['rm', outdir + subtuple])
+            # Delete the original ntuple.
+            sp.check_call(['rm', outdir + ntuple])
 
-            print '--- {} copied and skimmed from {!s} to {!s} entries.'.format(subtuple, n_tree, n_skim_tree)
+            print '--- {} copied and skimmed from {!s} to {!s} entries.'.format(ntuple, n_tree, n_skim_tree)
 
+            # Return a tuple of the number of entries after and before skimming, respectively.
             return (n_skim_tree, n_tree)
 
+#######################################################
 
-def step2(sample = '', overwrite = False, hadd = True):
+def step2(sample = '', overwrite = False):
 
     """
-    Retrieve and process a Step1 ntuple.
+    Generate a Step2 ntuple.
 
     Parameters
     ----------
     sample    : str
-                A minimally descriptive name used to distinguish the ntuple.
+                The name used to refer to the sample in settings.py.
     overwrite : bool
-                Flag whether the ntuple is forcibly copied by cmsStage.
+                Flag whether to forcibly copy the ntuple.
                 The default is False.
-    hadd      : bool
-                Flag whether the ntuples should be combined into a single file.
-                The default is True.
     """
 
     print '\nGenerating Step2 Ntuple for [{}]'.format(sample)
 
-    ###################
-    #-- Find Ntuple --#
-    ###################
-
-    # Look up the sample EOS directory.
+    # Look up the sample's EOS path.
     eos_dir = SAMPLES[sample]['EOS_DIR']
     print 'Searching EOS directory "{}"'.format(eos_dir)
 
-    # Retrieve the eos command alias. Inspired by amaltaro.
+    # Retrieve the alias for the "eos" command. Inspired by amaltaro.
     with open('/afs/cern.ch/project/eos/installation/cms/etc/setup.sh', 'r') as f:
         for l in f:
             if 'alias eos=' in l:
                 eos = l.split('"')[1]
 
-    # Recursively 'eos ls' until the ntuple is found.
+    # Recursively build the full EOS path to the ntuple.
     eos_out = ''    
 
     while '.root' not in eos_out:
 
-        # The function will abort if the path to the ntuple is not unique.
-        # Specify a full path in settings.py, e.g. path to most recent CRAB job.
+        # Abort if a unique EOS path is inaccessible. Provide a full path for
+        # 'EOS_DIR' in settings.py,  e.g. full path to most recent CRAB job.
         assert (eos_out.count('\n') <= 1), 'Failed to find a unique EOS path.'
 
-        # Modify the depth of the EOS path.
+        # Append the previous "eos ls" output to the end of the EOS path.
         eos_dir += eos_out.rstrip() + '/'
 
+        # Retrieve the "eos ls" output for the current EOS path.
         eos_ls = sp.Popen([eos, 'ls', eos_dir], stdout = sp.PIPE, stderr = sp.PIPE)
         eos_out, eos_err = eos_ls.communicate()
 
-    # Collect the ntuple. This works even if it is split across multiple files.
+    # Collect the .root files, ignoring other file types.
     ntuples = [_ for _ in eos_out.rstrip().split('\n') if '.root' in _]
 
-    ##################
-    #-- Get Ntuple --#
-    ##################
-        
+    # Set kwargs for the external copy_and_skim function.
+    cas_kwargs = {'indir': eos_dir, 'outdir': STEP2_DIR, 'overwrite': overwrite}
+
+    # If the ntuple is split across multiple files, use a temporary directory.
+    if (len(ntuples) > 1):
+        hadd = True
+        cas_kwargs['outdir'] = tf.mkdtemp(prefix = sample, dir = STEP2_DIR) + '/'
+    
+    # Report whether a Step2 cut was defined for skimming.
     if STEP2_CUT:
-        print 'Skimming with selection "{}"'.format(STEP2_CUT)
-        
-    # Collect kwargs for the external copy_and_skim function.
-    cas_kwargs = {'indir'    : eos_dir,
-                  'outdir'   : STEP2_DIR,
-                  'overwrite': overwrite}
-
-    if hadd:
-        # Use a temporary directory to handle multiple files.
-        tmpdir = tf.mkdtemp(prefix = sample + '_', dir = STEP2_DIR)
-        cas_kwargs['outdir'] = tmpdir + '/'
-
+        print 'Skimming with cut "{}"'.format(STEP2_CUT)
+    
     # Copy and skim the ntuple in parallel.
     pool = mp.Pool(processes = 4)
     results = [pool.apply_async(copy_and_skim, (_,), cas_kwargs).get() for _ in ntuples]
     pool.close()
     pool.join()
 
-    # Report any failures.
+    # Report and remove files which failed to copy and skim.
     failures = [_ for _ in results if '.root' in _]
     for fail in failures:
         print '--- Failed to get {}'.format(fail)
         results.remove(fail)
 
-    # Report a total sum before and after skimming.
+    # Report a total sum before and after skimming if a Step2 cut was defined.
     if STEP2_CUT:
         skim_total, total = 0, 0
         for result in results:
@@ -168,32 +159,44 @@ def step2(sample = '', overwrite = False, hadd = True):
             total += result[1]
         print 'Total Number of Entries after Skim (before Skim): {!s} ({!s})'.format(skim_total, total)
        
-    # hadd the separate subtuples into a single ntuple.
+    # Combine the separate files into a single ntuple.
     if hadd:
 
         inputfiles = glob.glob(tmpdir + '/*.root')
-        outputfile = '{}{}.root'.format(STEP2_DIR, sample)
-            
-        # Redirecting more output than sp.PIPE's buffer causes it to hang.
-        # See "Subprocess Hanging: PIPE is your enemy" by Anders Pearson.
-        # The solution is to redirect the output to a temporary file.
+        outputfile = '{}Step2_{}.root'.format(STEP2_DIR, sample)
+        
+        # Redirect output to a temporary file. Overflowing the buffer
+        # of sp.PIPE causes the function call to hang. See blog post
+        # "Subprocess Hanging: PIPE is your enemy" by Anders Pearson.
         hadd_log = tf.TemporaryFile(dir = STEP2_DIR)
-
+        
+        # Use the "hadd" command.
         sp.check_call(['hadd', '-f', outputfile] + inputfiles, stdout = hadd_log, stderr = hadd_log)
             
         # It is the users responsibility to delete the temporary directory.
         sp.check_call(['rm', '-r', tmpdir])
+
+###################################
   
 def write_sample_lumi(sample = ''):
-    
+
+    """
+    Add a new sample luminosity branch to a Step2 ntuple.
+
+    Parameters
+    ----------
+    sample    : str
+                The name used to refer to the sample in settings.py.
+    """
+ 
     print '\nWriting Sample Luminosity Branch for [{}]'.format(sample)
 
     # Look up the sample cross section.
     xsec = SAMPLES[sample]['XSEC']
     print 'Cross Section: {} pb'.format(xsec)
     
-    # Open the ntuple and access the TTree.
-    infile = ROOT.TFile('{}{}.root'.format(STEP2_DIR, sample), 'update')
+    # Open the ntuple and access the tree.
+    infile = ROOT.TFile('{}Step2_{}.root'.format(STEP2_DIR, sample), 'update')
     tree = infile.Get('tree')
 
     # Create the new sample luminosity branch.
@@ -214,7 +217,6 @@ def write_sample_lumi(sample = ''):
     # Write the information to file and close the ntuple.
     tree.Write()
     infile.Close()    
-
 
 #-------------
 # Main Program
@@ -245,8 +247,8 @@ if __name__ == '__main__':
         if sample in args.samples:
             step2(sample, properties['EOS_DIR'])
     
-            if 'XSEC' in properties:
-                write_sample_lumi(sample)
+        if 'XSEC' in properties:
+            write_sample_lumi(sample)
     
     print "\nJob's done!" 
     
