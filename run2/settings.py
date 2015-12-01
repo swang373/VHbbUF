@@ -21,7 +21,7 @@ https://twiki.cern.ch/twiki/bin/view/LHCPhysics/SingleTopRefXsec
 ###########################
 
 # Output directory for the Step2 ntuples.
-STEP2_DIR = '/afs/cern.ch/work/s/swang373/private/V14/'
+STEP2_DIR = '/afs/cern.ch/work/s/swang373/private/V14/Step2/'
 
 # The selection used to skim the Step1 ntuples.
 STEP2_CUT = 'Vtype>=0 && met_pt>150'
@@ -196,12 +196,12 @@ SAMPLES = {
 
 }
 
-
 ###########################
 #-- Step3 Configuration --#
 ###########################
 
-
+# Output directory for the Step3 ntuples.
+STEP3_DIR = '/afs/cern.ch/work/s/swang373/private/V14/Step3/'
 
 
 

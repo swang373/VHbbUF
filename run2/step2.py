@@ -80,7 +80,7 @@ def copy_and_skim(ntuple = '', indir = '', outdir = '', overwrite = False):
             # Return a tuple of the number of entries after and before skimming, respectively.
             return (n_skim_tree, n_tree)
 
-#######################################################
+##########################################
 
 def step2(sample = '', overwrite = False):
 
@@ -133,13 +133,15 @@ def step2(sample = '', overwrite = False):
     # If the ntuple is split across multiple files, use a temporary directory.
     if (len(ntuples) > 1):
         hadd = True
-        cas_kwargs['outdir'] = tf.mkdtemp(prefix = sample, dir = STEP2_DIR) + '/'
+        tmpdir = tf.mkdtemp(prefix = sample, dir = STEP2_DIR)
+        cas_kwargs['outdir'] = tmpdir + '/'
     
     # Report whether a Step2 cut was defined for skimming.
     if STEP2_CUT:
         print 'Skimming with cut "{}"'.format(STEP2_CUT)
     
-    # Copy and skim the ntuple in parallel.
+    # Copy and skim the ntuple in parallel. Four processes is a safe default.
+    # The (_,) syntax put the item in a tuple for apply_async to unpack.
     pool = mp.Pool(processes = 4)
     results = [pool.apply_async(copy_and_skim, (_,), cas_kwargs).get() for _ in ntuples]
     pool.close()
@@ -163,7 +165,7 @@ def step2(sample = '', overwrite = False):
     if hadd:
 
         inputfiles = glob.glob(tmpdir + '/*.root')
-        outputfile = '{}Step2_{}.root'.format(STEP2_DIR, sample)
+        outputfile = '{}{}.root'.format(STEP2_DIR, sample)
         
         # Redirect output to a temporary file. Overflowing the buffer
         # of sp.PIPE causes the function call to hang. See blog post
@@ -196,7 +198,7 @@ def write_sample_lumi(sample = ''):
     print 'Cross Section: {} pb'.format(xsec)
     
     # Open the ntuple and access the tree.
-    infile = ROOT.TFile('{}Step2_{}.root'.format(STEP2_DIR, sample), 'update')
+    infile = ROOT.TFile('{}{}.root'.format(STEP2_DIR, sample), 'update')
     tree = infile.Get('tree')
 
     # Create the new sample luminosity branch.
@@ -247,8 +249,8 @@ if __name__ == '__main__':
         if sample in args.samples:
             step2(sample, properties['EOS_DIR'])
     
-        if 'XSEC' in properties:
-            write_sample_lumi(sample)
+            if 'XSEC' in properties:
+                write_sample_lumi(sample)
     
     print "\nJob's done!" 
     
