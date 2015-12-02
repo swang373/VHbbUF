@@ -10,6 +10,7 @@ import numpy as np
 import ROOT
 
 from settings import *
+from skim import skim
 
 
 def copy_and_skim(ntuple = '', indir = '', outdir = '', overwrite = False):
@@ -47,38 +48,14 @@ def copy_and_skim(ntuple = '', indir = '', outdir = '', overwrite = False):
         if not STEP2_CUT:
             print '--- {} copied.'.format(ntuple)
         else:
-            # Open the ntuple and access the tree and count histograms.
-            infile = ROOT.TFile(outdir + ntuple, 'read')
-            tree = infile.Get('tree')
-            n_tree = tree.GetEntriesFast()
-
-            Count = infile.Get('Count')
-            CountWeighted = infile.Get('CountWeighted')
-            CountPosWeight = infile.Get('CountPosWeight')
-            CountNegWeight = infile.Get('CountNegWeight')
-
-            # Create an output file to store the skimmed tree and histograms.
-            outfile = ROOT.TFile(outdir + 'skim_' + ntuple, 'recreate')
-            skim_tree = tree.CopyTree(STEP2_CUT)
-            n_skim_tree = skim_tree.GetEntriesFast()
-
-            skim_tree.Write()
-            Count.Write()
-            CountWeighted.Write()
-            CountPosWeight.Write()
-            CountNegWeight.Write()
-        
-            # Close the files to ensure objects in memory are properly saved.
-            outfile.Close()
-            infile.Close()
+            result = skim(outdir, ntuple, STEP2_CUT)
 
             # Delete the original ntuple.
             sp.check_call(['rm', outdir + ntuple])
 
-            print '--- {} copied and skimmed from {!s} to {!s} entries.'.format(ntuple, n_tree, n_skim_tree)
+            print '--- {} copied and skimmed from {!s} to {!s} entries.'.format(ntuple, result[1], result[0])
 
-            # Return a tuple of the number of entries after and before skimming, respectively.
-            return (n_skim_tree, n_tree)
+            return result
 
 ##########################################
 
@@ -141,9 +118,11 @@ def step2(sample = '', overwrite = False):
         print 'Skimming with cut "{}"'.format(STEP2_CUT)
     
     # Copy and skim the ntuple in parallel. Four processes is a safe default.
-    # The (_,) syntax put the item in a tuple for apply_async to unpack.
+    # The (var,) syntax puts the item in a tuple for apply_async to unpack.
+    results = []
     pool = mp.Pool(processes = 4)
-    results = [pool.apply_async(copy_and_skim, (_,), cas_kwargs).get() for _ in ntuples]
+    for ntuple in ntuples:
+        pool.apply_async(copy_and_skim, (ntuple,), cas_kwargs, callback = results.append)
     pool.close()
     pool.join()
 
@@ -165,7 +144,7 @@ def step2(sample = '', overwrite = False):
     if hadd:
 
         inputfiles = glob.glob(tmpdir + '/*.root')
-        outputfile = '{}{}.root'.format(STEP2_DIR, sample)
+        step2_file = STEP2_DIR + sample + '.root'
         
         # Redirect output to a temporary file. Overflowing the buffer
         # of sp.PIPE causes the function call to hang. See blog post
@@ -173,7 +152,7 @@ def step2(sample = '', overwrite = False):
         hadd_log = tf.TemporaryFile(dir = STEP2_DIR)
         
         # Use the "hadd" command.
-        sp.check_call(['hadd', '-f', outputfile] + inputfiles, stdout = hadd_log, stderr = hadd_log)
+        sp.check_call(['hadd', '-f', step2_file] + inputfiles, stdout = hadd_log, stderr = hadd_log)
             
         # It is the users responsibility to delete the temporary directory.
         sp.check_call(['rm', '-r', tmpdir])
@@ -198,7 +177,7 @@ def write_sample_lumi(sample = ''):
     print 'Cross Section: {} pb'.format(xsec)
     
     # Open the ntuple and access the tree.
-    infile = ROOT.TFile('{}{}.root'.format(STEP2_DIR, sample), 'update')
+    infile = ROOT.TFile(STEP2_DIR + sample + '.root', 'update')
     tree = infile.Get('tree')
 
     # Create the new sample luminosity branch.
@@ -242,7 +221,7 @@ if __name__ == '__main__':
         ROOT.gSystem.mkdir(STEP2_DIR)
     
     # Generate the Step2 ntuples.
-    print "Running step2.py..."
+    print 'Running step2.py...'
 
     for sample, properties in SAMPLES.iteritems():
     

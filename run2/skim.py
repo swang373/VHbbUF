@@ -3,54 +3,47 @@
 
 import ROOT
 
-def skim_ntuple(selection = '', indir = '', ntuple = ''):
+def skim(indir = '', ntuple = '', cut = ''):
     
     """
-    This utility function will perform the common task of skimming a VHbb ntuple with
-    a selection. The output ntuple will be created in the same directory as the input.
+    Performs the common task of skimming an ntuple with a cut.
+    The output is created in the same directory as the input.
     
     Parameters
     ----------
-    selection : str
-                A string in the style of ROOT's TCut.
-    indir     : str
-                The full path to the ntuple's directory.
-    ntuple    : str
-                The name of the ntuple to be skimmed.
+    indir  : str
+             The full path to the ntuple's directory.
+    ntuple : str
+             The name of the ntuple to be skimmed.
+    cut    : str
+           A TCut style string which defines the skimming cut.
     """
 
-    print '\nSkimming: %s' % ntuple
-    print 'Selection: %s' % selection
-
-    ROOT.gROOT.SetBatch(1)
-
-    infile = ROOT.TFile(indir + ntuple, 'READ')
-    intree = infile.Get('tree')
-    n_intree = intree.GetEntriesFast()
-
-    # Copy the tree with a selection and cache the count histograms.
-    outfile = ROOT.TFile(indir + 'skim_' + ntuple, 'RECREATE')
-    outtree = intree.CopyTree(selection)
-    n_outtree = outtree.GetEntriesFast()
-    print 'Skimmed from %s to %s entries.' % (n_intree, n_outtree)
+    # Open the ntuple and access the tree and count histograms.
+    infile = ROOT.TFile(indir + ntuple, 'read')
+    tree = infile.Get('tree')
+    n_tree = tree.GetEntriesFast()
 
     Count = infile.Get('Count')
     CountWeighted = infile.Get('CountWeighted')
     CountPosWeight = infile.Get('CountPosWeight')
     CountNegWeight = infile.Get('CountNegWeight')
 
-    # Write the skimmed tree and the Step 1 count histograms.
-    outtree.Write()
+    # Create an output file to store the skimmed tree and histograms. 
+    outfile = ROOT.TFile(indir + 'skim_' + ntuple, 'recreate')
+    skim_tree = tree.CopyTree(cut)
+    n_skim_tree = skim_tree.GetEntriesFast()
+   
+    skim_tree.Write()
     Count.Write()
     CountWeighted.Write()
     CountPosWeight.Write()
     CountNegWeight.Write()
 
-    # Properly close the files to save the objects in memory.
+    # Close the files to ensure objects in memory are properly saved.
     outfile.Close()
     infile.Close()
 
-if __name__ == '__main__':
-
-    skim_ntuple('lheHT<100', '/afs/cern.ch/work/s/swang373/private/V14/', 'WJetsIncl.root')
+    # Return a tuple of the number of entries after and before skimming, respectively.
+    return (n_skim_tree, n_tree)
 
