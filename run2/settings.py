@@ -15,7 +15,6 @@ https://twiki.cern.ch/twiki/bin/view/LHCPhysics/CERNYellowReportPageAt1314TeV#s_
 https://twiki.cern.ch/twiki/bin/view/LHCPhysics/SingleTopRefXsec
 """
 
-
 ###########################
 #-- Step2 Configuration --#
 ###########################
@@ -203,7 +202,7 @@ SAMPLES = {
 # Output directory for the Step3 ntuples.
 STEP3_DIR = '/afs/cern.ch/work/s/swang373/private/V14/Step3/'
 
-# Step3 ntuples and their constituent ntuples.
+# The groupings of Step2 ntuples.
 GROUPS = {
 
     'Data_MET': {
@@ -243,7 +242,9 @@ GROUPS = {
 
 }
 
-
+###########################
+#-- Step4 Configuration --#
+###########################
 
 
 
@@ -331,62 +332,60 @@ CONTROL_REGIONS = {
 }
 
 
-#######################
-# Plotting Categories #
-#######################
+# Plotting Categories
 
 CATEGORIES = {
 
     'Data': {
-        'PATH': STEP2_DIR + 'Data_MET.root',
+        'PATH': STEP3_DIR + 'Data_MET.root',
     },
 
     'ZH': {
-        'PATH': STEP2_DIR + 'ZnnH125.root',
+        'PATH': STEP3_DIR + 'ZnnH125.root',
     },
 
     'ggZH': {
-        'PATH': STEP2_DIR + 'ggZH125.root',
+        'PATH': STEP3_DIR + 'ggZH125.root',
     },
 
     'WH': {
-        'PATH': STEP2_DIR + 'WlnH125.root',
+        'PATH': STEP3_DIR + 'WlnH125.root',
     },
 
     'WjLF': {
-        'PATH': STEP2_DIR + 'WJets.root',
+        'PATH': STEP3_DIR + 'WJets.root',
         'CUTS': LIGHT_FLAVOR,
     },
 
     'WjHF': {
-        'PATH': STEP2_DIR + 'WJets.root',
+        'PATH': STEP3_DIR + 'WJets.root',
         'CUTS': HEAVY_FLAVOR,
     },
 
     'ZjLF': {
-        'PATH': STEP2_DIR + 'ZJets.root',
+        'PATH': STEP3_DIR + 'ZJets.root',
         'CUTS': LIGHT_FLAVOR,
     },
 
     'ZjHF': {
-        'PATH': STEP2_DIR + 'ZJets.root',
+        'PATH': STEP3_DIR + 'ZJets.root',
         'CUTS': HEAVY_FLAVOR,
     },
 
     'TT': {
-        'PATH': STEP2_DIR + 'TTPow.root',
+        'PATH': STEP3_DIR + 'TT.root',
     },
 
     'ST': {
-        'PATH': STEP2_DIR + 's_Top.root',
+        'PATH': STEP3_DIR + 'ST.root',
     },
 
     'VV': {
-        'PATH': STEP2_DIR + 'VV.root',
+        'PATH': STEP3_DIR + 'VV.root',
     },
 
     'QCD': {
-        'PATH': STEP2_DIR + 'QCD.root',
+        'PATH': STEP3_DIR + 'QCD.root',
     },
 
 }

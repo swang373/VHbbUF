@@ -1,7 +1,5 @@
-# sean-jiun.wang@cern.ch
-# Proverbs 22:29
-
 import ROOT
+
 
 def skim(indir = '', ntuple = '', cut = ''):
     

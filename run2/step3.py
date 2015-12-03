@@ -1,6 +1,3 @@
-# sean-jiun.wang@cern.ch
-# Proverbs 22:29
-
 from itertools import izip_longest
 import subprocess as sp
 
@@ -18,7 +15,7 @@ def step3(group = ''):
     Parameters
     ----------
     group   : str
-              The name used to refer to the group.
+              The name used to refer to the group in settings.py.
     """
 
     print '\nGenerating Step3 Ntuple [{}]'.format(group)
@@ -59,19 +56,23 @@ def step3(group = ''):
         # Multiple samples provided.
         elif (len(samples) > 1):
 
-            # Collect the ntuples and then hadd them together.
             inputfiles = []        
 
+            # Iterate over the samples and cuts simultaneously. This is why
+            # the samples and their cuts must be provided in the same order.
             for sample, cut in izip_longest(samples, cuts, fillvalue = ''):
                 
                 ntuple = sample + '.root'
                 
+                # Append the original ntuple if there are no cuts.
                 if not cut:
                     inputfiles.append(STEP2_DIR + ntuple)
+                # Otherwise, append the skimmed ntuple.
                 else:
                     skim(STEP2_DIR, ntuple, cut)
                     inputfiles.append(STEP2_DIR + 'skim_' + ntuple)
-            
+
+            # hadd the files together.             
             sp.check_call(['hadd', '-f', step3_file] + inputfiles)
 
             # Delete the skimmed ntuples after hadding.

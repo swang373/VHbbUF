@@ -1,6 +1,3 @@
-# sean-jiun.wang@cern.ch
-# Proverbs 22:29
-
 import glob
 import multiprocessing as mp
 import subprocess as sp
@@ -151,10 +148,10 @@ def step2(sample = '', overwrite = False):
         # "Subprocess Hanging: PIPE is your enemy" by Anders Pearson.
         hadd_log = tf.TemporaryFile(dir = STEP2_DIR)
         
-        # Use the "hadd" command.
+        # hadd the files together.
         sp.check_call(['hadd', '-f', step2_file] + inputfiles, stdout = hadd_log, stderr = hadd_log)
             
-        # It is the users responsibility to delete the temporary directory.
+        # It is the user's responsibility to delete the temporary directory.
         sp.check_call(['rm', '-r', tmpdir])
 
 ###################################
