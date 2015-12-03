@@ -225,7 +225,7 @@ def make_plot(CR = '', plot = '', expression = '', x_title = '', n_bins = None, 
     latex.SetTextFont(62)
     latex.SetTextSize(0.04)
     latex.DrawLatex(0.19, 0.89, 'CMS Preliminary 2015')
-    latex.DrawLatex(0.19, 0.84, '#sqrt{s} = 13 TeV, L = 1.28 fb^{-1}')
+    latex.DrawLatex(0.19, 0.84, '#sqrt{s} = 13 TeV, L = 2.11 fb^{-1}')
     latex.DrawLatex(0.19, 0.79, 'Z(#nu#bar{#nu})H(b#bar{b})')
     
     lower_pad.cd()

@@ -39,7 +39,7 @@ SAMPLES = {
     },
 
     'Data_MET_DP': {
-        'EOS_DIR': '/store/group/phys_higgs/hbb/ntuples/V15/MET/VHBB_HEPPY_V15_MET__Run2015D-PromptReco-v4',
+        'EOS_DIR': '/store/group/phys_higgs/hbb/ntuples/V15a/MET/VHBB_HEPPY_V15a_MET__Run2015D-PromptReco-v4',
     },
 
     # Signal
@@ -203,6 +203,48 @@ SAMPLES = {
 # Output directory for the Step3 ntuples.
 STEP3_DIR = '/afs/cern.ch/work/s/swang373/private/V14/Step3/'
 
+# Step3 ntuples and their constituent ntuples.
+GROUPS = {
+
+    'Data_MET': {
+        'SAMPLES': ['Data_MET_C', 'Data_MET_D', 'Data_MET_DP'],
+    },
+
+    'ZnnH125': {},
+    
+    'ggZH125': {},
+
+    'WlnH125': {},
+ 
+    'WJets': {
+        'SAMPLES': ['WJetsIncl', 'WJetsHT100', 'WJetsHT200', 'WJetsHT400', 'WJetsHT600'],
+        'CUTS': ['lheHT<100'],
+    },
+
+    'ZJets': {
+        'SAMPLES': ['ZJetsHT100', 'ZJetsHT200', 'ZJetsHT400', 'ZJetsHT600'],
+    },
+   
+    'TT': {
+        'SAMPLES': ['TTPow'],
+    },
+
+    'ST': {
+        'SAMPLES': ['T_s_comb_lep', 'T_t_lep', 'Tbar_t_lep', 'T_tW', 'Tbar_tW'],
+    },
+
+    'QCD': {
+        'SAMPLES': ['QCDHT100', 'QCDHT200', 'QCDHT300', 'QCDHT500', 'QCDHT700', 'QCDHT1000', 'QCDHT1500', 'QCDHT2000'],
+    },
+
+    'VV': {
+        'SAMPLES': ['WW', 'WZ', 'ZZ'],
+    },
+
+}
+
+
+
 
 
 ##############################
@@ -358,13 +400,14 @@ CATEGORIES = {
 PLOT_DIR = 'plots/'
 
 # Target luminosity of the data in inverse picobarns (pb-1).
-TARGET_LUMI = 1280
+TARGET_LUMI = 2110
 
 # The weights to apply to the data samples.
-DATA_WEIGHT = tco.mult('json', 'HLT_BIT_HLT_PFMET90_PFMHT90_IDTight_v')
+DATA_WEIGHT = tco.mult('json', 'HLT_BIT_HLT_PFMET90_PFMHT90_IDTight_v || HLT_BIT_HLT_PFMET170_NoiseCleaned_v')
 
 # The weights to apply to the MC samples.
-MC_WEIGHT = tco.mult('sign(genWeight)', TARGET_LUMI, '1./sample_lumi', 'HLT_BIT_HLT_PFMET90_PFMHT90_IDLoose_v')
+MC_WEIGHT = tco.mult('sign(genWeight)', TARGET_LUMI, '1./sample_lumi', 'puWeight',
+                     'HLT_BIT_HLT_PFMET90_PFMHT90_IDLoose_v || HLT_BIT_HLT_PFMET170_NoiseCleaned_v')
 
 # The plots to draw and their properties.
 PLOTS = {

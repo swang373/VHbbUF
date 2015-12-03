@@ -73,7 +73,7 @@ def step2(sample = '', overwrite = False):
                 The default is False.
     """
 
-    print '\nGenerating Step2 Ntuple for [{}]'.format(sample)
+    print '\nGenerating Step2 Ntuple [{}]'.format(sample)
 
     # Look up the sample's EOS path.
     eos_dir = SAMPLES[sample]['EOS_DIR']
@@ -226,7 +226,7 @@ if __name__ == '__main__':
     for sample, properties in SAMPLES.iteritems():
     
         if sample in args.samples:
-            step2(sample, properties['EOS_DIR'])
+            step2(sample)
     
             if 'XSEC' in properties:
                 write_sample_lumi(sample)
