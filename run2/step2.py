@@ -72,8 +72,17 @@ def step2(sample = '', overwrite = False):
 
     print '\nGenerating Step2 Ntuple [{}]'.format(sample)
 
-    # Look up the sample's EOS path.
-    eos_dir = SAMPLES[sample]['EOS_DIR']
+    # Set the sample as the Step2 ntuple's name.
+    step2_file = STEP2_DIR + sample + '.root'
+
+    # Look up the sample's EOS path and cross section.
+    eos_dir = SAMPLES[sample]['EOS_DIR'] if 'EOS_DIR' in SAMPLES[sample] else ''
+    xsec = SAMPLES[sample]['XSEC'] if 'XSEC' in SAMPLES[sample] else None
+
+    if not eos_dir:
+        print 'Empty EOS path!'
+        return
+
     print 'Searching EOS directory "{}"'.format(eos_dir)
 
     # Retrieve the alias for the "eos" command. Inspired by amaltaro.
@@ -140,8 +149,7 @@ def step2(sample = '', overwrite = False):
     # Combine the separate files into a single ntuple.
     if hadd:
 
-        inputfiles = glob.glob(tmpdir + '/*.root')
-        step2_file = STEP2_DIR + sample + '.root'
+        inputfiles = glob.glob(tmpdir + '/*.root') 
         
         # Redirect output to a temporary file. Overflowing the buffer
         # of sp.PIPE causes the function call to hang. See blog post
@@ -154,27 +162,14 @@ def step2(sample = '', overwrite = False):
         # It is the user's responsibility to delete the temporary directory.
         sp.check_call(['rm', '-r', tmpdir])
 
-###################################
-  
-def write_sample_lumi(sample = ''):
+    # Add a sample luminosity branch if a cross section is provided.  
+    if not xsec:
+        return
 
-    """
-    Add a new sample luminosity branch to a Step2 ntuple.
-
-    Parameters
-    ----------
-    sample    : str
-                The name used to refer to the sample in settings.py.
-    """
- 
-    print '\nWriting Sample Luminosity Branch for [{}]'.format(sample)
-
-    # Look up the sample cross section.
-    xsec = SAMPLES[sample]['XSEC']
     print 'Cross Section: {} pb'.format(xsec)
-    
-    # Open the ntuple and access the tree.
-    infile = ROOT.TFile(STEP2_DIR + sample + '.root', 'update')
+
+    # Open the ntuple for updating and access the tree.
+    infile = ROOT.TFile(step2_file, 'update')
     tree = infile.Get('tree')
 
     # Create the new sample luminosity branch.
@@ -194,7 +189,7 @@ def write_sample_lumi(sample = ''):
 
     # Write the information to file and close the ntuple.
     tree.Write()
-    infile.Close()    
+    infile.Close()
 
 #-------------
 # Main Program
@@ -220,13 +215,9 @@ if __name__ == '__main__':
     # Generate the Step2 ntuples.
     print 'Running step2.py...'
 
-    for sample, properties in SAMPLES.iteritems():
-    
+    for sample, properties in SAMPLES.iteritems():  
         if sample in args.samples:
             step2(sample)
-    
-            if 'XSEC' in properties:
-                write_sample_lumi(sample)
-    
+       
     print "\nJob's done!" 
     
