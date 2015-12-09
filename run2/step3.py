@@ -14,8 +14,8 @@ def step3(group = ''):
 
     Parameters
     ----------
-    group   : str
-              The name used to refer to the group in settings.py.
+    group : str
+            The name used to refer to the group in settings.py.
     """
 
     print '\nGenerating Step3 Ntuple [{}]'.format(group)

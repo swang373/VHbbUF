@@ -215,7 +215,7 @@ if __name__ == '__main__':
     # Generate the Step2 ntuples.
     print 'Running step2.py...'
 
-    for sample, properties in SAMPLES.iteritems():  
+    for sample in SAMPLES:
         if sample in args.samples:
             step2(sample)
        
