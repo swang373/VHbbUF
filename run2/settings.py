@@ -297,6 +297,7 @@ CONTROL_REGIONS = {
     ],
 
     'Signal_Tight': [
+        Minimal,
         AntiQCD,
         tco.add('Vtype==4',
                 'Jet_btagCSV[hJCidx[1]]>0.8', 
@@ -308,6 +309,7 @@ CONTROL_REGIONS = {
     
     # TTbar Control Region
     'TTbar': [
+        Minimal,
         AntiQCD,
         tco.add('Vtype==2 || Vtype==3',
                 'vLeptons_pt>30', 
@@ -318,14 +320,16 @@ CONTROL_REGIONS = {
 
     # Z Jets Control Regions
     'Z_light': [
+        Minimal,
+        AntiQCD,
         tco.add('Vtype==4', 
                 addCenJet30e0, 
                 naddGoodLeptons10e0, 
-                'Jet_btagCSV[hJCidx[0]]<0.97'),
-        AntiQCD
+                'Jet_btagCSV[hJCidx[0]]<0.97')
     ],
 
     'Z_bb': [
+        Minimal,
         AntiQCD,
         tco.add('Vtype==4',
                 'HCSV_mass<100 || HCSV_mass>140',
@@ -336,6 +340,7 @@ CONTROL_REGIONS = {
 
     # W Jets Control Regions
     'W_light': [
+        Minimal,
         AntiQCD,
         tco.add('Vtype==2 || Vtype==3',
                 'vLeptons_pt>30',
@@ -344,6 +349,7 @@ CONTROL_REGIONS = {
     ],
 
     'W_bb': [
+        Minimal,
         AntiQCD,
         tco.add('Vtype==2 || Vtype==3',
                 'vLeptons_pt>30',
