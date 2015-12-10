@@ -282,7 +282,7 @@ if __name__ == '__main__':
         ROOT.gSystem.mkdir(PLOT_DIR)
     
     for CR in CONTROL_REGIONS:
-
+ 
         # Create the control region subdirectory if it doesn't exist.
         if (ROOT.gSystem.AccessPathName(PLOT_DIR + CR)):
             ROOT.gSystem.mkdir(PLOT_DIR + CR)

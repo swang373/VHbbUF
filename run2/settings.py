@@ -255,28 +255,28 @@ STEP4_DIR = '/afs/cern.ch/work/s/swang373/private/V14/Step4/'
 # Control Region Definitions #
 ##############################
 
-CONTROL_REGION_DIR = '/afs/cern.ch/work/s/swang373/private/V14/blargl/'
+CONTROL_REGION_DIR = '/afs/cern.ch/work/s/swang373/private/V14/CR/'
 
 # Define Useful Cuts
-Minimal = tco.add('Vtype==2 || Vtype==3 || Vtype==4',
+Minimal = tco.add('Vtype==2||Vtype==3||Vtype==4',
                   'HCSV_pt>150',
                   'Jet_btagCSV[hJCidx[1]]>0.3',
-                  'min(Jet_pt[hJCidx[0]], Jet_pt[hJCidx[1]])>30',
+                  'min(Jet_pt[hJCidx[0]],Jet_pt[hJCidx[1]])>30',
                   'HCSV_mass<300')
 
-AntiQCD = tco.add('MinIf$(abs(TVector2::Phi_mpi_pi(met_phi - Jet_phi)), Jet_pt>30 && Jet_puId && abs(Jet_eta)<4.5)>0.7',
-                  'abs(TVector2::Phi_mpi_pi(met_phi - tkMet_phi))<0.7',
+AntiQCD = tco.add('MinIf$(abs(TVector2::Phi_mpi_pi(met_phi-Jet_phi)),Jet_pt>30&&Jet_puId&&abs(Jet_eta)<4.5)>0.7',
+                  'abs(TVector2::Phi_mpi_pi(met_phi-tkMet_phi))<0.7',
                   'tkMet_pt>30')
 
 addCenJet30m0 = '(Sum$(Jet_pt>30 && Jet_puId && abs(Jet_eta)<4.5)-2)>0'
 
 addCenJet30e0 = '(Sum$(Jet_pt>30 && Jet_puId && abs(Jet_eta)<4.5)-2)==0'
 
-addCenJet30e1 = '(Sum$(Jet_pt>30 && Jet_puId && abs(Jet_eta)<4.5)-2)<=1'
+addCenJet30e1 = '(Sum$(Jet_pt>30&&Jet_puId&&abs(Jet_eta)<4.5)-2)<=1'
 
-naddGoodLeptons10e0 = '(Sum$(aLeptons_pt>10 && (aLeptons_jetBTagCSV<0.25 || aLeptons_relIso03<0.4 || aLeptons_looseIdSusy!=0 || aLeptons_jetDR>0.3)) + Sum$(vLeptons_pt>10 && (vLeptons_jetBTagCSV<0.25 || vLeptons_relIso03<0.4 || vLeptons_looseIdSusy!=0 || vLeptons_jetDR>0.3)))==0'
+naddGoodLeptons10e0 = '(Sum$(aLeptons_pt>10&&(aLeptons_jetBTagCSV<0.25||aLeptons_relIso03<0.4||aLeptons_looseIdSusy!=0||aLeptons_jetDR>0.3))+Sum$(vLeptons_pt>10&&(vLeptons_jetBTagCSV<0.25||vLeptons_relIso03<0.4||vLeptons_looseIdSusy!=0||vLeptons_jetDR>0.3)))==0'
 
-naddGoodTaus20e0 = 'Sum$(TauGood_idDecayMode>=1 && TauGood_idCI3hit>=1 && TauGood_pt>20 && abs(TauGood_eta)<2.3)==0'
+naddGoodTaus20e0 = 'Sum$(TauGood_idDecayMode>=1&&TauGood_idCI3hit>=1&&TauGood_pt>20&&abs(TauGood_eta)<2.3)==0'
 
 # Jet Flavors
 LIGHT_FLAVOR = 'abs(Jet_mcFlavour[hJCidx[0]])!=5 && abs(Jet_mcFlavour[hJCidx[1]])!=5'
@@ -301,7 +301,7 @@ CONTROL_REGIONS = {
         AntiQCD,
         tco.add('Vtype==4',
                 'Jet_btagCSV[hJCidx[1]]>0.8', 
-                'HCSV_mass<100 || HCSV_mass>140',
+                'HCSV_mass<100||HCSV_mass>140',
                 naddGoodLeptons10e0, 
                 naddGoodTaus20e0, 
                 addCenJet30e1)
