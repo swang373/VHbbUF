@@ -248,127 +248,107 @@ GROUPS = {
 # Output directory for the Step3 ntuples.
 STEP4_DIR = '/afs/cern.ch/work/s/swang373/private/V14/Step4/'
 
+#WORK IN PROGRESS#
 
+###########################################
+#-- Signal/Control Region Configuration --#
+###########################################
 
+# Minimal Preselection
+Minimal = [
+    'Vtype==2||Vtype==3||Vtype==4',
+    'HCSV_pt>150',
+    'Jet_btagCSV[hJCidx[1]]>0.3',
+    'min(Jet_pt[hJCidx[0]],Jet_pt[hJCidx[1]])>30',
+    'HCSV_mass<300',
+]
 
-##############################
-# Control Region Definitions #
-##############################
+# AntiQCD
+AntiQCD = [
+    'MinIf$(abs(TVector2::Phi_mpi_pi(met_phi-Jet_phi)),Jet_pt>30&&Jet_puId&&abs(Jet_eta)<4.5)>0.7',
+    'abs(TVector2::Phi_mpi_pi(met_phi-tkMet_phi))<0.7',
+    'tkMet_pt>30',
+]
 
-CONTROL_REGION_DIR = '/afs/cern.ch/work/s/swang373/private/V14/CR/'
-
-# Define Useful Cuts
-Minimal = tco.add('Vtype==2||Vtype==3||Vtype==4',
-                  'HCSV_pt>150',
-                  'Jet_btagCSV[hJCidx[1]]>0.3',
-                  'min(Jet_pt[hJCidx[0]],Jet_pt[hJCidx[1]])>30',
-                  'HCSV_mass<300')
-
-AntiQCD = tco.add('MinIf$(abs(TVector2::Phi_mpi_pi(met_phi-Jet_phi)),Jet_pt>30&&Jet_puId&&abs(Jet_eta)<4.5)>0.7',
-                  'abs(TVector2::Phi_mpi_pi(met_phi-tkMet_phi))<0.7',
-                  'tkMet_pt>30')
-
+# Additional Central Jet 
 addCenJet30m0 = '(Sum$(Jet_pt>30 && Jet_puId && abs(Jet_eta)<4.5)-2)>0'
-
 addCenJet30e0 = '(Sum$(Jet_pt>30 && Jet_puId && abs(Jet_eta)<4.5)-2)==0'
+addCenJet30e1 = '(Sum$(Jet_pt>30 && Jet_puId && abs(Jet_eta)<4.5)-2)<=1'
 
-addCenJet30e1 = '(Sum$(Jet_pt>30&&Jet_puId&&abs(Jet_eta)<4.5)-2)<=1'
+# Additional Lepton
+naddGoodLeptons10e0 = '(Sum$(aLeptons_pt>10 && (aLeptons_jetBTagCSV<0.25 || aLeptons_relIso03<0.4 || aLeptons_looseIdSusy!=0 || aLeptons_jetDR>0.3))+Sum$(vLeptons_pt>10 && (vLeptons_jetBTagCSV<0.25 || vLeptons_relIso03<0.4 || vLeptons_looseIdSusy!=0 || vLeptons_jetDR>0.3)))==0'
+naddGoodTaus20e0 = 'Sum$(TauGood_idDecayMode>=1 && TauGood_idCI3hit>=1 && TauGood_pt>20 && abs(TauGood_eta)<2.3)==0'
 
-naddGoodLeptons10e0 = '(Sum$(aLeptons_pt>10&&(aLeptons_jetBTagCSV<0.25||aLeptons_relIso03<0.4||aLeptons_looseIdSusy!=0||aLeptons_jetDR>0.3))+Sum$(vLeptons_pt>10&&(vLeptons_jetBTagCSV<0.25||vLeptons_relIso03<0.4||vLeptons_looseIdSusy!=0||vLeptons_jetDR>0.3)))==0'
+# Jet Flavor 
+LIGHT_FLAVOR = ['abs(Jet_mcFlavour[hJCidx[0]])!=5 && abs(Jet_mcFlavour[hJCidx[1]])!=5']
+HEAVY_FLAVOR = ['abs(Jet_mcFlavour[hJCidx[0]])==5 || abs(Jet_mcFlavour[hJCidx[1]])==5']
 
-naddGoodTaus20e0 = 'Sum$(TauGood_idDecayMode>=1&&TauGood_idCI3hit>=1&&TauGood_pt>20&&abs(TauGood_eta)<2.3)==0'
-
-# Jet Flavors
-LIGHT_FLAVOR = 'abs(Jet_mcFlavour[hJCidx[0]])!=5 && abs(Jet_mcFlavour[hJCidx[1]])!=5'
-HEAVY_FLAVOR = 'abs(Jet_mcFlavour[hJCidx[0]])==5 || abs(Jet_mcFlavour[hJCidx[1]])==5'
-
-# Control Regions
-CONTROL_REGIONS = {
+# Signal/Control Region Definitions
+REGIONS = {
 
     # Signal Regions
-    'Signal_Loose': [
-        Minimal,
-        AntiQCD,
-        tco.add('Vtype==4',
-                'Jet_btagCSV[hJCidx[1]]>0.605', 
-                'HCSV_mass<100 || HCSV_mass>140', 
-                naddGoodLeptons10e0, 
-                naddGoodTaus20e0)
+    'Signal_Loose': [Minimal, AntiQCD, ['Vtype==4',
+                                        'Jet_btagCSV[hJCidx[1]]>0.605',
+                                        'HCSV_mass<100 || HCSV_mass>140',
+                                        naddGoodLeptons10e0,
+                                        naddGoodTaus20e0]
     ],
 
-    'Signal_Tight': [
-        Minimal,
-        AntiQCD,
-        tco.add('Vtype==4',
-                'Jet_btagCSV[hJCidx[1]]>0.8', 
-                'HCSV_mass<100||HCSV_mass>140',
-                naddGoodLeptons10e0, 
-                naddGoodTaus20e0, 
-                addCenJet30e1)
+    'Signal_Tight': [Minimal, AntiQCD, ['Vtype==4',
+                                        'Jet_btagCSV[hJCidx[1]]>0.8',
+                                        'HCSV_mass<100||HCSV_mass>140',
+                                        naddGoodLeptons10e0,
+                                        naddGoodTaus20e0,
+                                        addCenJet30e1]
     ],
     
     # TTbar Control Region
-    'TTbar': [
-        Minimal,
-        AntiQCD,
-        tco.add('Vtype==2 || Vtype==3',
-                'vLeptons_pt>30', 
-                addCenJet30m0,
-                'Jet_btagCSV[hJCidx[0]]>0.97', 
-                'Jet_btagCSV[hJCidx[1]]<0.97')
+    'TTbar': [Minimal, AntiQCD, ['Vtype==2 || Vtype==3',
+                                 'vLeptons_pt>30',
+                                 addCenJet30m0,
+                                 'Jet_btagCSV[hJCidx[0]]>0.97',
+                                 'Jet_btagCSV[hJCidx[1]]<0.97']
     ],
 
-    # Z Jets Control Regions
-    'Z_light': [
-        Minimal,
-        AntiQCD,
-        tco.add('Vtype==4', 
-                addCenJet30e0, 
-                naddGoodLeptons10e0, 
-                'Jet_btagCSV[hJCidx[0]]<0.97')
+    # Z+Jets Control Regions
+    'Z_light': [Minimal, AntiQCD, ['Vtype==4',
+                                   addCenJet30e0,
+                                   naddGoodLeptons10e0,
+                                   'Jet_btagCSV[hJCidx[0]]<0.97']
     ],
 
-    'Z_bb': [
-        Minimal,
-        AntiQCD,
-        tco.add('Vtype==4',
-                'HCSV_mass<100 || HCSV_mass>140',
-                addCenJet30e0, 
-                naddGoodLeptons10e0, 
-                'Jet_btagCSV[hJCidx[1]]>0.8')
+    'Z_bb': [Minimal, AntiQCD, ['Vtype==4',
+                                'HCSV_mass<100 || HCSV_mass>140',
+                                addCenJet30e0,
+                                naddGoodLeptons10e0,
+                                'Jet_btagCSV[hJCidx[1]]>0.8']
     ],
 
-    # W Jets Control Regions
-    'W_light': [
-        Minimal,
-        AntiQCD,
-        tco.add('Vtype==2 || Vtype==3',
-                'vLeptons_pt>30',
-                addCenJet30e0,
-                'Jet_btagCSV[hJCidx[0]]<0.97')
+    # W+Jets Control Regions
+    'W_light': [Minimal, AntiQCD, ['Vtype==2 || Vtype==3',
+                                   'vLeptons_pt>30',
+                                   addCenJet30e0,
+                                   'Jet_btagCSV[hJCidx[0]]<0.97']
     ],
 
-    'W_bb': [
-        Minimal,
-        AntiQCD,
-        tco.add('Vtype==2 || Vtype==3',
-                'vLeptons_pt>30',
-                addCenJet30e0,
-                'Jet_btagCSV[hJCidx[1]]>0.8')
+    'W_bb': [Minimal, AntiQCD, ['Vtype==2 || Vtype==3',
+                                'vLeptons_pt>30',
+                                addCenJet30e0,
+                                'Jet_btagCSV[hJCidx[1]]>0.8']
     ],
 
     # QCD Control Region
-    'QCD': [
-        Minimal,
-        tco.add('MinIf$(abs(TVector2::Phi_mpi_pi(met_phi - Jet_phi)), Jet_pt>30 && Jet_puId && abs(Jet_eta)<4.5)<0.7',
-                'abs(TVector2::Phi_mpi_pi(met_phi - tkMet_phi))>0.7',
-                'tkMet_pt<30')
-    ]
+    'QCD': [Minimal, ['MinIf$(abs(TVector2::Phi_mpi_pi(met_phi - Jet_phi)), Jet_pt>30 && Jet_puId && abs(Jet_eta)<4.5)<0.7',
+                      'abs(TVector2::Phi_mpi_pi(met_phi - tkMet_phi))>0.7',
+                      'tkMet_pt<30']
+    ],
  
 }
 
+# Output directory for the signal/control region ntuples.
+REGION_DIR = '/afs/cern.ch/work/s/swang373/private/V14/test/'
 
-# Plotting Categories
+# Categories
 CATEGORIES = {
 
     'Data': {
@@ -424,7 +404,6 @@ CATEGORIES = {
     },
 
 }
-
 
 ##########################
 #-- Plot Configuration --#

@@ -5,13 +5,22 @@ operators which are not supported by PyROOT.
 
 def add(*cuts):
 
-    assert (len(cuts) > 1), 'Not enough summands!'
+    n_summands = len(cuts)
 
     result = ''
-    for cut in cuts[:-1]:
-        result += '({!s})&&'.format(cut)
-    result += '({!s})'.format(cuts[-1])
-    return result
+    
+    if (n_summands < 1):
+        return result
+
+    elif (n_summands == 1):
+        result += '{!s}'.format(cuts[0])
+        return result
+
+    else:
+        for cut in cuts[:-1]:
+            result += '({!s})&&'.format(cut)
+        result += '({!s})'.format(cuts[-1])
+        return result
     
 def mult(*cuts):
 
