@@ -1,11 +1,8 @@
-import TCutOperators as tco
-
 """
 ZnnHbb Analysis Settings
 
 The idea is to have all configuration options
 set centrally and leave the core code alone.
-
 
 The cross-sections for the MC samples are reported in picobarns (pb).
 Obtained from PDG reference pages and the following links
@@ -18,181 +15,186 @@ https://twiki.cern.ch/twiki/bin/view/LHCPhysics/SingleTopRefXsec
 #-- Step2 Configuration --#
 ###########################
 
-# Output directory for the Step2 ntuples.
-STEP2_DIR = '/afs/cern.ch/work/s/swang373/private/V14/Step2/'
+# The output directory for the Step2 ntuples.
+OUTDIR = '/afs/cern.ch/work/s/swang373/private/V14/blargl_test/'
 
-# The selection used to skim the Step1 ntuples.
-STEP2_CUT = 'Vtype>=0 && met_pt>150'
+# The list of cuts used to skim the Step1 ntuples.
+SKIM = [
+    'Vtype>=0',
+    'met_pt>150',
+]
 
 # The Step1 ntuples and their properties.
-SAMPLES = {
-    
+SAMPLES = { 
+
     # Datasets
     'Data_MET_C': {
-        'EOS_DIR': '/store/group/phys_higgs/hbb/ntuples/V15/MET/VHBB_HEPPY_V15_MET__Run2015C_25ns-05Oct2015-v1',
+        'path': '/store/group/phys_higgs/hbb/ntuples/V15/MET/VHBB_HEPPY_V15_MET__Run2015C_25ns-05Oct2015-v1',
     },
 
     'Data_MET_D': {
-        'EOS_DIR': '/store/group/phys_higgs/hbb/ntuples/V15/MET/VHBB_HEPPY_V15_MET__Run2015D-05Oct2015-v1',
+        'path': '/store/group/phys_higgs/hbb/ntuples/V15/MET/VHBB_HEPPY_V15_MET__Run2015D-05Oct2015-v1',
     },
 
     'Data_MET_DP': {
-        'EOS_DIR': '/store/group/phys_higgs/hbb/ntuples/V15a/MET/VHBB_HEPPY_V15a_MET__Run2015D-PromptReco-v4',
+        'path': '/store/group/phys_higgs/hbb/ntuples/V15a/MET/VHBB_HEPPY_V15a_MET__Run2015D-PromptReco-v4',
     },
 
     # Signal
     'ZnnH125': {
-        'EOS_DIR': '/store/group/phys_higgs/hbb/ntuples/V14/ZH_HToBB_ZToNuNu_M125_13TeV_amcatnloFXFX_madspin_pythia8',
-        'XSEC': (0.8696 - 0.1057) * 0.577 * 0.2,
+        'path': '/store/group/phys_higgs/hbb/ntuples/V14/ZH_HToBB_ZToNuNu_M125_13TeV_amcatnloFXFX_madspin_pythia8',
+        'xsec': (0.8696 - 0.1057) * 0.577 * 0.2,
     },
 
     'ggZH125': {
-        'EOS_DIR': '/store/group/phys_higgs/hbb/ntuples/V14/ggZH_HToBB_ZToNuNu_M125_13TeV_amcatnlo_pythia8',
-        'XSEC': 2 * 0.1057 * 0.577 * 0.2,
+        'path': '/store/group/phys_higgs/hbb/ntuples/V14/ggZH_HToBB_ZToNuNu_M125_13TeV_amcatnlo_pythia8',
+        'xsec': 2 * 0.1057 * 0.577 * 0.2,
     },
 
     'WlnH125': {
-        'EOS_DIR': '/store/group/phys_higgs/hbb/ntuples/V14/WH_HToBB_WToLNu_M125_13TeV_amcatnloFXFX_madspin_pythia8',
-        'XSEC': 1.380 * 0.577 * 0.1080 * 3,
+        'path': '/store/group/phys_higgs/hbb/ntuples/V14/WH_HToBB_WToLNu_M125_13TeV_amcatnloFXFX_madspin_pythia8',
+        'xsec': 1.380 * 0.577 * 0.1080 * 3,
     },
 
-    # W Jets
+    # W+Jets
     'WJetsIncl': {
-        'EOS_DIR': '/store/group/phys_higgs/hbb/ntuples/V14/WJetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8',
-        'XSEC': 61526.7,
+        'path': '/store/group/phys_higgs/hbb/ntuples/V14/WJetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8',
+        'cuts': ['lheHT<100'],
+        'xsec': 61526.7,
     },
 
     'WJetsHT100': {
-        'EOS_DIR': '/store/group/phys_higgs/hbb/ntuples/V14/WJetsToLNu_HT-100To200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8',
-        'XSEC': 1.21 * 1345,
+        'path': '/store/group/phys_higgs/hbb/ntuples/V14/WJetsToLNu_HT-100To200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8',
+        'xsec': 1.21 * 1345,
     },
 
     'WJetsHT200': {
-        'EOS_DIR': '/store/group/phys_higgs/hbb/ntuples/V14/WJetsToLNu_HT-200To400_TuneCUETP8M1_13TeV-madgraphMLM-pythia8',
-        'XSEC': 1.21 * 359.7,
+        'path': '/store/group/phys_higgs/hbb/ntuples/V14/WJetsToLNu_HT-200To400_TuneCUETP8M1_13TeV-madgraphMLM-pythia8',
+        'xsec': 1.21 * 359.7,
     },
 
     'WJetsHT400': {
-        'EOS_DIR': '/store/group/phys_higgs/hbb/ntuples/V14/WJetsToLNu_HT-400To600_TuneCUETP8M1_13TeV-madgraphMLM-pythia8',
-        'XSEC': 1.21 * 48.91,
+        'path': '/store/group/phys_higgs/hbb/ntuples/V14/WJetsToLNu_HT-400To600_TuneCUETP8M1_13TeV-madgraphMLM-pythia8',
+        'xsec': 1.21 * 48.91,
     },
 
     'WJetsHT600': {
-        'EOS_DIR': '/store/group/phys_higgs/hbb/ntuples/V14/WJetsToLNu_HT-600ToInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8',
-        'XSEC': 1.21 * 18.77,
+        'path': '/store/group/phys_higgs/hbb/ntuples/V14/WJetsToLNu_HT-600ToInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8',
+        'xsec': 1.21 * 18.77,
     },
 
-    # Z Jets
+    # Z+Jets
     'ZJetsHT100': {
-        'EOS_DIR': '/store/group/phys_higgs/hbb/ntuples/V14/ZJetsToNuNu_HT-100To200_13TeV-madgraph', 
-        'XSEC': 1.23 * 280.47, 
+        'path': '/store/group/phys_higgs/hbb/ntuples/V14/ZJetsToNuNu_HT-100To200_13TeV-madgraph', 
+        'xsec': 1.23 * 280.47, 
     },
 
     'ZJetsHT200': {
-        'EOS_DIR': '/store/group/phys_higgs/hbb/ntuples/V14/ZJetsToNuNu_HT-200To400_13TeV-madgraph',
-        'XSEC': 1.23 * 78.36,
+        'path': '/store/group/phys_higgs/hbb/ntuples/V14/ZJetsToNuNu_HT-200To400_13TeV-madgraph',
+        'xsec': 1.23 * 78.36,
     },
 
     'ZJetsHT400': {
-        'EOS_DIR': '/store/group/phys_higgs/hbb/ntuples/V14/ZJetsToNuNu_HT-400To600_13TeV-madgraph',
-        'XSEC': 1.23 * 10.94,
+        'path': '/store/group/phys_higgs/hbb/ntuples/V14/ZJetsToNuNu_HT-400To600_13TeV-madgraph',
+        'xsec': 1.23 * 10.94,
     },
 
     'ZJetsHT600': {
-        'EOS_DIR': '/store/group/phys_higgs/hbb/ntuples/V14/ZJetsToNuNu_HT-600ToInf_13TeV-madgraph',
-        'XSEC': 1.23 * 4.20,
+        'path': '/store/group/phys_higgs/hbb/ntuples/V14/ZJetsToNuNu_HT-600ToInf_13TeV-madgraph',
+        'xsec': 1.23 * 4.20,
     },
 
     # TTbar
     'TTPow': {
-        'EOS_DIR': '/store/group/phys_higgs/hbb/ntuples/V14/TT_TuneCUETP8M1_13TeV-powheg-pythia8',
-        'XSEC': 831.76,
+        'path': '/store/group/phys_higgs/hbb/ntuples/V14/TT_TuneCUETP8M1_13TeV-powheg-pythia8',
+        'xsec': 831.76,
     },
 
     # Single Top
     'T_tW': {
-        'EOS_DIR': '/store/group/phys_higgs/hbb/ntuples/V14/ST_tW_top_5f_inclusiveDecays_13TeV-powheg-pythia8_TuneCUETP8M1',
-        'XSEC': 35.6,
+        'path': '/store/group/phys_higgs/hbb/ntuples/V14/ST_tW_top_5f_inclusiveDecays_13TeV-powheg-pythia8_TuneCUETP8M1',
+        'xsec': 35.6,
     },
 
     'Tbar_tW': {
-        'EOS_DIR': '/store/group/phys_higgs/hbb/ntuples/V14/ST_tW_antitop_5f_inclusiveDecays_13TeV-powheg-pythia8_TuneCUETP8M1', 
-        'XSEC': 35.6,
+        'path': '/store/group/phys_higgs/hbb/ntuples/V14/ST_tW_antitop_5f_inclusiveDecays_13TeV-powheg-pythia8_TuneCUETP8M1', 
+        'xsec': 35.6,
     },
 
     'T_s_comb_lep': {
-        'EOS_DIR': '/store/group/phys_higgs/hbb/ntuples/V14/ST_s-channel_4f_leptonDecays_13TeV-amcatnlo-pythia8_TuneCUETP8M1',
-        'XSEC': 10.32 * 0.1080 * 3,
+        'path': '/store/group/phys_higgs/hbb/ntuples/V14/ST_s-channel_4f_leptonDecays_13TeV-amcatnlo-pythia8_TuneCUETP8M1',
+        'xsec': 10.32 * 0.1080 * 3,
     },
 
     'T_t_lep': {
-        'EOS_DIR': '/store/group/phys_higgs/hbb/ntuples/V14/ST_t-channel_top_4f_leptonDecays_13TeV-powheg-pythia8_TuneCUETP8M1',
-        'XSEC': 136.02 * 0.1080 * 3,
+        'path': '/store/group/phys_higgs/hbb/ntuples/V14/ST_t-channel_top_4f_leptonDecays_13TeV-powheg-pythia8_TuneCUETP8M1',
+        'xsec': 136.02 * 0.1080 * 3,
     },
 
     'Tbar_t_lep': {
-        'EOS_DIR': '/store/group/phys_higgs/hbb/ntuples/V14/ST_t-channel_antitop_4f_leptonDecays_13TeV-powheg-pythia8_TuneCUETP8M1',
-        'XSEC': 80.95 * 0.1080 * 3,
+        'path': '/store/group/phys_higgs/hbb/ntuples/V14/ST_t-channel_antitop_4f_leptonDecays_13TeV-powheg-pythia8_TuneCUETP8M1',
+        'xsec': 80.95 * 0.1080 * 3,
     },
 
     # QCD
     'QCDHT100': {
-        'EOS_DIR': '/store/group/phys_higgs/hbb/ntuples/V14/QCD_HT100to200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8',
-        'XSEC': 27850000, 
+        'path': '/store/group/phys_higgs/hbb/ntuples/V14/QCD_HT100to200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8',
+        'xsec': 27850000, 
     },
     
     'QCDHT200': {
-        'EOS_DIR': '/store/group/phys_higgs/hbb/ntuples/V14/QCD_HT200to300_TuneCUETP8M1_13TeV-madgraphMLM-pythia8',
-        'XSEC': 1717000,
+        'path': '/store/group/phys_higgs/hbb/ntuples/V14/QCD_HT200to300_TuneCUETP8M1_13TeV-madgraphMLM-pythia8',
+        'xsec': 1717000,
     },
 
     'QCDHT300': {
-        'EOS_DIR': '/store/group/phys_higgs/hbb/ntuples/V14/QCD_HT300to500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8',
-        'XSEC': 351300,
+        'path': '/store/group/phys_higgs/hbb/ntuples/V14/QCD_HT300to500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8',
+        'xsec': 351300,
     },
 
     'QCDHT500': {
-        'EOS_DIR': '/store/group/phys_higgs/hbb/ntuples/V14/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8',
-        'XSEC': 31630,
+        'path': '/store/group/phys_higgs/hbb/ntuples/V14/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8',
+        'xsec': 31630,
     },
 
     'QCDHT700': {
-        'EOS_DIR': '/store/group/phys_higgs/hbb/ntuples/V14/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8', 
-        'XSEC': 6802,
+        'path': '/store/group/phys_higgs/hbb/ntuples/V14/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8', 
+        'xsec': 6802,
     },
 
     'QCDHT1000': {
-        'EOS_DIR': '/store/group/phys_higgs/hbb/ntuples/V14/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8',
-        'XSEC': 1206,
+        'path': '/store/group/phys_higgs/hbb/ntuples/V14/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8',
+        'xsec': 1206,
     },
 
     'QCDHT1500': {
-        'EOS_DIR': '/store/group/phys_higgs/hbb/ntuples/V14/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8',
-        'XSEC': 120.4,
+        'path': '/store/group/phys_higgs/hbb/ntuples/V14/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8',
+        'xsec': 120.4,
     },
 
     'QCDHT2000': {
-        'EOS_DIR': '/store/group/phys_higgs/hbb/ntuples/V14/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8',
-        'XSEC': 25.24,
+        'path': '/store/group/phys_higgs/hbb/ntuples/V14/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8',
+        'xsec': 25.24,
     },
 
     # Diboson
     'WW': {
-        'EOS_DIR': '/store/group/phys_higgs/hbb/ntuples/V14/WW_TuneCUETP8M1_13TeV-pythia8',
-        'XSEC': 118.7, # unverified
+        'path': '/store/group/phys_higgs/hbb/ntuples/V14/WW_TuneCUETP8M1_13TeV-pythia8',
+        'xsec': 118.7, # unverified
     },
 
     'WZ': {
-        'EOS_DIR': '/store/group/phys_higgs/hbb/ntuples/V14/WZ_TuneCUETP8M1_13TeV-pythia8',
-        'XSEC': 47.13,
+        'path': '/store/group/phys_higgs/hbb/ntuples/V14/WZ_TuneCUETP8M1_13TeV-pythia8',
+        'xsec': 47.13,
     },
 
     'ZZ': {
-        'EOS_DIR': '/store/group/phys_higgs/hbb/ntuples/V14/ZZ_TuneCUETP8M1_13TeV-pythia8/VHBB_HEPPY_V14_ZZ_TuneCUETP8M1_13TeV-pythia8__RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/151025_083230',
-        'XSEC': 16.523,
+        'path': '/store/group/phys_higgs/hbb/ntuples/V14/ZZ_TuneCUETP8M1_13TeV-pythia8/VHBB_HEPPY_V14_ZZ_TuneCUETP8M1_13TeV-pythia8__RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/151025_083230',
+        'xsec': 16.523,
     },
 
 }
+
 
 ###########################
 #-- Step3 Configuration --#
@@ -250,97 +252,132 @@ STEP4_DIR = '/afs/cern.ch/work/s/swang373/private/V14/Step4/'
 
 #WORK IN PROGRESS#
 
-###########################################
-#-- Signal/Control Region Configuration --#
-###########################################
+#########################################
+#-- Signal/Control Region Definitions --#
+#########################################
 
-# Minimal Preselection
-Minimal = [
-    'Vtype==2||Vtype==3||Vtype==4',
-    'HCSV_pt>150',
-    'Jet_btagCSV[hJCidx[1]]>0.3',
-    'min(Jet_pt[hJCidx[0]],Jet_pt[hJCidx[1]])>30',
-    'HCSV_mass<300',
+Preselection = [
+    'mhtJet30>130', 
+    'HCSV_pt>100',
+    'Jet_btagCSV[hJCidx[1]]>0.2',
+    'HCSV_mass<500',
+    'HCSV_mass>0',
+    'abs(TVector2::Phi_mpi_pi(HCSV_phi-met_phi))>0.7',
+    'abs(Jet_eta[hJCidx[0]])<2.6',
+    'abs(Jet_eta[hJCidx[1]])<2.6',
+    'Jet_pt[hJCidx[0]]>20',
+    'Jet_pt[hJCidx[1]]>20',
+    'abs(Jet_eta[0])<2.6',
 ]
 
-# AntiQCD
 AntiQCD = [
-    'MinIf$(abs(TVector2::Phi_mpi_pi(met_phi-Jet_phi)),Jet_pt>30&&Jet_puId&&abs(Jet_eta)<4.5)>0.7',
-    'abs(TVector2::Phi_mpi_pi(met_phi-tkMet_phi))<0.7',
-    'tkMet_pt>30',
+    # MET Flags
+    'Flag_hbheFilterNew',
+    'Flag_hbheIsoFilter',
+    'Flag_goodVertices',
+    'Flag_eeBadScFilter',
+    'Flag_CSCTightHaloFilter',
+    'MinIf$(abs(TVector2::Phi_mpi_pi(Jet_phi-met_phi)),Jet_pt>25 && abs(Jet_eta)<5.2)>0.5',
+    'Jet_chHEF[0]>0.1',
+    'MinIf$(abs(TVector2::Phi_mpi_pi(DiscardedJet_phi-met_phi))-3.1415,DiscardedJet_pt>25 && abs(DiscardedJet_eta)<5.2)>(0.5-3.1415)',
 ]
 
-# Additional Central Jet 
-addCenJet30m0 = '(Sum$(Jet_pt>30 && Jet_puId && abs(Jet_eta)<4.5)-2)>0'
-addCenJet30e0 = '(Sum$(Jet_pt>30 && Jet_puId && abs(Jet_eta)<4.5)-2)==0'
-addCenJet30e1 = '(Sum$(Jet_pt>30 && Jet_puId && abs(Jet_eta)<4.5)-2)<=1'
+# Jet Flavour Definitions 
+Light_Flavour = ['abs(Jet_mcFlavour[hJCidx[0]])!=5 && abs(Jet_mcFlavour[hJCidx[1]])!=5']
+Heavy_Flavour = ['abs(Jet_mcFlavour[hJCidx[0]])==5 || abs(Jet_mcFlavour[hJCidx[1]])==5']
 
-# Additional Lepton
-naddGoodLeptons10e0 = '(Sum$(aLeptons_pt>10 && (aLeptons_jetBTagCSV<0.25 || aLeptons_relIso03<0.4 || aLeptons_looseIdSusy!=0 || aLeptons_jetDR>0.3))+Sum$(vLeptons_pt>10 && (vLeptons_jetBTagCSV<0.25 || vLeptons_relIso03<0.4 || vLeptons_looseIdSusy!=0 || vLeptons_jetDR>0.3)))==0'
-naddGoodTaus20e0 = 'Sum$(TauGood_idDecayMode>=1 && TauGood_idCI3hit>=1 && TauGood_pt>20 && abs(TauGood_eta)<2.3)==0'
+#####################################
+# Signal/Control Region Definitions #
+#####################################
 
-# Jet Flavor 
-LIGHT_FLAVOR = ['abs(Jet_mcFlavour[hJCidx[0]])!=5 && abs(Jet_mcFlavour[hJCidx[1]])!=5']
-HEAVY_FLAVOR = ['abs(Jet_mcFlavour[hJCidx[0]])==5 || abs(Jet_mcFlavour[hJCidx[1]])==5']
-
-# Signal/Control Region Definitions
 REGIONS = {
 
     # Signal Regions
-    'Signal_Loose': [Minimal, AntiQCD, ['Vtype==4',
-                                        'Jet_btagCSV[hJCidx[1]]>0.605',
-                                        'HCSV_mass<100 || HCSV_mass>140',
-                                        naddGoodLeptons10e0,
-                                        naddGoodTaus20e0]
+    'Signal_Loose': [
+        Preselection, 
+        AntiQCD, 
+        ['Vtype==4',],
     ],
 
-    'Signal_Tight': [Minimal, AntiQCD, ['Vtype==4',
-                                        'Jet_btagCSV[hJCidx[1]]>0.8',
-                                        'HCSV_mass<100||HCSV_mass>140',
-                                        naddGoodLeptons10e0,
-                                        naddGoodTaus20e0,
-                                        addCenJet30e1]
+    'Signal_Tight': [
+        Preselection, 
+        AntiQCD, 
+        ['Vtype==4',
+         'Jet_btagCSV[hJCidx[1]]>0.85',
+         'Jet_btagCSV[hJCidx[0]]>0.941',
+         # addCenJet30 == 0
+         '(Sum$(Jet_pt>30 && abs(Jet_eta)<5.2)-2)==0',
+         # naddGoodLeptons5 == 0, note implicit string concatentation
+         '(Sum$(aLeptons_pt>5 && (aLeptons_jetBTagCSV<0.25 || aLeptons_relIso03<0.4 || aLeptons_looseIdSusy!=0 || aLeptons_jetDR>0.3))'
+         '+Sum$(vLeptons_pt>5 && (vLeptons_jetBTagCSV<0.25 || vLeptons_relIso03<0.4 || vLeptons_looseIdSusy!=0 || vLeptons_jetDR>0.3)))==0',
+         'HCSV_mass<140',
+         'HCSV_mass>105',]
     ],
     
     # TTbar Control Region
-    'TTbar': [Minimal, AntiQCD, ['Vtype==2 || Vtype==3',
-                                 'vLeptons_pt>30',
-                                 addCenJet30m0,
-                                 'Jet_btagCSV[hJCidx[0]]>0.97',
-                                 'Jet_btagCSV[hJCidx[1]]<0.97']
+    'TTbar': [
+        Preselection, 
+        AntiQCD, 
+        [# naddGoodLeptons5 >= 1, note implicit string concatentation
+         '(Sum$(aLeptons_pt>5 && (aLeptons_jetBTagCSV<0.25 || aLeptons_relIso03<0.4 || aLeptons_looseIdSusy!=0 || aLeptons_jetDR>0.3))'
+         '+Sum$(vLeptons_pt>5 && (vLeptons_jetBTagCSV<0.25 || vLeptons_relIso03<0.4 || vLeptons_looseIdSusy!=0 || vLeptons_jetDR>0.3)))>=1',
+         # addCenJet30 >= 1 
+         '(Sum$(Jet_pt>30 && abs(Jet_eta)<5.2)-2)>=1',
+         'Jet_btagCSV[hJCidx[0]]>0.941',]
     ],
 
     # Z+Jets Control Regions
-    'Z_light': [Minimal, AntiQCD, ['Vtype==4',
-                                   addCenJet30e0,
-                                   naddGoodLeptons10e0,
-                                   'Jet_btagCSV[hJCidx[0]]<0.97']
+    'Z_light': [
+        Preselection, 
+        AntiQCD, 
+        [# naddGoodLeptons5 == 0, note implicit string concatentation
+         '(Sum$(aLeptons_pt>5 && (aLeptons_jetBTagCSV<0.25 || aLeptons_relIso03<0.4 || aLeptons_looseIdSusy!=0 || aLeptons_jetDR>0.3))'
+         '+Sum$(vLeptons_pt>5 && (vLeptons_jetBTagCSV<0.25 || vLeptons_relIso03<0.4 || vLeptons_looseIdSusy!=0 || vLeptons_jetDR>0.3)))==0',
+         # addCenJet30 <= 1 
+         '(Sum$(Jet_pt>30 && abs(Jet_eta)<5.2)-2)<=1',
+         'Jet_btagCSV[hJCidx[0]]<0.941',]
     ],
 
-    'Z_bb': [Minimal, AntiQCD, ['Vtype==4',
-                                'HCSV_mass<100 || HCSV_mass>140',
-                                addCenJet30e0,
-                                naddGoodLeptons10e0,
-                                'Jet_btagCSV[hJCidx[1]]>0.8']
+    'Z_bb': [
+        Preselection, 
+        AntiQCD, 
+        [# naddGoodLeptons5 == 0, note implicit string concatentation
+         '(Sum$(aLeptons_pt>5 && (aLeptons_jetBTagCSV<0.25 || aLeptons_relIso03<0.4 || aLeptons_looseIdSusy!=0 || aLeptons_jetDR>0.3))'
+         '+Sum$(vLeptons_pt>5 && (vLeptons_jetBTagCSV<0.25 || vLeptons_relIso03<0.4 || vLeptons_looseIdSusy!=0 || vLeptons_jetDR>0.3)))==0',
+         # addCenJet30 <= 1 
+         '(Sum$(Jet_pt>30 && abs(Jet_eta)<5.2)-2)<=1',
+         'Jet_btagCSV[hJCidx[0]]>0.941', 
+         'HCSV_mass<110 || HCSV_mass>140',]
     ],
 
     # W+Jets Control Regions
-    'W_light': [Minimal, AntiQCD, ['Vtype==2 || Vtype==3',
-                                   'vLeptons_pt>30',
-                                   addCenJet30e0,
-                                   'Jet_btagCSV[hJCidx[0]]<0.97']
+    'W_light': [
+        Preselection, 
+        AntiQCD, 
+        [# naddGoodLeptons5 >= 1, note implicit string concatentation
+         '(Sum$(aLeptons_pt>5 && (aLeptons_jetBTagCSV<0.25 || aLeptons_relIso03<0.4 || aLeptons_looseIdSusy!=0 || aLeptons_jetDR>0.3))'
+         '+Sum$(vLeptons_pt>5 && (vLeptons_jetBTagCSV<0.25 || vLeptons_relIso03<0.4 || vLeptons_looseIdSusy!=0 || vLeptons_jetDR>0.3)))>=1',
+         # addCenJet30 <= 1 
+         '(Sum$(Jet_pt>30 && abs(Jet_eta)<5.2)-2)<=1',
+         'Jet_btagCSV[hJCidx[0]]<0.941',]
     ],
 
-    'W_bb': [Minimal, AntiQCD, ['Vtype==2 || Vtype==3',
-                                'vLeptons_pt>30',
-                                addCenJet30e0,
-                                'Jet_btagCSV[hJCidx[1]]>0.8']
+    'W_bb': [
+        Preselection, 
+        AntiQCD, 
+        [# naddGoodLeptons5 >= 1, note implicit string concatentation
+         '(Sum$(aLeptons_pt>5 && (aLeptons_jetBTagCSV<0.25 || aLeptons_relIso03<0.4 || aLeptons_looseIdSusy!=0 || aLeptons_jetDR>0.3))'
+         '+Sum$(vLeptons_pt>5 && (vLeptons_jetBTagCSV<0.25 || vLeptons_relIso03<0.4 || vLeptons_looseIdSusy!=0 || vLeptons_jetDR>0.3)))>=1',
+         # addCenJet30 <= 1 
+         '(Sum$(Jet_pt>30 && abs(Jet_eta)<5.2)-2)<=1',
+         'Jet_btagCSV[hJCidx[0]]>0.941',]
     ],
 
     # QCD Control Region
-    'QCD': [Minimal, ['MinIf$(abs(TVector2::Phi_mpi_pi(met_phi - Jet_phi)), Jet_pt>30 && Jet_puId && abs(Jet_eta)<4.5)<0.7',
-                      'abs(TVector2::Phi_mpi_pi(met_phi - tkMet_phi))>0.7',
-                      'tkMet_pt<30']
+    'QCD': [
+        Preselection, 
+        [#minDeltaPhiJet2Met < 0.7
+         'MinIf$(abs(TVector2::Phi_mpi_pi(Jet_phi-met_phi)),Iteration$<2)<0.7',]
     ],
  
 }
@@ -369,22 +406,22 @@ CATEGORIES = {
 
     'WjLF': {
         'PATH': STEP3_DIR + 'WJets.root',
-        'CUTS': LIGHT_FLAVOR,
+        'CUTS': Light_Flavour,
     },
 
     'WjHF': {
         'PATH': STEP3_DIR + 'WJets.root',
-        'CUTS': HEAVY_FLAVOR,
+        'CUTS': Heavy_Flavour,
     },
 
     'ZjLF': {
         'PATH': STEP3_DIR + 'ZJets.root',
-        'CUTS': LIGHT_FLAVOR,
+        'CUTS': Light_Flavour,
     },
 
     'ZjHF': {
         'PATH': STEP3_DIR + 'ZJets.root',
-        'CUTS': HEAVY_FLAVOR,
+        'CUTS': Heavy_Flavour,
     },
 
     'TT': {
@@ -468,9 +505,9 @@ PLOTS = {
     'ht30': {
         'expression': 'htJet30',
         'x_title': 'HT [GeV]',
-        'n_bins': 25,
+        'n_bins': 50,
         'x_min': 0,
-        'x_max': 500,
+        'x_max': 1000,
     },
 
     'hj_maxpt': {
