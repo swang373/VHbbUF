@@ -1,3 +1,5 @@
+from cut import Cut
+
 """
 ZnnHbb Analysis Settings
 
@@ -11,18 +13,18 @@ https://twiki.cern.ch/twiki/bin/view/LHCPhysics/CERNYellowReportPageAt1314TeV#s_
 https://twiki.cern.ch/twiki/bin/view/LHCPhysics/SingleTopRefXsec
 """
 
-###########################
-#-- Step2 Configuration --#
-###########################
+#########################
+#-- Working Directory --#
+#########################
 
-# The output directory for the Step2 ntuples.
-OUTDIR = '/afs/cern.ch/work/s/swang373/private/V14/blargl_test/'
+WORKDIR = '/afs/cern.ch/work/s/swang373/private/V14/'
 
-# The list of cuts used to skim the Step1 ntuples.
-SKIM = [
-    'Vtype>=0',
-    'met_pt>150',
-]
+#########################
+#-- Configure Samples --#
+#########################
+
+# The cut used to skim the Step1 ntuples.
+SKIM = 'Vtype>=0 && met_pt>150'
 
 # The Step1 ntuples and their properties.
 SAMPLES = { 
@@ -59,7 +61,6 @@ SAMPLES = {
     # W+Jets
     'WJetsIncl': {
         'path': '/store/group/phys_higgs/hbb/ntuples/V14/WJetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8',
-        'cuts': ['lheHT<100'],
         'xsec': 61526.7,
     },
 
@@ -194,6 +195,59 @@ SAMPLES = {
     },
 
 }
+
+###########################
+#-- Configure Processes --#
+###########################
+
+# The groupings of Step2 ntuples representing a decay process.
+PROCESSES = {
+
+    'ZH': {
+        'samples': ['ZnnH125'],
+    },
+
+    'ggZH': {
+        'samples': ['ggZH125'],
+    },
+
+    'WH': {
+        'samples': ['WlnH125'],
+    },
+    
+    's_Top': {
+        'samples': ['T_s_comb_lep', 'T_t_lep', 'Tbar_t_lep', 'T_tW', 'Tbar_tW'],
+    },
+
+    'TT': {
+        'samples': ['TTPow'],
+    },
+
+    'Zj0b': {
+        'samples': ['ZJetsHT100', 'ZJetsHT200', 'ZJetsHT400', 'ZJetsHT600'],
+        'cuts': []
+    },
+
+}
+
+
+
+
+
+# Generator Level Higgs Jets Classifications
+
+Vbb = Cut('Sum$(GenJet_pt>20 && abs(GenJet_eta)<2.4 && GenJet_numBHadrons>0)>=2')
+
+Vb = Cut('Sum$(GenJet_pt>20 && abs(GenJet_eta)<2.4 && GenJet_numBHadrons>0)==1')
+
+Vcc = Cut('Sum$(GenJet_pt>20 && abs(GenJet_eta)<2.4 && GenJet_numCHadrons>0)>=1') & -Vb & -Vbb
+
+Vudsg = -(Vbb | Vb | Vcc)
+
+
+
+
+
 
 
 ###########################
@@ -453,11 +507,11 @@ PLOT_DIR = 'plots/'
 TARGET_LUMI = 2190
 
 # The weights to apply to the data samples.
-DATA_WEIGHT = tco.mult('json', 'HLT_BIT_HLT_PFMET90_PFMHT90_IDTight_v || HLT_BIT_HLT_PFMET170_NoiseCleaned_v')
+#DATA_WEIGHT = tco.mult('json', 'HLT_BIT_HLT_PFMET90_PFMHT90_IDTight_v || HLT_BIT_HLT_PFMET170_NoiseCleaned_v')
 
 # The weights to apply to the MC samples.
-MC_WEIGHT = tco.mult('sign(genWeight)', TARGET_LUMI, '1./sample_lumi', 'puWeight',
-                     'HLT_BIT_HLT_PFMET90_PFMHT90_IDLoose_v || HLT_BIT_HLT_PFMET170_NoiseCleaned_v')
+#MC_WEIGHT = tco.mult('sign(genWeight)', TARGET_LUMI, '1./sample_lumi', 'puWeight',
+#                     'HLT_BIT_HLT_PFMET90_PFMHT90_IDLoose_v || HLT_BIT_HLT_PFMET170_NoiseCleaned_v')
 
 # The plots to draw and their properties.
 PLOTS = {
