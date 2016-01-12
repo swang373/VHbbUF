@@ -1,12 +1,15 @@
-import glob
 import multiprocessing as mp
 import subprocess as sp
 import tempfile as tf
 
 import ROOT
 
-from settings import *
-import TCutOperators as tco
+import settings
+
+
+class Region(object):
+
+    def __init__(self, name = '', 
 
 
 def make_category(category = '', outdir = '', cuts = []):
@@ -23,22 +26,33 @@ def make_category(category = '', outdir = '', cuts = []):
     infile = ROOT.TFile(path, 'read')
     tree = infile.Get('tree')
     tree.SetName(category)
+    print tree.GetEntriesFast()
 
-    # Create an output file for the category.    
-    outfile = ROOT.TFile(outdir + category + '.root', 'recreate')
+    # Create an output file for the category. The output file will use
+    # more disk space than necessary because of how a TFile is written.
+    large_file = outdir + category + '_large.root'
+    outfile = ROOT.TFile(large_file, 'recreate')
 
     # Create the category's tree by destructively
     # iterating over the region and subcategory cuts.
     category_tree = tree.CopyTree(tco.add(*cuts.pop(0)))
+    print category_tree.GetEntriesFast()
     while cuts:
         category_tree = category_tree.CopyTree(tco.add(*cuts.pop(0)))
+        print category_tree.GetEntriesFast()
         
-    print '--- Category "{}", selecting {!s} entries from "{}"'.format(category, category_tree.GetEntriesFast(), path)
+    print '--- Category "{}": Selected {!s} entries from "{}"'.format(category, category_tree.GetEntriesFast(), path)
 
     # Save the category tree.
     category_tree.Write()
     outfile.Close()
     infile.Close()
+
+    # hadding the large file "reduces" the size on disk. This is the only
+    # work around I've found to reduce the TFile memory overhead.
+    small_file = outdir + category + '.root'
+    sp.check_call(['hadd', '-f', small_file, large_file], stdout = sp.PIPE, stderr = sp.PIPE)
+    sp.check_call(['rm', large_file])
      
 #############################
 
@@ -53,8 +67,10 @@ def make_region(region = ''):
     mc_kwargs = {'outdir': tmpdir + '/', 'cuts': REGIONS[region]}
 
     # Add the categories in parallel. Four processes is a safe default.
-    pool = mp.Pool(processes = 4)
+    pool = mp.Pool(processes = 1)
     for category in CATEGORIES:
+        if category != 'Data':
+            continue
         pool.apply_async(make_category, (category,), mc_kwargs)
     pool.close()
     pool.join()
@@ -62,7 +78,7 @@ def make_region(region = ''):
     # Combine the separate category files into a single ntuple.
     category_files = glob.glob(tmpdir + '/*.root')
     region_file = REGION_DIR + region + '.root'
-    sp.check_call(['hadd', '-f', region_file] + category_files)
+    sp.check_call(['hadd', '-f', region_file] + category_files, stdout = sp.PIPE, stderr = sp.PIPE)
 
     # It is the user's responsibility to delete the temporary directory.
     sp.check_call(['rm', '-r', tmpdir])
