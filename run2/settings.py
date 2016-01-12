@@ -1,4 +1,4 @@
-from cut import Cut
+from cut import *
 
 """
 ZnnHbb Analysis Settings
@@ -14,14 +14,11 @@ https://twiki.cern.ch/twiki/bin/view/LHCPhysics/SingleTopRefXsec
 """
 
 #########################
-#-- Working Directory --#
-#########################
-
-WORKDIR = '/afs/cern.ch/work/s/swang373/private/V14/'
-
-#########################
 #-- Configure Samples --#
 #########################
+
+# Output Directory
+SAMPLE_DIR = '/afs/cern.ch/work/s/swang373/private/V14/samples/'
 
 # The cut used to skim the Step1 ntuples.
 SKIM = 'Vtype>=0 && met_pt>150'
@@ -200,8 +197,15 @@ SAMPLES = {
 #-- Configure Processes --#
 ###########################
 
+# Output Directory
+PROCESS_DIR = '/afs/cern.ch/work/s/swang373/private/V14/processes/'
+
 # The groupings of Step2 ntuples representing a decay process.
 PROCESSES = {
+
+    'data_obs': {
+        'samples': ['Data_MET_C', 'Data_MET_D', 'Data_MET_DP'],
+    },
 
     'ZH': {
         'samples': ['ZnnH125'],
@@ -225,116 +229,63 @@ PROCESSES = {
 
     'Zj0b': {
         'samples': ['ZJetsHT100', 'ZJetsHT200', 'ZJetsHT400', 'ZJetsHT600'],
-        'cuts': []
+        'process_cut': Vudsg | Vcc,
     },
 
-}
-
-
-
-
-
-# Generator Level Higgs Jets Classifications
-
-Vbb = Cut('Sum$(GenJet_pt>20 && abs(GenJet_eta)<2.4 && GenJet_numBHadrons>0)>=2')
-
-Vb = Cut('Sum$(GenJet_pt>20 && abs(GenJet_eta)<2.4 && GenJet_numBHadrons>0)==1')
-
-Vcc = Cut('Sum$(GenJet_pt>20 && abs(GenJet_eta)<2.4 && GenJet_numCHadrons>0)>=1') & -Vb & -Vbb
-
-Vudsg = -(Vbb | Vb | Vcc)
-
-
-
-
-
-
-
-###########################
-#-- Step3 Configuration --#
-###########################
-
-# Output directory for the Step3 ntuples.
-STEP3_DIR = '/afs/cern.ch/work/s/swang373/private/V14/Step3/'
-
-# The groupings of Step2 ntuples.
-GROUPS = {
-
-    'Data_MET': {
-        'SAMPLES': ['Data_MET_C', 'Data_MET_D', 'Data_MET_DP'],
+    'Zj1b': {
+        'samples': ['ZJetsHT100', 'ZJetsHT200', 'ZJetsHT400', 'ZJetsHT600'],
+        'process_cut': Vb,
     },
 
-    'ZnnH125': {},
-    
-    'ggZH125': {},
-
-    'WlnH125': {},
- 
-    'WJets': {
-        'SAMPLES': ['WJetsIncl', 'WJetsHT100', 'WJetsHT200', 'WJetsHT400', 'WJetsHT600'],
-        'CUTS': ['lheHT<100'],
-    },
-
-    'ZJets': {
-        'SAMPLES': ['ZJetsHT100', 'ZJetsHT200', 'ZJetsHT400', 'ZJetsHT600'],
-    },
-   
-    'TT': {
-        'SAMPLES': ['TTPow'],
-    },
-
-    'ST': {
-        'SAMPLES': ['T_s_comb_lep', 'T_t_lep', 'Tbar_t_lep', 'T_tW', 'Tbar_tW'],
+    'Zj2b': {
+        'samples': ['ZJetsHT100', 'ZJetsHT200', 'ZJetsHT400', 'ZJetsHT600'],
+        'process_cut': Vbb,
     },
 
     'QCD': {
-        'SAMPLES': ['QCDHT100', 'QCDHT200', 'QCDHT300', 'QCDHT500', 'QCDHT700', 'QCDHT1000', 'QCDHT1500', 'QCDHT2000'],
+        'samples': ['QCDHT100', 'QCDHT200', 'QCDHT300', 'QCDHT500', 'QCDHT700', 'QCDHT1000', 'QCDHT1500', 'QCDHT2000'],
     },
 
-    'VV': {
-        'SAMPLES': ['WW', 'WZ', 'ZZ'],
+    'VVLF': {
+        'samples': ['WW', 'WZ', 'ZZ'],
+        'process_cut': Vudsg | Vcc,
+    },
+
+    'VVHF': {
+        'samples': ['WW', 'WZ', 'ZZ'],
+        'process_cut': Vb | Vbb,
     },
 
 }
-
-###########################
-#-- Step4 Configuration --#
-###########################
-
-# Output directory for the Step3 ntuples.
-STEP4_DIR = '/afs/cern.ch/work/s/swang373/private/V14/Step4/'
-
-#WORK IN PROGRESS#
 
 #########################################
 #-- Signal/Control Region Definitions --#
 #########################################
 
-Preselection = [
-    'mhtJet30>130', 
-    'HCSV_pt>100',
-    'Jet_btagCSV[hJCidx[1]]>0.2',
-    'HCSV_mass<500',
-    'HCSV_mass>0',
-    'abs(TVector2::Phi_mpi_pi(HCSV_phi-met_phi))>0.7',
-    'abs(Jet_eta[hJCidx[0]])<2.6',
-    'abs(Jet_eta[hJCidx[1]])<2.6',
-    'Jet_pt[hJCidx[0]]>20',
-    'Jet_pt[hJCidx[1]]>20',
-    'abs(Jet_eta[0])<2.6',
-]
+Preselection = (
+    Cut('mhtJet30>130') & 
+    'HCSV_pt>100' & 
+    'Jet_btagCSV[hJCidx[1]]>0.2' &
+    'HCSV_mass<500' & 
+    'HCSV_mass>0' & 
+    'abs(TVector2::Phi_mpi_pi(HCSV_phi-met_phi))>0.7' &
+    'abs(Jet_eta[hJCidx[0]])<2.6' & 
+    'abs(Jet_eta[hJCidx[1]])<2.6' & 
+    'Jet_pt[hJCidx[0]]>20' &
+    'Jet_pt[hJCidx[1]]>20' & 
+    'abs(Jet_eta[0])<2.6'
+)
 
-AntiQCD = [
-    # MET Flags
-    'Flag_hbheFilterNew',
-    'Flag_hbheIsoFilter',
-    'Flag_goodVertices',
-    'Flag_eeBadScFilter',
-    'Flag_CSCTightHaloFilter',
-    'MinIf$(abs(TVector2::Phi_mpi_pi(Jet_phi-met_phi)),Jet_pt>25 && abs(Jet_eta)<5.2)>0.5',
-    'Jet_chHEF[0]>0.1',
-    'MinIf$(abs(TVector2::Phi_mpi_pi(DiscardedJet_phi-met_phi))-3.1415,DiscardedJet_pt>25 && abs(DiscardedJet_eta)<5.2)>(0.5-3.1415)',
-]
+AntiQCD = (
+    Cut('Flag_hbheFilterNew') &
+    'Flag_hbheIsoFilter' &
+    'Flag_goodVertices' &
+    'Flag_eeBadScFilter' &
+    'Flag_CSCTightHaloFilter' &
+    'MinIf$(abs(TVector2::Phi_mpi_pi(Jet_phi-met_phi)),Jet_pt>25 && abs(Jet_eta)<5.2)>0.5' &
+    'Jet_chHEF[0]>0.1' &
+    'MinIf$(abs(TVector2::Phi_mpi_pi(DiscardedJet_phi-met_phi))-3.1415,DiscardedJet_pt>25 && abs(DiscardedJet_eta)<5.2)>(0.5-3.1415)'
+)
 
 # Jet Flavour Definitions 
 Light_Flavour = ['abs(Jet_mcFlavour[hJCidx[0]])!=5 && abs(Jet_mcFlavour[hJCidx[1]])!=5']
@@ -438,6 +389,8 @@ REGIONS = {
 
 # Output directory for the signal/control region ntuples.
 REGION_DIR = '/afs/cern.ch/work/s/swang373/private/V14/test/'
+
+STEP3_DIR = '/afs/cern.ch/work/s/swang373/private/V14/Step3_test/'
 
 # Categories
 CATEGORIES = {

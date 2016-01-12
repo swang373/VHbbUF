@@ -16,7 +16,7 @@ EOS = '/afs/cern.ch/project/eos/installation/0.3.84-aquamarine/bin/eos.select'
 
 class Sample(object):
     
-    def __init__(self, name = '', path = '', xsec = None):
+    def __init__(self, name = '', path = '', xsec = None, **kwargs):
 
         self.logger = logging.getLogger('Sample')
         self.logger.info('Initialized for {}'.format(name))
@@ -37,16 +37,14 @@ class Sample(object):
         self.logger.info('Number of ".root" files: {!s}'.format(len(files)))
 
         # Output Directory
-        sample_dir = settings.WORKDIR + 'samples/'
-
         try:
-            os.makedirs(sample_dir)
+            os.makedirs(settings.SAMPLE_DIR)
         except OSError:
-            if not os.path.isdir(sample_dir):
+            if not os.path.isdir(settings.SAMPLE_DIR):
                 raise
 
         # Temporary Work Directory
-        tmpdir = tf.mkdtemp(prefix = self.name, dir = sample_dir)
+        tmpdir = tf.mkdtemp(prefix = self.name, dir = settings.SAMPLE_DIR)
         self.tmpdir = tmpdir + '/'
 
         # Parallel Copy
@@ -75,15 +73,17 @@ class Sample(object):
 
         # hadd Files
         inputfiles = glob.glob(self.tmpdir + '*.root')
-        self.outputfile = sample_dir + self.name + '.root'
+        outputfile = settings.SAMPLE_DIR + self.name + '.root'
 
-        hadd_log = tf.TemporaryFile(dir = sample_dir)
-        sp.check_call(['hadd', '-f', self.outputfile] + inputfiles, stdout = hadd_log, stderr = hadd_log)
-        sp.check_call(['rm', '-r', self.tmpdir])
+        hadd_log = tf.TemporaryFile(dir = settings.SAMPLE_DIR)
+        sp.check_call(['hadd', '-f', outputfile] + inputfiles, stdout = hadd_log, stderr = hadd_log)
+
+        if hasattr(self, 'tmpdir'):
+            sp.check_call(['rm', '-r', self.tmpdir])
 
         # Add Sample Luminosity Branch
         if hasattr(self, 'xsec'):
-            sample_lumi = self._write_sample_lumi()
+            sample_lumi = self._write_sample_lumi(outputfile)
             self.logger.info('Sample Luminosity: {} pb-1'.format(sample_lumi))
 
     def _find_dir(self):
@@ -137,9 +137,10 @@ class Sample(object):
 
             results.put(result)
 
-    def _write_sample_lumi(self):
+    @staticmethod
+    def _write_sample_lumi(fname):
         
-        infile = ROOT.TFile(self.outputfile, 'update')
+        infile = ROOT.TFile(fname, 'update')
         tree = infile.Get('tree')
 
         sample_lumi_address = np.array([-999], np.float32)
@@ -172,6 +173,5 @@ if __name__ == '__main__':
         logging.basicConfig(level = logging.INFO,
                             format = '%(name)s(%(levelname)s) - %(message)s')
 
-        sample = Sample(name, **settings.SAMPLES[name])
-        sample.make()
+        Sample(name, **settings.SAMPLES[name]).make()
 
