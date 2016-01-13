@@ -1,12 +1,14 @@
 from cut import *
 
 """
-ZnnHbb Analysis Configuration
+VHbb Analysis Configuration
+
+See also cut.py
 """
 
-###########################
-#-- Working Environment --#
-###########################
+#########################
+#-- Working Directory --#
+#########################
 
 WORK_DIR = '/afs/cern.ch/work/s/swang373/private/V14/'
 
@@ -14,13 +16,26 @@ WORK_DIR = '/afs/cern.ch/work/s/swang373/private/V14/'
 #-- Samples --#
 ###############
 
-# The cross-sections for the MC samples are reported in picobarns (pb).
-# They were obtained from PDG reference pages and the following links:
-# https://twiki.cern.ch/twiki/bin/viewauth/CMS/SummaryTable1G25ns
-# https://twiki.cern.ch/twiki/bin/view/LHCPhysics/CERNYellowReportPageAt1314TeV#s_13_0_TeV
-# https://twiki.cern.ch/twiki/bin/view/LHCPhysics/SingleTopRefXsec
+"""
+Properties
+----------
+path : str
+       The path to the Step1 ntuple on EOS. The directory tree from the path
+       to the sample's files must contain a single subdirectory at each level,
+       as multiple subdirectories may lead to different versions of the sample.
+xsec : float, optional
+       The cross-section for the MC sample, reported in picobarns (pb).
 
-# The Step1 ntuples and their properties.
+BEFORE RUNNING sample.py: MAKE SURE SKIM IN cut.py IS CORRECT!
+
+The cross-sections and k-factors were obtained from the following CERN TWiki's:
+twiki.cern.ch/twiki/bin/viewauth/CMS/SummaryTable1G25ns
+twiki.cern.ch/twiki/bin/view/LHCPhysics/CERNYellowReportPageAt1314TeV#s_13_0_TeV
+twiki.cern.ch/twiki/bin/view/LHCPhysics/SingleTopRefXsec
+
+The branching ratios were obtained from the PDG refernce tables.
+"""
+
 SAMPLES = { 
 
     # Datasets
@@ -200,10 +215,10 @@ Properties
 samples     : list of str
               The list of samples to be combined into a decay process. 
               Sample names must be valid keys of the SAMPLES dictionary.
-sample_cuts : list of str or Cut
+sample_cuts : list of str or Cut, optional
               A list of sample-specific cuts applied before combination. 
               Their ordering must match that of the samples property.
-process_cut : str or Cut
+process_cut : str or Cut, optional
               A process-specific cut applied to all samples before combination. 
 """
 
@@ -286,7 +301,15 @@ PROCESSES = {
 #-- Regions --#
 ###############
 
-# The signal and control region definitions.
+"""
+Properties
+----------
+cuts : list of str or Cut
+       The list of cuts defining the signal or control region. Please keep 
+       the individual cuts small in length, as the design choice to apply cuts
+       sequentially was made because PyROOT crashes when using one large string.
+"""
+
 REGIONS = {
 
     'Signal_Loose': {
