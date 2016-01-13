@@ -36,14 +36,14 @@ class Cut(str):
         """
         if not self:
             return Cut()
-        return Cut('!({})'.format(self))
+        return Cut('!({0!s})'.format(self))
 
     @op
     def __and__(self, other):
         """
         Logical AND. Ex: a & b
         """
-        return Cut('({})&&({})'.format(self, other))
+        return Cut('({0!s})&&({1!s})'.format(self, other))
 
     @op
     def __rand__(self, other):
@@ -54,11 +54,22 @@ class Cut(str):
         """
         Logical OR. Ex: a | b
         """
-        return Cut('({})||({})'.format(self, other))
+        return Cut('({0!s})||({1!s})'.format(self, other))
 
     @op
     def __ror__(self, other):
         return self | other
+
+    @op
+    def __mul__(self, other):
+        """
+        Multiplication. Ex: a * b
+        """
+        return Cut('({0!s})*({1!s})'.format(self, other))
+
+    @op
+    def __rmul__(self, other):
+        return self * other
 
 #################################################
 #-- Generator Level Higgs Jets Classification --#
@@ -127,4 +138,13 @@ qcd = (
     'tkMet_pt<30'
 )
 
+#######################
+#-- Event Weighting --#
+#######################
 
+# Target luminosity of the data in inverse picobarns (pb-1).
+target_lumi = 2200
+
+data_weight = Cut('json') * 'HLT_BIT_HLT_PFMET90_PFMHT90_IDTight_v || HLT_BIT_HLT_PFMET170_NoiseCleaned_v'
+
+mc_weight = Cut('sign(genWeight)') * target_lumi * '1./sample_lumi' * 'puWeight' * 'HLT_BIT_HLT_PFMET90_PFMHT90_IDLoose_v || HLT_BIT_HLT_PFMET170_NoiseCleaned_v'

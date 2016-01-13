@@ -55,16 +55,16 @@ class Process(object):
             tmpdir = tf.mkdtemp(prefix = self.name, dir = settings.PROCESS_DIR)
             self.tmpdir = tmpdir + '/'
 
-            processes = [
+            _processes = [
                 mp.Process(target = self._cut_sample, args = (tasks, results))
                 for i in range(min(n_tasks, mp.cpu_count()))
             ]
 
-            for p in processes:
+            for p in _processes:
                 tasks.put(None)
                 p.start()
 
-            for p in processes:
+            for p in _processes:
                 p.join()
 
             results.put(None)

@@ -60,7 +60,7 @@ class Region(object):
         results.put(None)
 
         for r in iter(results.get, None):
-            self.logger.info('Selected {!s} out of {!s} entries in {}.'.format(*r)
+            self.logger.info('Selected {!s} out of {!s} entries in {}.'.format(*r))
 
         # hadd Files
         inputfiles = glob.glob(self.tmpdir + '*.root')
@@ -84,7 +84,7 @@ class Region(object):
 
         for process in iter(tasks.get, None):
 
-            infile = ROOT.TFile(self.PROCESS_DIR + process + '.root', 'read')
+            infile = ROOT.TFile(settings.PROCESS_DIR + process + '.root', 'read')
             outfile = ROOT.TFile(self.tmpdir + process + '.root', 'recreate')
 
             intree = infile.Get('tree')
@@ -120,5 +120,5 @@ if __name__ == '__main__':
         logging.basicConfig(level = logging.INFO,
                             format = '%(name)s(%(levelname)s) - %(message)s')
 
-        REGION(name, **settings.REGIONS[name]).make()
+        Region(name, **settings.REGIONS[name]).make()
 

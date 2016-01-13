@@ -197,6 +197,7 @@ SAMPLES = {
 #-- Configure Processes --#
 ###########################
 
+"""
 # Output Directory
 PROCESS_DIR = '/afs/cern.ch/work/s/swang373/private/V14/processes/'
 
@@ -257,14 +258,16 @@ PROCESSES = {
     },
 
 }
+"""
 
-########################################
-#-- Configure Signal/Control Regions --#
-########################################
+#########################
+#-- Configure Regions --#
+#########################
 
 # Output Directory
-REGION_DIR = '/afs/cern.ch/work/s/swang373/private/V14/regions/'
+REGION_DIR = '/afs/cern.ch/work/s/swang373/private/V14/regions_test/'
 
+# The signal and control region definitions.
 REGIONS = {
 
     'Signal_Loose': {
@@ -302,61 +305,39 @@ REGIONS = {
 }
 
 
-STEP3_DIR = '/afs/cern.ch/work/s/swang373/private/V14/Step3_test/'
+PROCESS_DIR = '/afs/cern.ch/work/s/swang373/private/V14/Step3/'
 
 # Categories
-CATEGORIES = {
+PROCESSES = {
 
-    'Data': {
-        'PATH': STEP3_DIR + 'Data_MET.root',
+    'Data_MET': {
     },
 
-    'ZH': {
-        'PATH': STEP3_DIR + 'ZnnH125.root',
+    'ZnnH125': {
     },
 
-    'ggZH': {
-        'PATH': STEP3_DIR + 'ggZH125.root',
+    'ggZH125': {
     },
 
-    'WH': {
-        'PATH': STEP3_DIR + 'WlnH125.root',
+    'WlnH125': {
     },
 
-    'WjLF': {
-        'PATH': STEP3_DIR + 'WJets.root',
-        'CUTS': Light_Flavour,
+    'WJets': {
     },
 
-    'WjHF': {
-        'PATH': STEP3_DIR + 'WJets.root',
-        'CUTS': Heavy_Flavour,
-    },
-
-    'ZjLF': {
-        'PATH': STEP3_DIR + 'ZJets.root',
-        'CUTS': Light_Flavour,
-    },
-
-    'ZjHF': {
-        'PATH': STEP3_DIR + 'ZJets.root',
-        'CUTS': Heavy_Flavour,
+    'ZJets': {
     },
 
     'TT': {
-        'PATH': STEP3_DIR + 'TT.root',
     },
 
     'ST': {
-        'PATH': STEP3_DIR + 'ST.root',
     },
 
     'VV': {
-        'PATH': STEP3_DIR + 'VV.root',
     },
 
     'QCD': {
-        'PATH': STEP3_DIR + 'QCD.root',
     },
 
 }
@@ -368,15 +349,11 @@ CATEGORIES = {
 # Output directory for the plots.
 PLOT_DIR = 'plots/'
 
-# Target luminosity of the data in inverse picobarns (pb-1).
-TARGET_LUMI = 2190
-
 # The weights to apply to the data samples.
-#DATA_WEIGHT = tco.mult('json', 'HLT_BIT_HLT_PFMET90_PFMHT90_IDTight_v || HLT_BIT_HLT_PFMET170_NoiseCleaned_v')
+DATA_WEIGHT = data_weight 
 
 # The weights to apply to the MC samples.
-#MC_WEIGHT = tco.mult('sign(genWeight)', TARGET_LUMI, '1./sample_lumi', 'puWeight',
-#                     'HLT_BIT_HLT_PFMET90_PFMHT90_IDLoose_v || HLT_BIT_HLT_PFMET170_NoiseCleaned_v')
+MC_WEIGHT = mc_weight 
 
 # The plots to draw and their properties.
 PLOTS = {

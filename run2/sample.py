@@ -51,7 +51,7 @@ class Sample(object):
         tasks = mp.Queue()
         results = mp.Queue()
  
-        processes = [
+        _processes = [
             mp.Process(target = self._copy_file, args = (tasks, results))
             for cpu in range(mp.cpu_count())
         ]
@@ -59,11 +59,11 @@ class Sample(object):
         for f in files:
             tasks.put(f)
 
-        for p in processes:
+        for p in _processes:
             tasks.put(None)
             p.start()
         
-        for p in processes:
+        for p in _processes:
             p.join()
 
         results.put(None)
@@ -81,7 +81,7 @@ class Sample(object):
 
         # Add Sample Luminosity Branch
         if hasattr(self, 'xsec'):
-            sample_lumi = self._write_sample_lumi(outputfile)
+            sample_lumi = self._write_sample_lumi()
             self.logger.info('Sample Luminosity: {} pb-1'.format(sample_lumi))
 
     def _find_dir(self):
@@ -135,10 +135,9 @@ class Sample(object):
 
             results.put(result)
 
-    @staticmethod
-    def _write_sample_lumi(fname):
+    def _write_sample_lumi(self):
         
-        infile = ROOT.TFile(fname, 'update')
+        infile = ROOT.TFile(settings.SAMPLE_DIR + self.name + '.root', 'update')
         tree = infile.Get('tree')
 
         sample_lumi_address = np.array([-999], np.float32)
