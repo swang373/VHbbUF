@@ -258,137 +258,49 @@ PROCESSES = {
 
 }
 
-#########################################
-#-- Signal/Control Region Definitions --#
-#########################################
+########################################
+#-- Configure Signal/Control Regions --#
+########################################
 
-Preselection = (
-    Cut('mhtJet30>130') & 
-    'HCSV_pt>100' & 
-    'Jet_btagCSV[hJCidx[1]]>0.2' &
-    'HCSV_mass<500' & 
-    'HCSV_mass>0' & 
-    'abs(TVector2::Phi_mpi_pi(HCSV_phi-met_phi))>0.7' &
-    'abs(Jet_eta[hJCidx[0]])<2.6' & 
-    'abs(Jet_eta[hJCidx[1]])<2.6' & 
-    'Jet_pt[hJCidx[0]]>20' &
-    'Jet_pt[hJCidx[1]]>20' & 
-    'abs(Jet_eta[0])<2.6'
-)
-
-AntiQCD = (
-    Cut('Flag_hbheFilterNew') &
-    'Flag_hbheIsoFilter' &
-    'Flag_goodVertices' &
-    'Flag_eeBadScFilter' &
-    'Flag_CSCTightHaloFilter' &
-    'MinIf$(abs(TVector2::Phi_mpi_pi(Jet_phi-met_phi)),Jet_pt>25 && abs(Jet_eta)<5.2)>0.5' &
-    'Jet_chHEF[0]>0.1' &
-    'MinIf$(abs(TVector2::Phi_mpi_pi(DiscardedJet_phi-met_phi))-3.1415,DiscardedJet_pt>25 && abs(DiscardedJet_eta)<5.2)>(0.5-3.1415)'
-)
-
-# Jet Flavour Definitions 
-Light_Flavour = ['abs(Jet_mcFlavour[hJCidx[0]])!=5 && abs(Jet_mcFlavour[hJCidx[1]])!=5']
-Heavy_Flavour = ['abs(Jet_mcFlavour[hJCidx[0]])==5 || abs(Jet_mcFlavour[hJCidx[1]])==5']
-
-#####################################
-# Signal/Control Region Definitions #
-#####################################
+# Output Directory
+REGION_DIR = '/afs/cern.ch/work/s/swang373/private/V14/regions/'
 
 REGIONS = {
 
-    # Signal Regions
-    'Signal_Loose': [
-        Preselection, 
-        AntiQCD, 
-        ['Vtype==4',],
-    ],
+    'Signal_Loose': {
+        'cuts': [minimal, noQCD, signal_loose],
+    },
 
-    'Signal_Tight': [
-        Preselection, 
-        AntiQCD, 
-        ['Vtype==4',
-         'Jet_btagCSV[hJCidx[1]]>0.85',
-         'Jet_btagCSV[hJCidx[0]]>0.941',
-         # addCenJet30 == 0
-         '(Sum$(Jet_pt>30 && abs(Jet_eta)<5.2)-2)==0',
-         # naddGoodLeptons5 == 0, note implicit string concatentation
-         '(Sum$(aLeptons_pt>5 && (aLeptons_jetBTagCSV<0.25 || aLeptons_relIso03<0.4 || aLeptons_looseIdSusy!=0 || aLeptons_jetDR>0.3))'
-         '+Sum$(vLeptons_pt>5 && (vLeptons_jetBTagCSV<0.25 || vLeptons_relIso03<0.4 || vLeptons_looseIdSusy!=0 || vLeptons_jetDR>0.3)))==0',
-         'HCSV_mass<140',
-         'HCSV_mass>105',]
-    ],
+    'Signal_Tight': {
+        'cuts': [minimal, noQCD, signal_tight],
+    },
     
-    # TTbar Control Region
-    'TTbar': [
-        Preselection, 
-        AntiQCD, 
-        [# naddGoodLeptons5 >= 1, note implicit string concatentation
-         '(Sum$(aLeptons_pt>5 && (aLeptons_jetBTagCSV<0.25 || aLeptons_relIso03<0.4 || aLeptons_looseIdSusy!=0 || aLeptons_jetDR>0.3))'
-         '+Sum$(vLeptons_pt>5 && (vLeptons_jetBTagCSV<0.25 || vLeptons_relIso03<0.4 || vLeptons_looseIdSusy!=0 || vLeptons_jetDR>0.3)))>=1',
-         # addCenJet30 >= 1 
-         '(Sum$(Jet_pt>30 && abs(Jet_eta)<5.2)-2)>=1',
-         'Jet_btagCSV[hJCidx[0]]>0.941',]
-    ],
+    'TT': {
+        'cuts': [minimal, noQCD, tt],
+    },
 
-    # Z+Jets Control Regions
-    'Z_light': [
-        Preselection, 
-        AntiQCD, 
-        [# naddGoodLeptons5 == 0, note implicit string concatentation
-         '(Sum$(aLeptons_pt>5 && (aLeptons_jetBTagCSV<0.25 || aLeptons_relIso03<0.4 || aLeptons_looseIdSusy!=0 || aLeptons_jetDR>0.3))'
-         '+Sum$(vLeptons_pt>5 && (vLeptons_jetBTagCSV<0.25 || vLeptons_relIso03<0.4 || vLeptons_looseIdSusy!=0 || vLeptons_jetDR>0.3)))==0',
-         # addCenJet30 <= 1 
-         '(Sum$(Jet_pt>30 && abs(Jet_eta)<5.2)-2)<=1',
-         'Jet_btagCSV[hJCidx[0]]<0.941',]
-    ],
+    'Z_light': {
+        'cuts': [minimal, noQCD, z_light],
+    },
 
-    'Z_bb': [
-        Preselection, 
-        AntiQCD, 
-        [# naddGoodLeptons5 == 0, note implicit string concatentation
-         '(Sum$(aLeptons_pt>5 && (aLeptons_jetBTagCSV<0.25 || aLeptons_relIso03<0.4 || aLeptons_looseIdSusy!=0 || aLeptons_jetDR>0.3))'
-         '+Sum$(vLeptons_pt>5 && (vLeptons_jetBTagCSV<0.25 || vLeptons_relIso03<0.4 || vLeptons_looseIdSusy!=0 || vLeptons_jetDR>0.3)))==0',
-         # addCenJet30 <= 1 
-         '(Sum$(Jet_pt>30 && abs(Jet_eta)<5.2)-2)<=1',
-         'Jet_btagCSV[hJCidx[0]]>0.941', 
-         'HCSV_mass<110 || HCSV_mass>140',]
-    ],
+    'Z_bb': {
+        'cuts': [minimal, noQCD, z_bb],
+    },
 
-    # W+Jets Control Regions
-    'W_light': [
-        Preselection, 
-        AntiQCD, 
-        [# naddGoodLeptons5 >= 1, note implicit string concatentation
-         '(Sum$(aLeptons_pt>5 && (aLeptons_jetBTagCSV<0.25 || aLeptons_relIso03<0.4 || aLeptons_looseIdSusy!=0 || aLeptons_jetDR>0.3))'
-         '+Sum$(vLeptons_pt>5 && (vLeptons_jetBTagCSV<0.25 || vLeptons_relIso03<0.4 || vLeptons_looseIdSusy!=0 || vLeptons_jetDR>0.3)))>=1',
-         # addCenJet30 <= 1 
-         '(Sum$(Jet_pt>30 && abs(Jet_eta)<5.2)-2)<=1',
-         'Jet_btagCSV[hJCidx[0]]<0.941',]
-    ],
+    'W_light': {
+        'cuts': [minimal, noQCD, w_light],
+    },
 
-    'W_bb': [
-        Preselection, 
-        AntiQCD, 
-        [# naddGoodLeptons5 >= 1, note implicit string concatentation
-         '(Sum$(aLeptons_pt>5 && (aLeptons_jetBTagCSV<0.25 || aLeptons_relIso03<0.4 || aLeptons_looseIdSusy!=0 || aLeptons_jetDR>0.3))'
-         '+Sum$(vLeptons_pt>5 && (vLeptons_jetBTagCSV<0.25 || vLeptons_relIso03<0.4 || vLeptons_looseIdSusy!=0 || vLeptons_jetDR>0.3)))>=1',
-         # addCenJet30 <= 1 
-         '(Sum$(Jet_pt>30 && abs(Jet_eta)<5.2)-2)<=1',
-         'Jet_btagCSV[hJCidx[0]]>0.941',]
-    ],
+    'W_bb': {
+        'cuts': [minimal, noQCD, w_bb],
+    },
 
-    # QCD Control Region
-    'QCD': [
-        Preselection, 
-        [#minDeltaPhiJet2Met < 0.7
-         'MinIf$(abs(TVector2::Phi_mpi_pi(Jet_phi-met_phi)),Iteration$<2)<0.7',]
-    ],
+    'QCD': {
+        'cuts': [minimal, qcd],
+    },
  
 }
 
-# Output directory for the signal/control region ntuples.
-REGION_DIR = '/afs/cern.ch/work/s/swang373/private/V14/test/'
 
 STEP3_DIR = '/afs/cern.ch/work/s/swang373/private/V14/Step3_test/'
 

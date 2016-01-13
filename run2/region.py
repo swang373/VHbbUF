@@ -1,3 +1,4 @@
+import logging
 import multiprocessing as mp
 import subprocess as sp
 import tempfile as tf
@@ -9,7 +10,22 @@ import settings
 
 class Region(object):
 
-    def __init__(self, name = '', 
+    def __init__(self, name = '', cuts =[]):
+    
+        self.logger = logging.getLogger('Region')
+        self.logger.info('Initialized for {}'.format(name))
+
+        self.name = name
+        self.cuts = cuts
+
+    def make(self):
+
+        pass
+    
+    def _cut_process(self, tasks = None, results = None):
+
+        pass
+
 
 
 def make_category(category = '', outdir = '', cuts = []):
