@@ -34,7 +34,7 @@ class Process(object):
                 raise
 
         # Prepare Samples
-        self.samples = self._check_samples()
+        sample_files = self._check_samples()
 
         inputfiles = []
 
@@ -42,11 +42,11 @@ class Process(object):
         tasks = mp.Queue()
         results = mp.Queue()
 
-        for sample, sample_cut in izip_longest(self.samples, self.sample_cuts, fillvalue = ''):
+        for sample_file, sample_cut in izip_longest(sample_files, self.sample_cuts, fillvalue = ''):
             if (sample_cut is '') and (self.process_cut is ''):
-                inputfiles.append(sample)
+                inputfiles.append(sample_file)
             else:
-                tasks.put((sample, sample_cut))
+                tasks.put((sample_file, sample_cut))
                 n_tasks += 1
 
         # Parallel Cut 
@@ -81,33 +81,32 @@ class Process(object):
         else:
             sp.check_call(['hadd', '-f', outputfile] + inputfiles)
 
-        if hasattr(self, 'tmpdir'):
-            sp.check_call(['rm', '-r', self.tmpdir])
+        sp.check_call(['rm', '-r', self.tmpdir])
          
     def _check_samples(self):
     
-        samples = []
+        sample_files = []
      
         for sample in self.samples:
 
             fname = settings.SAMPLE_DIR + sample + '.root'
 
             if os.path.isfile(fname):
-                samples.append(fname)
+                sample_files.append(fname)
             else:
                 self.logger.info('Getting missing sample {}'.format(sample))
                 Sample(sample, **settings.SAMPLES[sample]).make()
-                samples.append(fname)
+                sample_files.append(fname)
 
-        return samples
+        return sample_files
 
     def _cut_sample(self, tasks = None, results = None):
     
-        for sample, sample_cut in iter(tasks.get, None):
+        for sample_file, sample_cut in iter(tasks.get, None):
 
-            outname = self.tmpdir + os.path.basename(sample)
+            outname = self.tmpdir + os.path.basename(sample_file)
 
-            infile = ROOT.TFile(sample, 'read')
+            infile = ROOT.TFile(sample_file, 'read')
             outfile = ROOT.TFile(outname, 'recreate')
 
             intree = infile.Get('tree')
@@ -126,9 +125,9 @@ class Process(object):
 
             results.put(outname)
 
-#-------------
-# Main Program
-#-------------
+#------
+# Main 
+#------
 
 if __name__ == '__main__':
 

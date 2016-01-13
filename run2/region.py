@@ -1,16 +1,20 @@
+import glob
 import logging
 import multiprocessing as mp
+import os
 import subprocess as sp
+import sys
 import tempfile as tf
 
 import ROOT
 
+from process import Process
 import settings
 
 
 class Region(object):
 
-    def __init__(self, name = '', cuts =[]):
+    def __init__(self, name = '', cuts = [], **kwargs):
     
         self.logger = logging.getLogger('Region')
         self.logger.info('Initialized for {}'.format(name))
@@ -20,111 +24,101 @@ class Region(object):
 
     def make(self):
 
-        pass
+        # Output Directory
+        try:
+            os.makedirs(settings.REGION_DIR)
+        except OSError:
+            if not os.path.isdir(settings.REGION_DIR):
+                raise
+
+        # Prepare Processes
+        self._check_processes()
+
+        # Parallel Cut
+        tasks = mp.Queue()
+        results = mp.Queue()
+
+        tmpdir = tf.mkdtemp(prefix = self.name, dir = settings.REGION_DIR)
+        self.tmpdir = tmpdir + '/'
+
+        # _processes refers to newly spawned Python processes
+        _processes = [
+            mp.Process(target = self._cut_process, args = (tasks, results))
+            for cpu in range(mp.cpu_count())
+        ]
+
+        for process in settings.PROCESSES:
+            tasks.put(process)
+
+        for p in _processes:
+            tasks.put(None)
+            p.start()
+
+        for p in _processes:
+            p.join()
+
+        results.put(None)
+
+        for r in iter(results.get, None):
+            self.logger.info('Selected {!s} out of {!s} entries in {}.'.format(*r)
+
+        # hadd Files
+        inputfiles = glob.glob(self.tmpdir + '*.root')
+        outputfile = settings.REGION_DIR + self.name + '.root'
+
+        sp.check_call(['hadd', '-f', outputfile] + inputfiles)
+        sp.check_call(['rm', '-r', self.tmpdir])
+
+    def _check_processes(self):
+        
+        for process in settings.PROCESSES:
+        
+            if os.path.isfile(settings.PROCESS_DIR + process + '.root'):
+                continue
+            
+            self.logger.info('Getting missing process {}'.format(process))
+            Process(process, **settings.PROCESSES[process]).make()
+
     
     def _cut_process(self, tasks = None, results = None):
 
-        pass
+        for process in iter(tasks.get, None):
 
+            infile = ROOT.TFile(self.PROCESS_DIR + process + '.root', 'read')
+            outfile = ROOT.TFile(self.tmpdir + process + '.root', 'recreate')
 
+            intree = infile.Get('tree')
+            intree.SetName(process)
 
-def make_category(category = '', outdir = '', cuts = []):
+            for i, cut in enumerate(self.cuts):
+               intree.Draw('>>{}_elist_{}'.format(process,i), cut)
+               eventlist = ROOT.gDirectory.Get('{}_elist_{}'.format(process,i))
+               intree.SetEventList(eventlist)
 
-    # Look up the path to the category's ntuple.
-    path = CATEGORIES[category]['PATH']
+            outtree = intree.CopyTree('')
 
-    # If a cut defining a subcategory is provided, append it
-    # to the list of cuts defining the signal/control region.
-    if 'CUTS' in CATEGORIES[category]:
-        cuts.append(CATEGORIES[category]['CUTS'])
+            result = (outtree.GetEntriesFast(), intree.GetEntriesFast(), process)
 
-    # Access the category's ntuple and TTree.
-    infile = ROOT.TFile(path, 'read')
-    tree = infile.Get('tree')
-    tree.SetName(category)
-    print tree.GetEntriesFast()
+            outtree.Write()
 
-    # Create an output file for the category. The output file will use
-    # more disk space than necessary because of how a TFile is written.
-    large_file = outdir + category + '_large.root'
-    outfile = ROOT.TFile(large_file, 'recreate')
+            outfile.Close()
+            infile.Close()
 
-    # Create the category's tree by destructively
-    # iterating over the region and subcategory cuts.
-    category_tree = tree.CopyTree(tco.add(*cuts.pop(0)))
-    print category_tree.GetEntriesFast()
-    while cuts:
-        category_tree = category_tree.CopyTree(tco.add(*cuts.pop(0)))
-        print category_tree.GetEntriesFast()
-        
-    print '--- Category "{}": Selected {!s} entries from "{}"'.format(category, category_tree.GetEntriesFast(), path)
+            results.put(result)
 
-    # Save the category tree.
-    category_tree.Write()
-    outfile.Close()
-    infile.Close()
-
-    # hadding the large file "reduces" the size on disk. This is the only
-    # work around I've found to reduce the TFile memory overhead.
-    small_file = outdir + category + '.root'
-    sp.check_call(['hadd', '-f', small_file, large_file], stdout = sp.PIPE, stderr = sp.PIPE)
-    sp.check_call(['rm', large_file])
-     
-#############################
-
-def make_region(region = ''):
-
-    print '\nGenerating Signal/Control Region [{}]'.format(region)
-
-    # Use a temporary directory to collect the different categories.
-    tmpdir = tf.mkdtemp(prefix = region, dir = REGION_DIR)
-
-    # Set kwargs for the external make_category function.
-    mc_kwargs = {'outdir': tmpdir + '/', 'cuts': REGIONS[region]}
-
-    # Add the categories in parallel. Four processes is a safe default.
-    pool = mp.Pool(processes = 1)
-    for category in CATEGORIES:
-        if category != 'Data':
-            continue
-        pool.apply_async(make_category, (category,), mc_kwargs)
-    pool.close()
-    pool.join()
-
-    # Combine the separate category files into a single ntuple.
-    category_files = glob.glob(tmpdir + '/*.root')
-    region_file = REGION_DIR + region + '.root'
-    sp.check_call(['hadd', '-f', region_file] + category_files, stdout = sp.PIPE, stderr = sp.PIPE)
-
-    # It is the user's responsibility to delete the temporary directory.
-    sp.check_call(['rm', '-r', tmpdir])
-
-#-------------
-# Main Program
-#-------------
+#------
+# Main
+#------
 
 if __name__ == '__main__':
 
     # Set ROOT to run in batch mode.
     ROOT.gROOT.SetBatch(1)
 
-    # Parse command line arguments.
-    import argparse
+    for name in sys.argv[1:]:
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument('regions', nargs = '*', default = [r for r in REGIONS],
-                        help = 'The signal/control regions for which to generate .root files.')
-    args = parser.parse_args()
+        logging.basicConfig(level = logging.INFO,
+                            format = '%(name)s(%(levelname)s) - %(message)s')
 
-    # Create the signal/control region directory if it doesn't exist.
-    if (ROOT.gSystem.AccessPathName(REGION_DIR)):
-        ROOT.gSystem.mkdir(REGION_DIR)
-
-    print 'Running make_region.py...'
-
-    for region in REGIONS:
-        if region in args.regions:
-            make_region(region)
-    
-    print "\nJob's done!"
+        REGION(name, **settings.REGIONS[name]).make()
 

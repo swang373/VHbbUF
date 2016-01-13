@@ -77,9 +77,7 @@ class Sample(object):
 
         hadd_log = tf.TemporaryFile(dir = settings.SAMPLE_DIR)
         sp.check_call(['hadd', '-f', outputfile] + inputfiles, stdout = hadd_log, stderr = hadd_log)
-
-        if hasattr(self, 'tmpdir'):
-            sp.check_call(['rm', '-r', self.tmpdir])
+        sp.check_call(['rm', '-r', self.tmpdir])
 
         # Add Sample Luminosity Branch
         if hasattr(self, 'xsec'):
