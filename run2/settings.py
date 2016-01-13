@@ -8,7 +8,7 @@ ZnnHbb Analysis Configuration
 #-- Working Environment --#
 ###########################
 
-WORK_DIR = '/afs/cern.ch/work/s/swang373/private/V14/testy/'
+WORK_DIR = '/afs/cern.ch/work/s/swang373/private/V14/'
 
 ###############
 #-- Samples --#
@@ -194,7 +194,19 @@ SAMPLES = {
 #-- Processes --#
 #################
 
-# The groupings of Step2 ntuples representing a decay process.
+"""
+Properties
+----------
+samples     : list of str
+              The list of samples to be combined into a decay process. 
+              Sample names must be valid keys of the SAMPLES dictionary.
+sample_cuts : list of str or Cut
+              A list of sample-specific cuts applied before combination. 
+              Their ordering must match that of the samples property.
+process_cut : str or Cut
+              A process-specific cut applied to all samples before combination. 
+"""
+
 PROCESSES = {
 
     'data_obs': {
@@ -219,6 +231,24 @@ PROCESSES = {
 
     'TT': {
         'samples': ['TTPow'],
+    },
+
+    'Wj0b': {
+        'samples': ['WJetsIncl', 'WJetsHT100', 'WJetsHT200', 'WJetsHT400', 'WJetsHT600'],
+        'sample_cuts': ['lheHT<100'],
+        'process_cut': Vudsg | Vcc,
+    },
+
+    'Wj1b': {
+        'samples': ['WJetsIncl', 'WJetsHT100', 'WJetsHT200', 'WJetsHT400', 'WJetsHT600'],
+        'sample_cuts': ['lheHT<100'],
+        'process_cut': Vb,
+    },
+
+    'Wj2b': {
+        'samples': ['WJetsIncl', 'WJetsHT100', 'WJetsHT200', 'WJetsHT400', 'WJetsHT600'],
+        'sample_cuts': ['lheHT<100'],
+        'process_cut': Vbb,
     },
 
     'Zj0b': {

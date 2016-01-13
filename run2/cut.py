@@ -47,7 +47,7 @@ class Cut(str):
 
     @op
     def __rand__(self, other):
-        return self & other
+        return other & self
 
     @op
     def __or__(self, other):
@@ -58,7 +58,7 @@ class Cut(str):
 
     @op
     def __ror__(self, other):
-        return self | other
+        return other | self
 
     @op
     def __mul__(self, other):
@@ -69,7 +69,7 @@ class Cut(str):
 
     @op
     def __rmul__(self, other):
-        return self * other
+        return other * self
 
 #########################
 #-- Step1 Ntuple Skim --#

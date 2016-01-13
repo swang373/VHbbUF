@@ -8,7 +8,7 @@ import tempfile as tf
 
 import ROOT
 
-from sample import Sample
+from sample import Sample, SAMPLE_DIR
 import settings
 
 
@@ -78,7 +78,7 @@ class Process(object):
         # hadd Files
         outputfile = PROCESS_DIR + self.name + '.root'
         
-        if (len(inputfiles) == 1) and (settings.SAMPLE_DIR in inputfiles[0]):
+        if (len(inputfiles) == 1) and (SAMPLE_DIR in inputfiles[0]):
             # Make symbolic link instead to save memory.
             sp.check_call(['ln', '-s', inputfiles[0], outputfile])
         else:
@@ -92,7 +92,7 @@ class Process(object):
      
         for sample in self.samples:
 
-            fname = settings.SAMPLE_DIR + sample + '.root'
+            fname = SAMPLE_DIR + sample + '.root'
 
             if os.path.isfile(fname):
                 sample_files.append(fname)
@@ -113,7 +113,7 @@ class Process(object):
             outfile = ROOT.TFile(outname, 'recreate')
 
             intree = infile.Get('tree')
-            outtree = intree.CopyTree(self.process_cut & sample_cut)
+            outtree = intree.CopyTree(sample_cut & self.process_cut)
 
             outtree.Write()
             
