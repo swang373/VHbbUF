@@ -71,6 +71,12 @@ class Cut(str):
     def __rmul__(self, other):
         return self * other
 
+#########################
+#-- Step1 Ntuple Skim --#
+#########################
+
+SKIM = 'Vtype>=0 && met_pt>150'
+
 #################################################
 #-- Generator Level Higgs Jets Classification --#
 #################################################
@@ -94,7 +100,7 @@ minimal = (
 )
 
 # AntiQCD Cuts
-noQCD = (
+antiQCD = (
     Cut('MinIf$(abs(TVector2::Phi_mpi_pi(met_phi - Jet_phi)), Jet_pt>30 && Jet_puId && abs(Jet_eta)<4.5)>0.7') &
     'abs(TVector2::Phi_mpi_pi(met_phi - tkMet_phi))<0.7' &
     'tkMet_pt>30'

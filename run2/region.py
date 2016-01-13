@@ -12,6 +12,9 @@ from process import Process
 import settings
 
 
+# Output Directory
+REGION_DIR = settings.WORK_DIR + 'regions/'
+
 class Region(object):
 
     def __init__(self, name = '', cuts = [], **kwargs):
@@ -26,9 +29,9 @@ class Region(object):
 
         # Output Directory
         try:
-            os.makedirs(settings.REGION_DIR)
+            os.makedirs(REGION_DIR)
         except OSError:
-            if not os.path.isdir(settings.REGION_DIR):
+            if not os.path.isdir(REGION_DIR):
                 raise
 
         # Prepare Processes
@@ -38,7 +41,7 @@ class Region(object):
         tasks = mp.Queue()
         results = mp.Queue()
 
-        tmpdir = tf.mkdtemp(prefix = self.name, dir = settings.REGION_DIR)
+        tmpdir = tf.mkdtemp(prefix = self.name, dir = REGION_DIR)
         self.tmpdir = tmpdir + '/'
 
         # _processes refers to newly spawned Python processes
@@ -64,7 +67,7 @@ class Region(object):
 
         # hadd Files
         inputfiles = glob.glob(self.tmpdir + '*.root')
-        outputfile = settings.REGION_DIR + self.name + '.root'
+        outputfile = REGION_DIR + self.name + '.root'
 
         sp.check_call(['hadd', '-f', outputfile] + inputfiles)
         sp.check_call(['rm', '-r', self.tmpdir])

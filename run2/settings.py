@@ -1,27 +1,24 @@
 from cut import *
 
 """
-ZnnHbb Analysis Settings
-
-The idea is to have all configuration options
-set centrally and leave the core code alone.
-
-The cross-sections for the MC samples are reported in picobarns (pb).
-Obtained from PDG reference pages and the following links
-https://twiki.cern.ch/twiki/bin/viewauth/CMS/SummaryTable1G25ns
-https://twiki.cern.ch/twiki/bin/view/LHCPhysics/CERNYellowReportPageAt1314TeV#s_13_0_TeV
-https://twiki.cern.ch/twiki/bin/view/LHCPhysics/SingleTopRefXsec
+ZnnHbb Analysis Configuration
 """
 
-#########################
-#-- Configure Samples --#
-#########################
+###########################
+#-- Working Environment --#
+###########################
 
-# Output Directory
-SAMPLE_DIR = '/afs/cern.ch/work/s/swang373/private/V14/samples/'
+WORK_DIR = '/afs/cern.ch/work/s/swang373/private/V14/testy/'
 
-# The cut used to skim the Step1 ntuples.
-SKIM = 'Vtype>=0 && met_pt>150'
+###############
+#-- Samples --#
+###############
+
+# The cross-sections for the MC samples are reported in picobarns (pb).
+# They were obtained from PDG reference pages and the following links:
+# https://twiki.cern.ch/twiki/bin/viewauth/CMS/SummaryTable1G25ns
+# https://twiki.cern.ch/twiki/bin/view/LHCPhysics/CERNYellowReportPageAt1314TeV#s_13_0_TeV
+# https://twiki.cern.ch/twiki/bin/view/LHCPhysics/SingleTopRefXsec
 
 # The Step1 ntuples and their properties.
 SAMPLES = { 
@@ -193,13 +190,9 @@ SAMPLES = {
 
 }
 
-###########################
-#-- Configure Processes --#
-###########################
-
-"""
-# Output Directory
-PROCESS_DIR = '/afs/cern.ch/work/s/swang373/private/V14/processes/'
+#################
+#-- Processes --#
+#################
 
 # The groupings of Step2 ntuples representing a decay process.
 PROCESSES = {
@@ -258,44 +251,40 @@ PROCESSES = {
     },
 
 }
-"""
 
-#########################
-#-- Configure Regions --#
-#########################
-
-# Output Directory
-REGION_DIR = '/afs/cern.ch/work/s/swang373/private/V14/regions_test/'
+###############
+#-- Regions --#
+###############
 
 # The signal and control region definitions.
 REGIONS = {
 
     'Signal_Loose': {
-        'cuts': [minimal, noQCD, signal_loose],
+        'cuts': [minimal, antiQCD, signal_loose],
     },
 
     'Signal_Tight': {
-        'cuts': [minimal, noQCD, signal_tight],
+        'cuts': [minimal, antiQCD, signal_tight],
     },
     
     'TT': {
-        'cuts': [minimal, noQCD, tt],
+        'cuts': [minimal, antiQCD, tt],
     },
 
     'Z_light': {
-        'cuts': [minimal, noQCD, z_light],
+        'cuts': [minimal, antiQCD, z_light],
     },
 
     'Z_bb': {
-        'cuts': [minimal, noQCD, z_bb],
+        'cuts': [minimal, antiQCD, z_bb],
     },
 
     'W_light': {
-        'cuts': [minimal, noQCD, w_light],
+        'cuts': [minimal, antiQCD, w_light],
     },
 
     'W_bb': {
-        'cuts': [minimal, noQCD, w_bb],
+        'cuts': [minimal, antiQCD, w_bb],
     },
 
     'QCD': {
@@ -304,56 +293,9 @@ REGIONS = {
  
 }
 
-
-PROCESS_DIR = '/afs/cern.ch/work/s/swang373/private/V14/Step3/'
-
-# Categories
-PROCESSES = {
-
-    'Data_MET': {
-    },
-
-    'ZnnH125': {
-    },
-
-    'ggZH125': {
-    },
-
-    'WlnH125': {
-    },
-
-    'WJets': {
-    },
-
-    'ZJets': {
-    },
-
-    'TT': {
-    },
-
-    'ST': {
-    },
-
-    'VV': {
-    },
-
-    'QCD': {
-    },
-
-}
-
-##########################
-#-- Plot Configuration --#
-##########################
-
-# Output directory for the plots.
-PLOT_DIR = 'plots/'
-
-# The weights to apply to the data samples.
-DATA_WEIGHT = data_weight 
-
-# The weights to apply to the MC samples.
-MC_WEIGHT = mc_weight 
+#############
+#-- Plots --#
+#############
 
 # The plots to draw and their properties.
 PLOTS = {

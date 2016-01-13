@@ -12,6 +12,9 @@ from sample import Sample
 import settings
 
 
+# Output Directory
+PROCESS_DIR = settings.WORK_DIR + 'processes/'
+
 class Process(object):
 
     def __init__(self, name = '', process_cut = '', samples = [], sample_cuts = [], **kwargs):
@@ -28,9 +31,9 @@ class Process(object):
     
         # Output Directory
         try:
-            os.makedirs(settings.PROCESS_DIR)
+            os.makedirs(PROCESS_DIR)
         except OSError:
-            if not os.path.isdir(settings.PROCESS_DIR):
+            if not os.path.isdir(PROCESS_DIR):
                 raise
 
         # Prepare Samples
@@ -52,7 +55,7 @@ class Process(object):
         # Parallel Cut 
         if (n_tasks > 0):
             
-            tmpdir = tf.mkdtemp(prefix = self.name, dir = settings.PROCESS_DIR)
+            tmpdir = tf.mkdtemp(prefix = self.name, dir = PROCESS_DIR)
             self.tmpdir = tmpdir + '/'
 
             _processes = [
@@ -73,7 +76,7 @@ class Process(object):
                 inputfiles.append(r)
 
         # hadd Files
-        outputfile = settings.PROCESS_DIR + self.name + '.root'
+        outputfile = PROCESS_DIR + self.name + '.root'
         
         if (len(inputfiles) == 1) and (settings.SAMPLE_DIR in inputfiles[0]):
             # Make symbolic link instead to save memory.

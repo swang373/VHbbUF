@@ -12,7 +12,11 @@ import ROOT
 import settings
 
 
+# EOS Command Alias on LXPLUS
 EOS = '/afs/cern.ch/project/eos/installation/0.3.84-aquamarine/bin/eos.select'
+
+# Output Directory
+SAMPLE_DIR = settings.WORK_DIR + 'samples/'
 
 class Sample(object):
     
@@ -38,13 +42,13 @@ class Sample(object):
 
         # Output Directory
         try:
-            os.makedirs(settings.SAMPLE_DIR)
+            os.makedirs(SAMPLE_DIR)
         except OSError:
-            if not os.path.isdir(settings.SAMPLE_DIR):
+            if not os.path.isdir(SAMPLE_DIR):
                 raise
 
         # Temporary Work Directory
-        tmpdir = tf.mkdtemp(prefix = self.name, dir = settings.SAMPLE_DIR)
+        tmpdir = tf.mkdtemp(prefix = self.name, dir = SAMPLE_DIR)
         self.tmpdir = tmpdir + '/'
 
         # Parallel Copy
@@ -73,9 +77,9 @@ class Sample(object):
 
         # hadd Files
         inputfiles = glob.glob(self.tmpdir + '*.root')
-        outputfile = settings.SAMPLE_DIR + self.name + '.root'
+        outputfile = SAMPLE_DIR + self.name + '.root'
 
-        hadd_log = tf.TemporaryFile(dir = settings.SAMPLE_DIR)
+        hadd_log = tf.TemporaryFile(dir = SAMPLE_DIR)
         sp.check_call(['hadd', '-f', outputfile] + inputfiles, stdout = hadd_log, stderr = hadd_log)
         sp.check_call(['rm', '-r', self.tmpdir])
 
@@ -137,7 +141,7 @@ class Sample(object):
 
     def _write_sample_lumi(self):
         
-        infile = ROOT.TFile(settings.SAMPLE_DIR + self.name + '.root', 'update')
+        infile = ROOT.TFile(SAMPLE_DIR + self.name + '.root', 'update')
         tree = infile.Get('tree')
 
         sample_lumi_address = np.array([-999], np.float32)
