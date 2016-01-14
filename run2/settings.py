@@ -226,73 +226,88 @@ PROCESSES = {
 
     'data_obs': {
         'samples': ['Data_MET_C', 'Data_MET_D', 'Data_MET_DP'],
+        'types': 'data',
     },
 
     'ZH': {
         'samples': ['ZnnH125'],
+        'types': 'MC:sig',
     },
 
     'ggZH': {
         'samples': ['ggZH125'],
+        'types': 'MC:sig',
     },
 
     'WH': {
         'samples': ['WlnH125'],
+        'types': 'MC:sig',
     },
     
     's_Top': {
         'samples': ['T_s_comb_lep', 'T_t_lep', 'Tbar_t_lep', 'T_tW', 'Tbar_tW'],
+        'types': 'MC:bkg',
     },
 
     'TT': {
         'samples': ['TTPow'],
+        'types': 'MC:bkg',
     },
 
     'Wj0b': {
         'samples': ['WJetsIncl', 'WJetsHT100', 'WJetsHT200', 'WJetsHT400', 'WJetsHT600'],
         'sample_cuts': ['lheHT<100'],
         'process_cut': Vudsg | Vcc,
+        'types': 'MC:bkg',
     },
 
     'Wj1b': {
         'samples': ['WJetsIncl', 'WJetsHT100', 'WJetsHT200', 'WJetsHT400', 'WJetsHT600'],
         'sample_cuts': ['lheHT<100'],
         'process_cut': Vb,
+        'types': 'MC:bkg',
     },
 
     'Wj2b': {
         'samples': ['WJetsIncl', 'WJetsHT100', 'WJetsHT200', 'WJetsHT400', 'WJetsHT600'],
         'sample_cuts': ['lheHT<100'],
         'process_cut': Vbb,
+        'types': 'MC:bkg',
     },
 
     'Zj0b': {
         'samples': ['ZJetsHT100', 'ZJetsHT200', 'ZJetsHT400', 'ZJetsHT600'],
         'process_cut': Vudsg | Vcc,
+        'types': 'MC:bkg',
     },
 
     'Zj1b': {
         'samples': ['ZJetsHT100', 'ZJetsHT200', 'ZJetsHT400', 'ZJetsHT600'],
         'process_cut': Vb,
+        'types': 'MC:bkg',
     },
 
     'Zj2b': {
         'samples': ['ZJetsHT100', 'ZJetsHT200', 'ZJetsHT400', 'ZJetsHT600'],
         'process_cut': Vbb,
+        'types': 'MC:bkg',
     },
 
     'QCD': {
         'samples': ['QCDHT100', 'QCDHT200', 'QCDHT300', 'QCDHT500', 'QCDHT700', 'QCDHT1000', 'QCDHT1500', 'QCDHT2000'],
+        'types': 'MC:bkg',
     },
 
     'VVLF': {
         'samples': ['WW', 'WZ', 'ZZ'],
         'process_cut': Vudsg | Vcc,
+        'types': 'MC:bkg',
     },
 
     'VVHF': {
         'samples': ['WW', 'WZ', 'ZZ'],
         'process_cut': Vb | Vbb,
+        'types': 'MC:bkg',
     },
 
 }
@@ -353,7 +368,8 @@ REGIONS = {
 # The plots to draw and their properties.
 PLOTS = {
 
-    'H_mass': {
+    'The mass of the Higgs.': {
+        'name': 'H_mass',
         'expression': 'HCSV_mass',
         'x_title': 'm_{H} [GeV]',
         'n_bins': 30,
@@ -361,7 +377,8 @@ PLOTS = {
         'x_max': 300,
     },
 
-    'HCSV_pt': {
+    'The Pt of the Higgs.': {
+        'name': 'HCSV_pt',
         'expression': 'HCSV_pt',
         'x_title': 'H p_{T} [GeV]',
         'n_bins': 20,
@@ -369,7 +386,8 @@ PLOTS = {
         'x_max': 450, 
     },
 
-    'nAddJets': {
+    'The number of additional jets within a selection.': {
+        'name': 'nAddJets',
         'expression': 'Sum$(Jet_pt>30 && Jet_puId &&  abs(Jet_eta)<4.5)',
         'x_title': '# Add. Jets',
         'n_bins': 8,                                                          
@@ -377,7 +395,8 @@ PLOTS = {
         'x_max': 8,
     },
 
-    'min_dPhi_MET_hJ': {
+    'The minimum delta phi between MET and the Higgs jets.': {
+        'name': 'min_dPhi_MET_hJ',
         'expression': 'min(abs(TVector2::Phi_mpi_pi(met_phi - Jet_phi[hJCidx[0]])), abs(TVector2::Phi_mpi_pi(met_phi - Jet_phi[hJCidx[1]])))',
         'x_title': 'Min #||{#Delta#phi(#slash{E}_{T}, H Jet)}',
         'n_bins': 32, 
@@ -385,7 +404,8 @@ PLOTS = {
         'x_max': 3.2,
     },
 
-    'min_dPhi_MET_J': {
+    'The minimum delta phi between MET and any jet within a selection.': {
+        'name': 'min_dPhi_MET_J',
         'expression': 'MinIf$(abs(TVector2::Phi_mpi_pi(met_phi - Jet_phi)), Jet_pt>30 && Jet_puId && abs(Jet_eta)<4.5)',
         'x_title': 'Min #||{#Delta#phi(#slash{E}_{T}, Jet)}',
         'n_bins': 32,
@@ -393,7 +413,8 @@ PLOTS = {
         'x_max': 3.2,
     },
 
-    'ht30': {
+    'The HT for jets with Pt > 30.': {
+        'name': 'ht30',
         'expression': 'htJet30',
         'x_title': 'HT [GeV]',
         'n_bins': 50,
@@ -401,7 +422,8 @@ PLOTS = {
         'x_max': 1000,
     },
 
-    'hj_maxpt': {
+    'The larger Higgs jet Pt.': {
+        'name': 'hj_maxpt',
         'expression': 'max(Jet_pt[hJCidx[0]], Jet_pt[hJCidx[1]])',
         'x_title': 'Max H Jet p_{T} [GeV]',
         'n_bins': 15,
@@ -409,7 +431,8 @@ PLOTS = {
         'x_max': 300,
     },
 
-    'hj_minpt': {
+    'The smaller Higgs jet Pt.': {
+        'name': 'hj_minpt',
         'expression': 'min(Jet_pt[hJCidx[0]], Jet_pt[hJCidx[1]])',
         'x_title': 'Min H Jet p_{T} [GeV]',
         'n_bins': 15,
@@ -417,7 +440,8 @@ PLOTS = {
         'x_max': 300,
     },
 
-    'CSV1': {
+    'The CSV of the first Higgs jet.': {
+        'name': 'CSV1',
         'expression': 'Jet_btagCSV[hJCidx[0]]',
         'x_title': 'H Jet 1 CSV',
         'n_bins': 20,
@@ -425,7 +449,8 @@ PLOTS = {
         'x_max': 1,
     },
 
-    'CSV2': {
+    'The CSV of the second Higgs jet.': {
+        'name': 'CSV2',
         'expression': 'Jet_btagCSV[hJCidx[1]]',
         'x_title': 'H Jet 2 CSV',
         'n_bins': 20,
@@ -433,7 +458,8 @@ PLOTS = {
         'x_max': 1,
     },
 
-    'MET_pt': {
+    'The Pt of MET.': {
+        'name': 'MET_pt',
         'expression': 'met_pt',
         'x_title': '#slash{E}_{T} [GeV]',
         'n_bins': 30,
@@ -441,7 +467,8 @@ PLOTS = {
         'x_max': 450,
     },
     
-    'nPV': {
+    'The number of primary vertices.': {
+        'name': 'nPV',
         'expression': 'nPVs',
         'x_title': '# Primary Vertices',
         'n_bins': 30,
@@ -449,7 +476,8 @@ PLOTS = {
         'x_max': 30,
     },
 
-    'tkMet': {
+    'The Pt of tracker MET.': {
+        'name': 'tkMet',
         'expression': 'tkMet_pt',
         'x_title': 'Tracker #slash{E}_{T} [GeV]',
         'n_bins': 30,
@@ -457,7 +485,8 @@ PLOTS = {
         'x_max': 300,
     },
 
-    'dPhi_MET_tkMET': {
+    'The delta phi between the MET and tracker MET.': {
+        'name': 'dPhi_MET_tkMET',
         'expression': 'abs(TVector2::Phi_mpi_pi(met_phi - tkMet_phi))',
         'x_title': '#||{#Delta#phi(#slash{E}_{T}, Tracker #slash{E}_{T})}',
         'n_bins': 32,
