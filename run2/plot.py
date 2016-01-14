@@ -1,7 +1,10 @@
+import logging
+import os
 import math
 
 import ROOT
 
+from region import REGION_DIR
 import settings
 
 
@@ -10,8 +13,62 @@ PLOT_DIR = settings.WORK_DIR + 'plots/'
 
 class Plot(object):
 
-    def __init__(self, **kwargs):
-        pass
+    def __init__(self, region = '', **kwargs):
+        
+        self.logger = logging.getLogger('Plot')
+        self.logger.info('Initialized for {}'.format(region))
+
+        self.region = region
+        self.outdir = PLOT_DIR + region + '/'
+
+    def make(self):
+
+        # Output Directory
+        try:
+            os.makedirs(self.outdir)
+        except OSError:
+            if not os.path.isdir(self.outdir):
+                raise
+
+        # Open region file.
+        self.infile = ROOT.TFile(REGION_DIR + self.region + '.root', 'read')
+
+        for plot in settings.PLOTS.itervalues():
+        
+            self.hist = self._book_histograms(**plot)
+            print self.hist
+
+        # Close region file.
+        self.infile.Close() 
+
+    def _book_histograms(self, expression, n_bins, x_min, x_max, **kwargs):
+
+        histograms = {}
+
+        for key in self.infile.GetListOfKeys():
+            
+            process = key.GetName()
+            h_name = 'h_{}'.format(process)
+            types = settings.PROCESSES[process]['types'].lower().split(':')
+
+            histograms[process] = ROOT.TH1F(h_name, '', n_bins, x_min, x_max)
+            if 'data' in types:
+                self.infile.Get(process).Project(h_name, expression, settings.data_weight)
+            else:
+                self.infile.Get(process).Project(h_name, expression, settings.mc_weight) 
+
+        return histograms
+
+    def _combine_sig_hists(self, n_bins, x_min, x_max, **kwargs):
+
+        self.hist['VH'] = ROOT.TH1F('VH', '', n_bins, x_min, x_max)
+        
+        self.hist['VH'].Add(
+
+    def _combine_bkg_hists(self):
+
+        
+            
 
     @staticmethod
     def set_tdrStyle():
