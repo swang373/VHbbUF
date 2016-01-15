@@ -132,20 +132,22 @@ def make_dataset(process = '', rnd_seed = 0):
     # Figure out how to split the entries.
     # For uneven splits, the training set gets the remaining entries.
     n_entries = intree.GetEntriesFast()
-    n_train = n_entries / 2
-    n_train += n_entries % 2
- 
+    n_test = n_entries / 2
+    n_train = n_test if (n_entries % 2 == 0) else n_test + 1
+    
     # Randomly shuffle the entries.
     # Seeding for now to make sure code works.
+    # The entry numbers must be fed into the eventlist
+    # in ASCENDING order, because of its binary search structure.
     np.random.seed(rnd_seed)
     permute_entries = np.random.permutation(n_entries)
 
-    train_elist = ROOT.TEventList('train')
-    for i in permute_entries[:n_train]:
+    train_elist = ROOT.TEventList('train', '', n_train)
+    for i in np.sort(permute_entries[:n_train]): 
         train_elist.Enter(i)
 
-    test_elist  = ROOT.TEventList('test')
-    for i in permute_entries[n_train:]:
+    test_elist  = ROOT.TEventList('test', '', n_test)
+    for i in np.sort(permute_entries[n_train:]):
         test_elist.Enter(i)
 
     # Start filling the new file.
