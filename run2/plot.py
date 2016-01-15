@@ -122,7 +122,7 @@ def make_plot(region = '', name = '', expression = '', x_title = '', n_bins = No
     #--------------------------------------------------------------------------#
 
     # Setup output directory.
-    outdir = ''.join([PLOT_DIR, region, '/'])
+    outdir = PLOT_DIR + region + '/'
     try:
         os.makedirs(outdir)
     except OSError:
@@ -130,7 +130,7 @@ def make_plot(region = '', name = '', expression = '', x_title = '', n_bins = No
             raise
       
     # Book histograms in dictionary and stacked histogram.
-    infile = ROOT.TFile(''.join([REGION_DIR, region, '.root']), 'read')
+    infile = ROOT.TFile(REGION_DIR + region + '.root', 'read')
 
     hist = {}
     hist['mc_exp'] = ROOT.TH1F('mc_exp', '', n_bins, x_min, x_max)
@@ -138,7 +138,7 @@ def make_plot(region = '', name = '', expression = '', x_title = '', n_bins = No
 
     for process, properties in PROCESSES.iteritems():
 
-        if process in ignore:
+        if process in omit:
             continue
 
         # Check process properties.
@@ -163,18 +163,13 @@ def make_plot(region = '', name = '', expression = '', x_title = '', n_bins = No
                 histogram.SetLineColor(ROOT.kBlack)
                 histogram.SetFillColor(color)
                 histogram.SetMarkerColor(color)
+            hstack.Add(histogram)
 
-        # Book the histogram.
-        hstack.Add(histogram)
         hist[process] = histogram
 
-    # Set the stacked histogram style.
-    bin_width = (float(x_max) - float(x_min)) / n_bins
+    # Rescale the stacked histogram for viewing.
     y_max = max(hist['data_obs'].GetMaximum(), hstack.GetMaximum())
-
-    hstack.SetMaximum(y_max * 1.7) 
-    hstack.GetXaxis().SetLabelSize(0)
-    hstack.GetYaxis().SetTitle('Events / {:3.3f}'.format(bin_wight))
+    hstack.SetMaximum(y_max * 1.7)
 
     # Setup canvas and pads.
     canvas = ROOT.TCanvas('canvas', '', 700, 700)
@@ -254,7 +249,7 @@ def make_plot(region = '', name = '', expression = '', x_title = '', n_bins = No
     for i in xrange(1, n_bins + 1):
         if (hist['mc_exp'].GetBinContent(i) > 0): 
             bin_errors = [
-                1.00 * hist['mc_exp'.GetBinError(i),
+                1.00 * hist['mc_exp'].GetBinError(i),
                 0.08 * hist['Wj0b'].GetBinError(i),
                 0.08 * hist['Wj1b'].GetBinError(i),
                 0.20 * hist['Wj2b'].GetBinContent(i),
@@ -265,7 +260,7 @@ def make_plot(region = '', name = '', expression = '', x_title = '', n_bins = No
                 0.25 * hist['s_Top'].GetBinContent(i),
                 0.25 * hist['VVLF'].GetBinContent(i),
                 0.25 * hist['VVHF'].GetBinContent(i),
-                0.50 * hist'QCD'].GetBinContent(i),
+                0.50 * hist['QCD'].GetBinContent(i),
             ]
             total_bin_error = np.sqrt(np.sum(np.power(bin_errors, 2)))
             ratio_syst_unc.SetBinError(i, total_bin_error / hist['mc_exp'].GetBinContent(i))
@@ -275,7 +270,7 @@ def make_plot(region = '', name = '', expression = '', x_title = '', n_bins = No
     # Manually setup drawing of upper pad objects. ----------------------------#
     upper_pad.cd()
 
-    legend_1 = ROOT.TLegend(0.50, 0.68, 0.72, 0.92)
+    legend_1 = ROOT.TLegend(0.61, 0.62, 0.78, 0.90)
     legend_1.SetFillColor(0)
     legend_1.SetLineColor(0)
     legend_1.SetShadowColor(0)
@@ -291,7 +286,7 @@ def make_plot(region = '', name = '', expression = '', x_title = '', n_bins = No
     legend_1.AddEntry(hist['TT'], 't#bar{t}', 'f')
     legend_1.AddEntry(hist['s_Top'], 'Single Top', 'f')
 
-    legend_2 = ROOT.TLegend(0.72, 0.68, 0.94, 0.92)
+    legend_2 = ROOT.TLegend(0.78, 0.62, 0.95, 0.90)
     legend_2.SetFillColor(0)
     legend_2.SetLineColor(0)
     legend_2.SetShadowColor(0)
@@ -307,20 +302,25 @@ def make_plot(region = '', name = '', expression = '', x_title = '', n_bins = No
     legend_2.AddEntry(hist['QCD'], 'QCD', 'f') 
     legend_2.AddEntry(hist['bkg_stat_unc'], 'MC Unc. (Stat)', 'f')
 
-    legend_1.Draw()
-    legend_2.Draw()
-    hstack.Draw('hist')    
-    hist['bkg_stat_unc'].Draw('e2 same')
-    hist['data_obs'].Draw('e1 same')
-
     latex = ROOT.TLatex()
     latex.SetNDC()
     latex.SetTextAlign(12)
     latex.SetTextFont(62)
     latex.SetTextSize(0.04)
-    latex.DrawLatex(0.19, 0.89, 'CMS Preliminary 2016')
-    latex.DrawLatex(0.19, 0.84, '#sqrt{s} = 13 TeV, L = 2.20 fb^{-1}')
-    latex.DrawLatex(0.19, 0.79, 'Z(#nu#bar{#nu})H(b#bar{b})')
+
+    # Draw Order
+    hstack.Draw('hist')
+    # Stacked histogram axes exist only after drawing.
+    bin_width = (float(x_max) - float(x_min)) / n_bins
+    hstack.GetXaxis().SetLabelSize(0)
+    hstack.GetYaxis().SetTitle('Events / {:3.3f}'.format(bin_width))
+    hist['bkg_stat_unc'].Draw('e2 same')
+    hist['data_obs'].Draw('e1 same')
+    legend_1.Draw()
+    legend_2.Draw()
+    latex.DrawLatex(0.19, 0.88, 'CMS Preliminary 2016')
+    latex.DrawLatex(0.19, 0.83, '#sqrt{s} = 13 TeV, L = 2.20 fb^{-1}')
+    latex.DrawLatex(0.19, 0.78, 'Z(#nu#bar{#nu})H(b#bar{b})')
    
     #hist['ggZH'].SetLineColor(ROOT.kOrange-2)
     #hist['ggZH'].SetLineWidth(3)
@@ -332,25 +332,25 @@ def make_plot(region = '', name = '', expression = '', x_title = '', n_bins = No
     lower_pad.cd()
     lower_pad.SetGridy(0)
 
-    legend_3 = ROOT.TLegend(0.72, 0.88, 0.94, 0.96)
+    legend_3 = ROOT.TLegend(0.61, 0.88, 0.78, 0.95)
     legend_3.SetFillColor(0)
     legend_3.SetLineColor(0)
     legend_3.SetShadowColor(0)
     legend_3.SetTextFont(62)
     legend_3.SetTextSize(0.07)
     legend_3.SetBorderSize(1)
-    legend_3.AddEntry(hist['ratio_stat_unc'], 'MC Unc. (Stat)', 'f')
-    
-    legend_4 = ROOT.TLegend(0.50, 0.88, 0.72, 0.96)
+    legend_3.AddEntry(hist['ratio_syst_unc'], 'MC Unc. (Syst)', 'f')
+
+    legend_4 = ROOT.TLegend(0.78, 0.88, 0.95, 0.95)
     legend_4.SetFillColor(0)
     legend_4.SetLineColor(0)
     legend_4.SetShadowColor(0)
     legend_4.SetTextFont(62)
     legend_4.SetTextSize(0.07)
     legend_4.SetBorderSize(1)
-    legend_4.AddEntry(hist['ratio_syst_unc'], 'MC Unc. (Syst)', 'f')
-
-    pave = ROOT.TPaveText(0.18, 0.86, 0.28, 0.96, 'brNDC')
+    legend_4.AddEntry(hist['ratio_stat_unc'], 'MC Unc. (Stat)', 'f')
+    
+    pave = ROOT.TPaveText(0.18, 0.86, 0.28, 0.95, 'brNDC')
     pave.SetLineColor(0)
     pave.SetFillColor(0)
     pave.SetShadowColor(0)
@@ -361,13 +361,14 @@ def make_plot(region = '', name = '', expression = '', x_title = '', n_bins = No
     text.SetTextFont(62)
     text.SetTextSize(0.07)
 
-    legend_3.Draw()
-    legend_4.Draw()
+    # Draw Order
     hist['ratio_stat_unc'].Draw('e2')
     hist['ratio_syst_unc'].Draw('e2 same')
     hist['ratio_stat_unc'].Draw('e2 same')
-    ratio_unity.Draw()
     hist['ratio'].Draw('e1 same')
+    legend_3.Draw()
+    legend_4.Draw()
+    ratio_unity.Draw()
     pave.Draw()
     #--------------------------------------------------------------------------#
   
@@ -383,7 +384,7 @@ def make_plot(region = '', name = '', expression = '', x_title = '', n_bins = No
     canvas.cd()
     
     for ftype in ['.png', '.pdf']:
-        canvas.SaveAs(''.join([outdir, name, ftype]))
+        canvas.SaveAs(outdir + name + ftype)
     
     # Clean up to exit gracefully.
     canvas.IsA().Destructor(canvas)    
