@@ -370,7 +370,7 @@ REGIONS = {
     },
 
     'QCD': {
-        'cuts': [minimal, qcd],
+        'cuts': [NoQCD],
     },
  
 }

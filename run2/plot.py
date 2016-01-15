@@ -1,11 +1,10 @@
 import os
 import sys
 
-import numpy as np
 import ROOT
 
 from region import REGION_DIR
-from settings import WORK_DIR, PROCESSES, PLOTS, DATA_WEIGHT, MC_WEIGHT
+from settings import WORK_DIR, PROCESSES, PLOTS, TARGET_LUMI, DATA_WEIGHT, MC_WEIGHT
 
 
 # Output Directory
@@ -117,6 +116,9 @@ def set_tdrStyle():
 
 def make_plot(region = '', name = '', expression = '', x_title = '', n_bins = None, x_min = None, x_max = None, **kwargs):
 
+    # Load the custom pileup reweighting function.
+    ROOT.gSystem.Load('PU_C')
+
     # Manually set which processes are omitted. -------------------------------#
     omit = set() # E.g. set(['Wj0b', 'Wj1b', 'Wj2b'])
     #--------------------------------------------------------------------------#
@@ -133,7 +135,6 @@ def make_plot(region = '', name = '', expression = '', x_title = '', n_bins = No
     infile = ROOT.TFile(REGION_DIR + region + '.root', 'read')
 
     hist = {}
-    hist['mc_exp'] = ROOT.TH1F('mc_exp', '', n_bins, x_min, x_max)
     hstack = ROOT.THStack('hstack','')
 
     for process, properties in PROCESSES.iteritems():
@@ -159,13 +160,15 @@ def make_plot(region = '', name = '', expression = '', x_title = '', n_bins = No
                 histogram.SetFillColor(color)
                 histogram.SetMarkerColor(color)
             elif 'bkg' in types:
-                hist['mc_exp'].Add(histogram)
                 histogram.SetLineColor(ROOT.kBlack)
                 histogram.SetFillColor(color)
                 histogram.SetMarkerColor(color)
             hstack.Add(histogram)
 
         hist[process] = histogram
+
+    # Create a reference to the sum of all MC samples.
+    hist['sum_mc'] = hstack.GetStack().Last().Clone()
 
     # Rescale the stacked histogram for viewing.
     y_max = max(hist['data_obs'].GetMaximum(), hstack.GetMaximum())
@@ -183,23 +186,17 @@ def make_plot(region = '', name = '', expression = '', x_title = '', n_bins = No
     lower_pad.SetBottomMargin(0.35)
     lower_pad.Draw()
 
-    # Setup statistical uncertainty of the backgrounds.
-    bkg_stat_unc = hist['mc_exp'].Clone('bkg_stat_unc')
-
-    bkg_stat_unc.Sumw2()
-    bkg_stat_unc.SetFillColor(ROOT.kGray+3)
-    bkg_stat_unc.SetMarkerSize(0)
-    bkg_stat_unc.SetFillStyle(3013)
-
-    hist['bkg_stat_unc'] = bkg_stat_unc
+    # Setup statistical uncertainty of the MC sum.
+    mc_stat_unc = ROOT.TGraphErrors(hist['sum_mc'])
+    mc_stat_unc.SetFillColor(ROOT.kGray+3)
+    mc_stat_unc.SetFillStyle(3013)
+    hist['mc_stat_unc'] = mc_stat_unc
     
     # Setup the data to MC ratio.
     ratio = hist['data_obs'].Clone('ratio')
-
     ratio.Sumw2()
     ratio.SetMarkerSize(0.8)
-    ratio.Divide(hist['data_obs'], hist['mc_exp'], 1., 1., '')
-
+    ratio.Divide(hist['data_obs'], hist['sum_mc'], 1., 1., '')
     hist['ratio'] = ratio
 
     # Setup the unity reference line for the data to MC ratio.
@@ -207,7 +204,7 @@ def make_plot(region = '', name = '', expression = '', x_title = '', n_bins = No
     ratio_unity.SetLineStyle(2)
     
     # Setup the statistical uncertainty for the data to MC ratio.
-    ratio_stat_unc = hist['mc_exp'].Clone('ratio_stat')
+    ratio_stat_unc = hist['data_obs'].Clone('ratio_stat')
 
     ratio_stat_unc.Sumw2()
     ratio_stat_unc.SetStats(0)
@@ -232,14 +229,16 @@ def make_plot(region = '', name = '', expression = '', x_title = '', n_bins = No
 
     for i in xrange(1, n_bins + 1):
         ratio_stat_unc.SetBinContent(i, 1.0)
-        if (hist['mc_exp'].GetBinContent(i) > 0):
-            bin_error = hist['mc_exp'].GetBinError(i) / hist['mc_exp'].GetBinContent(i)
+        if (hist['sum_mc'].GetBinContent(i) > 0):
+            bin_error = hist['sum_mc'].GetBinError(i) / hist['sum_mc'].GetBinContent(i)
             ratio_stat_unc.SetBinError(i, bin_error)
         else:
             ratio_stat_unc.SetBinError(i, 0)
 
     hist['ratio_stat_unc'] = ratio_stat_unc
-    
+   
+    # Removing systematic uncertainty until we know more about this.
+    ''' 
     # Setup the systematic uncertainty for the data to MC ratio.
     ratio_syst_unc = hist['ratio_stat_unc'].Clone('ratio_syst_unc')
     ratio_syst_unc.SetMarkerSize(0)
@@ -247,9 +246,9 @@ def make_plot(region = '', name = '', expression = '', x_title = '', n_bins = No
     ratio_syst_unc.SetFillStyle(1001)
     
     for i in xrange(1, n_bins + 1):
-        if (hist['mc_exp'].GetBinContent(i) > 0): 
+        if (hist['sum_mc'].GetBinContent(i) > 0): 
             bin_errors = [
-                1.00 * hist['mc_exp'].GetBinError(i),
+                1.00 * hist['sum_mc'].GetBinError(i),
                 0.08 * hist['Wj0b'].GetBinError(i),
                 0.08 * hist['Wj1b'].GetBinError(i),
                 0.20 * hist['Wj2b'].GetBinContent(i),
@@ -263,9 +262,10 @@ def make_plot(region = '', name = '', expression = '', x_title = '', n_bins = No
                 0.50 * hist['QCD'].GetBinContent(i),
             ]
             total_bin_error = np.sqrt(np.sum(np.power(bin_errors, 2)))
-            ratio_syst_unc.SetBinError(i, total_bin_error / hist['mc_exp'].GetBinContent(i))
+            ratio_syst_unc.SetBinError(i, total_bin_error / hist['sum_mc'].GetBinContent(i))
 
     hist['ratio_syst_unc'] = ratio_syst_unc
+    '''
         
     # Manually setup drawing of upper pad objects. ----------------------------#
     upper_pad.cd()
@@ -300,7 +300,7 @@ def make_plot(region = '', name = '', expression = '', x_title = '', n_bins = No
     legend_2.AddEntry(hist['Zj1b'], 'Z + b', 'f')
     legend_2.AddEntry(hist['Zj2b'], 'Z + b#bar{b}', 'f')
     legend_2.AddEntry(hist['QCD'], 'QCD', 'f') 
-    legend_2.AddEntry(hist['bkg_stat_unc'], 'MC Unc. (Stat)', 'f')
+    legend_2.AddEntry(hist['mc_stat_unc'], 'MC Unc. (Stat)', 'f')
 
     latex = ROOT.TLatex()
     latex.SetNDC()
@@ -314,12 +314,12 @@ def make_plot(region = '', name = '', expression = '', x_title = '', n_bins = No
     bin_width = (float(x_max) - float(x_min)) / n_bins
     hstack.GetXaxis().SetLabelSize(0)
     hstack.GetYaxis().SetTitle('Events / {:3.3f}'.format(bin_width))
-    hist['bkg_stat_unc'].Draw('e2 same')
+    hist['mc_stat_unc'].Draw('e2 same')
     hist['data_obs'].Draw('e1 same')
     legend_1.Draw()
     legend_2.Draw()
     latex.DrawLatex(0.19, 0.88, 'CMS Preliminary 2016')
-    latex.DrawLatex(0.19, 0.83, '#sqrt{s} = 13 TeV, L = 2.20 fb^{-1}')
+    latex.DrawLatex(0.19, 0.83, '#sqrt{{s}} = 13 TeV, L = {:.2f} fb^{{-1}}'.format(TARGET_LUMI/1000.))
     latex.DrawLatex(0.19, 0.78, 'Z(#nu#bar{#nu})H(b#bar{b})')
    
     #hist['ggZH'].SetLineColor(ROOT.kOrange-2)
@@ -332,23 +332,16 @@ def make_plot(region = '', name = '', expression = '', x_title = '', n_bins = No
     lower_pad.cd()
     lower_pad.SetGridy(0)
 
-    legend_3 = ROOT.TLegend(0.61, 0.88, 0.78, 0.95)
+    legend_3 = ROOT.TLegend(0.78, 0.88, 0.95, 0.95)
     legend_3.SetFillColor(0)
     legend_3.SetLineColor(0)
     legend_3.SetShadowColor(0)
     legend_3.SetTextFont(62)
     legend_3.SetTextSize(0.07)
     legend_3.SetBorderSize(1)
-    legend_3.AddEntry(hist['ratio_syst_unc'], 'MC Unc. (Syst)', 'f')
-
-    legend_4 = ROOT.TLegend(0.78, 0.88, 0.95, 0.95)
-    legend_4.SetFillColor(0)
-    legend_4.SetLineColor(0)
-    legend_4.SetShadowColor(0)
-    legend_4.SetTextFont(62)
-    legend_4.SetTextSize(0.07)
-    legend_4.SetBorderSize(1)
-    legend_4.AddEntry(hist['ratio_stat_unc'], 'MC Unc. (Stat)', 'f')
+    #legend_3.SetNColumns(2)
+    #legend_3.AddEntry(hist['ratio_syst_unc'], 'MC Unc. (Syst)', 'f')
+    legend_3.AddEntry(hist['ratio_stat_unc'], 'MC Unc. (Stat)', 'f')
     
     pave = ROOT.TPaveText(0.18, 0.86, 0.28, 0.95, 'brNDC')
     pave.SetLineColor(0)
@@ -356,18 +349,16 @@ def make_plot(region = '', name = '', expression = '', x_title = '', n_bins = No
     pave.SetShadowColor(0)
     pave.SetBorderSize(1)
 
-    chi_square = hist['data_obs'].Chi2Test(hist['mc_exp'], 'UWCHI2/NDF')
+    chi_square = hist['data_obs'].Chi2Test(hist['sum_mc'], 'UWCHI2/NDF')
     text = pave.AddText('#chi_{{#nu}}^{{2}} = {:.3f}'.format(chi_square))
     text.SetTextFont(62)
     text.SetTextSize(0.07)
 
     # Draw Order
     hist['ratio_stat_unc'].Draw('e2')
-    hist['ratio_syst_unc'].Draw('e2 same')
-    hist['ratio_stat_unc'].Draw('e2 same')
+    #hist['ratio_syst_unc'].Draw('e2 same')
     hist['ratio'].Draw('e1 same')
     legend_3.Draw()
-    legend_4.Draw()
     ratio_unity.Draw()
     pave.Draw()
     #--------------------------------------------------------------------------#
