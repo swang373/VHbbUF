@@ -57,7 +57,7 @@ class Sample(object):
  
         _processes = [
             mp.Process(target = self._copy_file, args = (tasks, results))
-            for cpu in range(mp.cpu_count())
+            for cpu in xrange(mp.cpu_count())
         ]
 
         for f in files:
@@ -151,7 +151,7 @@ class Sample(object):
         n_neg = infile.Get('CountNegWeight').GetBinContent(1)
         sample_lumi_address[0] = (n_pos - n_neg) / self.xsec
 
-        for i in range(0, tree.GetEntriesFast()):
+        for i in xrange(0, tree.GetEntriesFast()):
             tree.GetEntry(i)
             sample_lumi_branch.Fill()
 

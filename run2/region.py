@@ -47,7 +47,7 @@ class Region(object):
         # _processes refers to newly spawned Python processes
         _processes = [
             mp.Process(target = self._cut_process, args = (tasks, results))
-            for cpu in range(mp.cpu_count())
+            for cpu in xrange(mp.cpu_count())
         ]
 
         for process in PROCESSES:

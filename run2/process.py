@@ -60,7 +60,7 @@ class Process(object):
 
             _processes = [
                 mp.Process(target = self._cut_sample, args = (tasks, results))
-                for i in range(min(n_tasks, mp.cpu_count()))
+                for i in xrange(min(n_tasks, mp.cpu_count()))
             ]
 
             for p in _processes:

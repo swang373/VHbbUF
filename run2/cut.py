@@ -77,11 +77,45 @@ class Cut(str):
     def __rmul__(self, other):
         return other * self
 
+
+#####################
+#-- Register Cuts --#
+#####################
+
+"""
+This module is * imported into the central configuration module settings.py.
+While any number of cut strings may be defined here, register only those cuts
+which are considered analysis-wide constants for safety.
+"""
+
+__all__ = ['SKIM', 'Vbb', 'Vb', 'Vcc', 'Vudsg', 'TARGET_LUMI', 'DATA_WEIGHT', 'MC_WEIGHT']
+
 #########################
 #-- Step1 Ntuple Skim --#
 #########################
 
-SKIM = 'Vtype>=0 && met_pt>150'
+Preselection = (
+    Cut('Vtype>=0') &
+    'min(met_pt, mhtJet30)>150' &
+    'HCSV_pt>100' &
+    'Jet_btagCSV[hJCidx[1]]>0.605' &
+    'HCSV_mass<500 && HCSV_mass>0' &
+    'abs(TVector2::Phi_mpi_pi(HCSV_phi-met_phi))>0.7' &
+    'max(abs(Jet_eta[hJCidx[0]]), abs(Jet_eta[hJCidx[1]]))<2.6' &
+    'min(Jet_pt[hJCidx[0]], Jet_pt[hJCidx[1]])>20' &
+    'abs(Jet_eta[0])<2.6' &
+    'Jet_id[0]>=3' &
+    'min(Jet_id[hJCidx[0]], Jet_id[hJCidx[1]])>=3'
+)
+
+JSON_Triggers = (
+    (Cut('Alt$(HLT_BIT_HLT_PFMET90_PFMHT90_IDLoose_v, 0)') |
+    'Alt$(HLT_BIT_HLT_PFMET90_PFMHT90_IDTight_v, 0)' | 
+    'HLT_BIT_HLT_PFMET170_NoiseCleaned_v') &
+    'json'
+)
+
+SKIM = Preselection & JSON_Triggers
 
 #################################################
 #-- Generator Level Higgs Jets Classification --#

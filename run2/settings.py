@@ -64,14 +64,14 @@ SAMPLES = {
 
     'WlnH125': {
         'path': '/store/group/phys_higgs/hbb/ntuples/V14/WH_HToBB_WToLNu_M125_13TeV_amcatnloFXFX_madspin_pythia8',
-        'xsec': 1.380 * 0.577 * 0.1080 * 3,
+        'xsec': 1.380 * 0.577 * 0.1086 * 3,
     },
 
     # W+Jets
-    'WJetsIncl': {
-        'path': '/store/group/phys_higgs/hbb/ntuples/V14/WJetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8',
-        'xsec': 61526.7,
-    },
+    #'WJetsIncl': {
+    #    'path': '/store/group/phys_higgs/hbb/ntuples/V14/WJetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8',
+    #    'xsec': 61526.7,
+    #},
 
     'WJetsHT100': {
         'path': '/store/group/phys_higgs/hbb/ntuples/V14/WJetsToLNu_HT-100To200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8',
@@ -96,22 +96,22 @@ SAMPLES = {
     # Z+Jets
     'ZJetsHT100': {
         'path': '/store/group/phys_higgs/hbb/ntuples/V14/ZJetsToNuNu_HT-100To200_13TeV-madgraph', 
-        'xsec': 1.23 * 280.47, 
+        'xsec': 1.23 * 280.35, 
     },
 
     'ZJetsHT200': {
         'path': '/store/group/phys_higgs/hbb/ntuples/V14/ZJetsToNuNu_HT-200To400_13TeV-madgraph',
-        'xsec': 1.23 * 78.36,
+        'xsec': 1.23 * 77.67,
     },
 
     'ZJetsHT400': {
         'path': '/store/group/phys_higgs/hbb/ntuples/V14/ZJetsToNuNu_HT-400To600_13TeV-madgraph',
-        'xsec': 1.23 * 10.94,
+        'xsec': 1.23 * 10.73,
     },
 
     'ZJetsHT600': {
         'path': '/store/group/phys_higgs/hbb/ntuples/V14/ZJetsToNuNu_HT-600ToInf_13TeV-madgraph',
-        'xsec': 1.23 * 4.20,
+        'xsec': 1.23 * 4.116,
     },
 
     # TTbar
@@ -133,53 +133,53 @@ SAMPLES = {
 
     'T_s_comb_lep': {
         'path': '/store/group/phys_higgs/hbb/ntuples/V14/ST_s-channel_4f_leptonDecays_13TeV-amcatnlo-pythia8_TuneCUETP8M1',
-        'xsec': 10.32 * 0.1080 * 3,
+        'xsec': 3.36,
     },
 
     'T_t_lep': {
         'path': '/store/group/phys_higgs/hbb/ntuples/V14/ST_t-channel_top_4f_leptonDecays_13TeV-powheg-pythia8_TuneCUETP8M1',
-        'xsec': 136.02 * 0.1080 * 3,
+        'xsec': 44.33,
     },
 
     'Tbar_t_lep': {
         'path': '/store/group/phys_higgs/hbb/ntuples/V14/ST_t-channel_antitop_4f_leptonDecays_13TeV-powheg-pythia8_TuneCUETP8M1',
-        'xsec': 80.95 * 0.1080 * 3,
+        'xsec': 26.38,
     },
 
     # QCD
     'QCDHT100': {
         'path': '/store/group/phys_higgs/hbb/ntuples/V14/QCD_HT100to200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8',
-        'xsec': 27850000, 
+        'xsec': 27990000, 
     },
     
     'QCDHT200': {
         'path': '/store/group/phys_higgs/hbb/ntuples/V14/QCD_HT200to300_TuneCUETP8M1_13TeV-madgraphMLM-pythia8',
-        'xsec': 1717000,
+        'xsec': 1712000,
     },
 
     'QCDHT300': {
         'path': '/store/group/phys_higgs/hbb/ntuples/V14/QCD_HT300to500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8',
-        'xsec': 351300,
+        'xsec': 347700,
     },
 
     'QCDHT500': {
         'path': '/store/group/phys_higgs/hbb/ntuples/V14/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8',
-        'xsec': 31630,
+        'xsec': 32100,
     },
 
     'QCDHT700': {
         'path': '/store/group/phys_higgs/hbb/ntuples/V14/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8', 
-        'xsec': 6802,
+        'xsec': 6831,
     },
 
     'QCDHT1000': {
         'path': '/store/group/phys_higgs/hbb/ntuples/V14/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8',
-        'xsec': 1206,
+        'xsec': 1207,
     },
 
     'QCDHT1500': {
         'path': '/store/group/phys_higgs/hbb/ntuples/V14/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8',
-        'xsec': 120.4,
+        'xsec': 119.9,
     },
 
     'QCDHT2000': {
@@ -190,7 +190,7 @@ SAMPLES = {
     # Diboson
     'WW': {
         'path': '/store/group/phys_higgs/hbb/ntuples/V14/WW_TuneCUETP8M1_13TeV-pythia8',
-        'xsec': 118.7, # unverified
+        'xsec': 63.21, # unverified
     },
 
     'WZ': {
@@ -339,6 +339,7 @@ cuts : list of str or Cut
        sequentially was made because PyROOT crashes when using one large string.
 """
 
+"""
 REGIONS = {
 
     'Signal_Loose': {
@@ -374,6 +375,7 @@ REGIONS = {
     },
  
 }
+"""
 
 #############
 #-- Plots --#
