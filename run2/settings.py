@@ -232,26 +232,31 @@ PROCESSES = {
     'ZH': {
         'samples': ['ZnnH125'],
         'types': 'MC:sig',
+        'color': 632,
     },
 
     'ggZH': {
         'samples': ['ggZH125'],
         'types': 'MC:sig',
+        'color': 632 - 7,
     },
 
     'WH': {
         'samples': ['WlnH125'],
         'types': 'MC:sig',
+        'color': 632 + 2,
     },
     
     's_Top': {
         'samples': ['T_s_comb_lep', 'T_t_lep', 'Tbar_t_lep', 'T_tW', 'Tbar_tW'],
         'types': 'MC:bkg',
+        'color': 840,
     },
 
     'TT': {
         'samples': ['TTPow'],
         'types': 'MC:bkg',
+        'color': 600,
     },
 
     'Wj0b': {
@@ -259,6 +264,7 @@ PROCESSES = {
         'sample_cuts': ['lheHT<100'],
         'process_cut': Vudsg | Vcc,
         'types': 'MC:bkg',
+        'color': 820 - 6,
     },
 
     'Wj1b': {
@@ -266,6 +272,7 @@ PROCESSES = {
         'sample_cuts': ['lheHT<100'],
         'process_cut': Vb,
         'types': 'MC:bkg',
+        'color': 820 - 1,
     },
 
     'Wj2b': {
@@ -273,41 +280,48 @@ PROCESSES = {
         'sample_cuts': ['lheHT<100'],
         'process_cut': Vbb,
         'types': 'MC:bkg',
+        'color': 820,
     },
 
     'Zj0b': {
         'samples': ['ZJetsHT100', 'ZJetsHT200', 'ZJetsHT400', 'ZJetsHT600'],
         'process_cut': Vudsg | Vcc,
         'types': 'MC:bkg',
+        'color': 400 + 2,
     },
 
     'Zj1b': {
         'samples': ['ZJetsHT100', 'ZJetsHT200', 'ZJetsHT400', 'ZJetsHT600'],
         'process_cut': Vb,
         'types': 'MC:bkg',
+        'color': 400 - 7,
     },
 
     'Zj2b': {
         'samples': ['ZJetsHT100', 'ZJetsHT200', 'ZJetsHT400', 'ZJetsHT600'],
         'process_cut': Vbb,
         'types': 'MC:bkg',
+        'color': 400,
     },
 
     'QCD': {
         'samples': ['QCDHT100', 'QCDHT200', 'QCDHT300', 'QCDHT500', 'QCDHT700', 'QCDHT1000', 'QCDHT1500', 'QCDHT2000'],
         'types': 'MC:bkg',
+        'color': 613,
     },
 
     'VVLF': {
         'samples': ['WW', 'WZ', 'ZZ'],
         'process_cut': Vudsg | Vcc,
         'types': 'MC:bkg',
+        'color': 920,
     },
 
     'VVHF': {
         'samples': ['WW', 'WZ', 'ZZ'],
         'process_cut': Vb | Vbb,
         'types': 'MC:bkg',
+        'color': 920 + 1,
     },
 
 }

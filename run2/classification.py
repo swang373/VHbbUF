@@ -169,19 +169,19 @@ def run_classification():
 
     # Book Trees
     signal = ROOT.TFile.Open(DATASET_DIR + 'ZH.root', 'read')
-    sig_train_tree = signal.Get('train')
-    sig_test_tree = signal.Get('test')
+    #sig_train_tree = signal.Get('train')
+    #sig_test_tree = signal.Get('test')
     background = ROOT.TFile.Open(DATASET_DIR + 'QCD.root', 'read')
-    bkg_train_tree = background.Get('train')
-    bkg_test_tree = background.Get('test')
+    #bkg_train_tree = background.Get('train')
+    #bkg_test_tree = background.Get('test')
 
     # Start TMVA
     ROOT.TMVA.Tools.Instance()
 
     # Change the weight directory.
-    io_names = ROOT.TMVA.gConfig().GetIONames()
-    io_names.fWeightFileDir = WEIGHT_DIR
-    io_names.fWeightFileExtension = 'weights_ZH'
+    ioNames = ROOT.TMVA.gConfig().GetIONames()
+    ioNames.fWeightFileDir = WEIGHT_DIR
+    ioNames.fWeightFileExtension = 'ZnnHbb'
 
     outfile = ROOT.TFile('TMVA_BDT.root', 'recreate')
 
@@ -193,11 +193,11 @@ def run_classification():
     for var in VARIABLES.itervalues():
         factory.AddVariable(var['expression'], var['title'], var['unit'], var['type']) 
 
-    factory.AddSignalTree(sig_train_tree, 2.0, 'train')
-    factory.AddSignalTree(sig_test_tree, 2.0, 'test')
+    factory.AddSignalTree(signal.Get('train'), 2.0, 'train')
+    factory.AddSignalTree(signal.Get('test'), 2.0, 'test')
 
-    factory.AddBackgroundTree(bkg_train_tree, 2.0, 'train')
-    factory.AddBackgroundTree(bkg_test_tree, 2.0, 'test')
+    factory.AddBackgroundTree(background.Get('train'), 2.0, 'train')
+    factory.AddBackgroundTree(background.Get('test'), 2.0, 'test')
 
     factory.SetSignalWeightExpression('sample_lumi')
     factory.SetBackgroundWeightExpression('sample_lumi')

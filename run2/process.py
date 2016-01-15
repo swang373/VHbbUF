@@ -9,11 +9,11 @@ import tempfile as tf
 import ROOT
 
 from sample import Sample, SAMPLE_DIR
-import settings
+from settings import WORK_DIR, SAMPLES, PROCESSES
 
 
 # Output Directory
-PROCESS_DIR = settings.WORK_DIR + 'processes/'
+PROCESS_DIR = WORK_DIR + 'processes/'
 
 class Process(object):
 
@@ -98,7 +98,7 @@ class Process(object):
                 sample_files.append(fname)
             else:
                 self.logger.info('Getting missing sample {}'.format(sample))
-                Sample(sample, **settings.SAMPLES[sample]).make()
+                Sample(sample, **SAMPLES[sample]).make()
                 sample_files.append(fname)
 
         return sample_files
@@ -142,5 +142,5 @@ if __name__ == '__main__':
         logging.basicConfig(level = logging.INFO,
                             format = '%(name)s(%(levelname)s) - %(message)s')
 
-        Process(name, **settings.PROCESSES[name]).make()
+        Process(name, **PROCESSES[name]).make()
 

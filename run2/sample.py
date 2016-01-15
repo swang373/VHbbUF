@@ -9,14 +9,14 @@ import tempfile as tf
 import numpy as np
 import ROOT
 
-import settings
+from settings import WORK_DIR, SKIM, SAMPLES
 
 
 # EOS Command Alias on LXPLUS
 EOS = '/afs/cern.ch/project/eos/installation/0.3.84-aquamarine/bin/eos.select'
 
 # Output Directory
-SAMPLE_DIR = settings.WORK_DIR + 'samples/'
+SAMPLE_DIR = WORK_DIR + 'samples/'
 
 class Sample(object):
     
@@ -122,7 +122,7 @@ class Sample(object):
             outfile = ROOT.TFile(self.tmpdir + fname, 'recreate')
 
             intree = infile.Get('tree')
-            outtree = intree.CopyTree(settings.SKIM)
+            outtree = intree.CopyTree(SKIM)
             
             result = (fname, intree.GetEntriesFast(), outtree.GetEntriesFast())
             
@@ -174,5 +174,5 @@ if __name__ == '__main__':
         logging.basicConfig(level = logging.INFO,
                             format = '%(name)s(%(levelname)s) - %(message)s')
 
-        Sample(name, **settings.SAMPLES[name]).make()
+        Sample(name, **SAMPLES[name]).make()
 

@@ -1,319 +1,280 @@
-import logging
 import os
-import math
+import sys
 
+import numpy as np
 import ROOT
 
 from region import REGION_DIR
-import settings
+from settings import WORK_DIR, PROCESSES, PLOTS, DATA_WEIGHT, MC_WEIGHT
 
 
 # Output Directory
-PLOT_DIR = settings.WORK_DIR + 'plots/'
+PLOT_DIR = WORK_DIR + 'plots/'
 
-class Plot(object):
+def set_tdrStyle():
 
-    def __init__(self, region = '', **kwargs):
-        
-        self.logger = logging.getLogger('Plot')
-        self.logger.info('Initialized for {}'.format(region))
-
-        self.region = region
-        self.outdir = PLOT_DIR + region + '/'
-
-    def make(self):
-
-        # Output Directory
-        try:
-            os.makedirs(self.outdir)
-        except OSError:
-            if not os.path.isdir(self.outdir):
-                raise
-
-        # Open region file.
-        self.infile = ROOT.TFile(REGION_DIR + self.region + '.root', 'read')
-
-        for plot in settings.PLOTS.itervalues():
-        
-            self.hist = self._book_histograms(**plot)
-            print self.hist
-
-        # Close region file.
-        self.infile.Close() 
-
-    def _book_histograms(self, expression, n_bins, x_min, x_max, **kwargs):
-
-        histograms = {}
-
-        for key in self.infile.GetListOfKeys():
-            
-            process = key.GetName()
-            h_name = 'h_{}'.format(process)
-            types = settings.PROCESSES[process]['types'].lower().split(':')
-
-            histograms[process] = ROOT.TH1F(h_name, '', n_bins, x_min, x_max)
-            if 'data' in types:
-                self.infile.Get(process).Project(h_name, expression, settings.data_weight)
-            else:
-                self.infile.Get(process).Project(h_name, expression, settings.mc_weight) 
-
-        return histograms
-
-    def _combine_sig_hists(self, n_bins, x_min, x_max, **kwargs):
-
-        self.hist['VH'] = ROOT.TH1F('VH', '', n_bins, x_min, x_max)
-        
-        self.hist['VH'].Add(
-
-    def _combine_bkg_hists(self):
-
-        
-            
-
-    @staticmethod
-    def set_tdrStyle():
-
-        tdrStyle = ROOT.TStyle('tdrStyle', 'Style for P-TDR')
-	
-	# Canvas
-	tdrStyle.SetCanvasBorderMode(0)
-	tdrStyle.SetCanvasColor(ROOT.kWhite)
-	tdrStyle.SetCanvasDefH(600) # Height
-	tdrStyle.SetCanvasDefW(600) # Width
-	tdrStyle.SetCanvasDefX(0) # Screen X Position
-	tdrStyle.SetCanvasDefY(0) # Screen Y Position
-	
-	# Pad
-	tdrStyle.SetPadBorderMode(0)
-	tdrStyle.SetPadColor(ROOT.kWhite)
-	tdrStyle.SetPadGridX(False)
-	tdrStyle.SetPadGridY(False)
-	tdrStyle.SetGridColor(0)
-	tdrStyle.SetGridStyle(3)
-	tdrStyle.SetGridWidth(1)
-	
-	# Frame
-	tdrStyle.SetFrameBorderMode(0)
-	tdrStyle.SetFrameBorderSize(1)
-	tdrStyle.SetFrameFillColor(0)
-	tdrStyle.SetFrameFillStyle(0)
-	tdrStyle.SetFrameLineColor(1)
-	tdrStyle.SetFrameLineStyle(1)
-	tdrStyle.SetFrameLineWidth(2)
-	
-	# Histogram
-	tdrStyle.SetHistLineColor(1)
-	tdrStyle.SetHistLineStyle(0)
-	tdrStyle.SetHistLineWidth(1)
-	tdrStyle.SetEndErrorSize(1)
-	tdrStyle.SetMarkerStyle(20)
-	
-	# Function/Fit
-	tdrStyle.SetOptFit(1)
-	tdrStyle.SetFitFormat('5.4g')
-	tdrStyle.SetFuncColor(2)
-	tdrStyle.SetFuncStyle(1)
-	tdrStyle.SetFuncWidth(1)
-	
-	# Date
-	tdrStyle.SetOptDate(0)
-	
-	# Statistics Box
-	tdrStyle.SetOptFile(0)
-	tdrStyle.SetOptStat(0) # Use 'mr' to display mean and RMS.
-	tdrStyle.SetStatColor(ROOT.kWhite)
-	tdrStyle.SetStatFont(42)
-	tdrStyle.SetStatFontSize(0.025)
-	tdrStyle.SetStatTextColor(1)
-	tdrStyle.SetStatFormat('6.4g')
-	tdrStyle.SetStatBorderSize(1)
-	tdrStyle.SetStatH(0.1)
-	tdrStyle.SetStatW(0.15)
-	
-	# Margins
-	tdrStyle.SetPadTopMargin(0.05)
-	tdrStyle.SetPadBottomMargin(0.13)
-	tdrStyle.SetPadLeftMargin(0.15)
-	tdrStyle.SetPadRightMargin(0.03)
-	
-	# Global Title
-	tdrStyle.SetOptTitle(0)
-	tdrStyle.SetTitleFont(42)
-	tdrStyle.SetTitleColor(1)
-	tdrStyle.SetTitleTextColor(1)
-	tdrStyle.SetTitleFillColor(10)
-	tdrStyle.SetTitleFontSize(0.05)
-	
-	# Axis Titles
-	tdrStyle.SetTitleColor(1, 'XYZ')
-	tdrStyle.SetTitleFont(42, 'XYZ')
-	tdrStyle.SetTitleSize(0.06, 'XYZ')
-	tdrStyle.SetTitleXOffset(0.9)
-	tdrStyle.SetTitleYOffset(1.25)
-	
-	# Axis Labels
-	tdrStyle.SetLabelColor(1, 'XYZ')
-	tdrStyle.SetLabelFont(42, 'XYZ')
-	tdrStyle.SetLabelOffset(0.007, 'XYZ')
-	tdrStyle.SetLabelSize(0.05, 'XYZ')
-	
-	# Axis
-	tdrStyle.SetAxisColor(1, 'XYZ')
-	tdrStyle.SetStripDecimals(ROOT.kTRUE)
-	tdrStyle.SetTickLength(0.03, 'XYZ')
-	tdrStyle.SetNdivisions(510, 'XYZ')
-	tdrStyle.SetPadTickX(1)  # Tick marks on opposite side of frame.
-	tdrStyle.SetPadTickY(1)
-	
-	# Log Plots
-	tdrStyle.SetOptLogx(0)
-	tdrStyle.SetOptLogy(0)
-	tdrStyle.SetOptLogz(0)
-	
-	# Postscript
-	tdrStyle.SetPaperSize(20.,20.)
-	
-	tdrStyle.cd()
-
-
-def make_plot(CR = '', plot = '', expression = '', x_title = '', n_bins = None, x_min = None, x_max = None):
+    tdrStyle = ROOT.TStyle('tdrStyle', 'Style for P-TDR')
     
-    infile = ROOT.TFile('{}{}.root'.format('/afs/cern.ch/work/s/swang373/private/V14/CR/', CR), 'read')
+    # Canvas
+    tdrStyle.SetCanvasBorderMode(0)
+    tdrStyle.SetCanvasColor(ROOT.kWhite)
+    tdrStyle.SetCanvasDefH(600) # Height
+    tdrStyle.SetCanvasDefW(600) # Width
+    tdrStyle.SetCanvasDefX(0) # Screen X Position
+    tdrStyle.SetCanvasDefY(0) # Screen Y Position
+    
+    # Pad
+    tdrStyle.SetPadBorderMode(0)
+    tdrStyle.SetPadColor(ROOT.kWhite)
+    tdrStyle.SetPadGridX(False)
+    tdrStyle.SetPadGridY(False)
+    tdrStyle.SetGridColor(0)
+    tdrStyle.SetGridStyle(3)
+    tdrStyle.SetGridWidth(1)
+    
+    # Frame
+    tdrStyle.SetFrameBorderMode(0)
+    tdrStyle.SetFrameBorderSize(1)
+    tdrStyle.SetFrameFillColor(0)
+    tdrStyle.SetFrameFillStyle(0)
+    tdrStyle.SetFrameLineColor(1)
+    tdrStyle.SetFrameLineStyle(1)
+    tdrStyle.SetFrameLineWidth(2)
+    
+    # Histogram
+    tdrStyle.SetHistLineColor(1)
+    tdrStyle.SetHistLineStyle(0)
+    tdrStyle.SetHistLineWidth(1)
+    tdrStyle.SetEndErrorSize(1)
+    tdrStyle.SetMarkerStyle(20)
+    
+    # Function/Fit
+    tdrStyle.SetOptFit(1)
+    tdrStyle.SetFitFormat('5.4g')
+    tdrStyle.SetFuncColor(2)
+    tdrStyle.SetFuncStyle(1)
+    tdrStyle.SetFuncWidth(1)
+    
+    # Date
+    tdrStyle.SetOptDate(0)
+    
+    # Statistics Box
+    tdrStyle.SetOptFile(0)
+    tdrStyle.SetOptStat(0) # Use 'mr' to display mean and RMS.
+    tdrStyle.SetStatColor(ROOT.kWhite)
+    tdrStyle.SetStatFont(42)
+    tdrStyle.SetStatFontSize(0.025)
+    tdrStyle.SetStatTextColor(1)
+    tdrStyle.SetStatFormat('6.4g')
+    tdrStyle.SetStatBorderSize(1)
+    tdrStyle.SetStatH(0.1)
+    tdrStyle.SetStatW(0.15)
+    
+    # Margins
+    tdrStyle.SetPadTopMargin(0.05)
+    tdrStyle.SetPadBottomMargin(0.13)
+    tdrStyle.SetPadLeftMargin(0.15)
+    tdrStyle.SetPadRightMargin(0.03)
+    
+    # Global Title
+    tdrStyle.SetOptTitle(0)
+    tdrStyle.SetTitleFont(42)
+    tdrStyle.SetTitleColor(1)
+    tdrStyle.SetTitleTextColor(1)
+    tdrStyle.SetTitleFillColor(10)
+    tdrStyle.SetTitleFontSize(0.05)
+    
+    # Axis Titles
+    tdrStyle.SetTitleColor(1, 'XYZ')
+    tdrStyle.SetTitleFont(42, 'XYZ')
+    tdrStyle.SetTitleSize(0.06, 'XYZ')
+    tdrStyle.SetTitleXOffset(0.9)
+    tdrStyle.SetTitleYOffset(1.25)
+    
+    # Axis Labels
+    tdrStyle.SetLabelColor(1, 'XYZ')
+    tdrStyle.SetLabelFont(42, 'XYZ')
+    tdrStyle.SetLabelOffset(0.007, 'XYZ')
+    tdrStyle.SetLabelSize(0.05, 'XYZ')
+    
+    # Axis
+    tdrStyle.SetAxisColor(1, 'XYZ')
+    tdrStyle.SetStripDecimals(ROOT.kTRUE)
+    tdrStyle.SetTickLength(0.03, 'XYZ')
+    tdrStyle.SetNdivisions(510, 'XYZ')
+    tdrStyle.SetPadTickX(1)  # Tick marks on opposite side of frame.
+    tdrStyle.SetPadTickY(1)
+    
+    # Log Plots
+    tdrStyle.SetOptLogx(0)
+    tdrStyle.SetOptLogy(0)
+    tdrStyle.SetOptLogz(0)
+    
+    # Postscript
+    tdrStyle.SetPaperSize(20.,20.)
+    
+    tdrStyle.cd()
+
+def make_plot(region = '', name = '', expression = '', x_title = '', n_bins = None, x_min = None, x_max = None, **kwargs):
+
+    # Manually set which processes are omitted. -------------------------------#
+    omit = set() # E.g. set(['Wj0b', 'Wj1b', 'Wj2b'])
+    #--------------------------------------------------------------------------#
+
+    # Setup output directory.
+    outdir = ''.join([PLOT_DIR, region, '/'])
+    try:
+        os.makedirs(outdir)
+    except OSError:
+        if not os.path.isdir(outdir):
+            raise
+      
+    # Book histograms in dictionary and stacked histogram.
+    infile = ROOT.TFile(''.join([REGION_DIR, region, '.root']), 'read')
 
     hist = {}
-
-    # Make histograms for each category.
-    for c in PROCESSES:
-        hist[c] = ROOT.TH1F('h_{}'.format(c), '', n_bins, x_min, x_max)
-        if (c == 'Data_MET'):
-            infile.Get(c).Project('h_{}'.format(c), expression, DATA_WEIGHT)
-        else:
-            infile.Get(c).Project('h_{}'.format(c), expression, MC_WEIGHT)
-    
-    # Make additional histogram combining all signals.
-    hist['VH'] = ROOT.TH1F('VH', '', n_bins, x_min, x_max)
-    hist['VH'].Add(hist['ZnnH125'])
-    hist['VH'].Add(hist['WlnH125'])
-
-    # Make additional histogram combining all backgrounds.
     hist['mc_exp'] = ROOT.TH1F('mc_exp', '', n_bins, x_min, x_max)
-    hist['mc_exp'].Add(hist['ST'])
-    hist['mc_exp'].Add(hist['TT'])
-    hist['mc_exp'].Add(hist['ZJets'])
-    hist['mc_exp'].Add(hist['WJets'])
-    hist['mc_exp'].Add(hist['VV'])
-    hist['mc_exp'].Add(hist['QCD'])
-    
-    # Make histogram stack for all signals and backgrounds.
     hstack = ROOT.THStack('hstack','')
-    hstack.Add(hist['ST'])
-    hstack.Add(hist['TT'])
-    hstack.Add(hist['ZJets'])
-    hstack.Add(hist['WJets'])
-    hstack.Add(hist['VV'])
-    hstack.Add(hist['QCD'])
-    hstack.Add(hist['VH'])
-    hstack.Add(hist['ggZH125'])
-    
-    # Canvas and pads.
+
+    for process, properties in PROCESSES.iteritems():
+
+        if process in ignore:
+            continue
+
+        # Check process properties.
+        hname = 'h_{}'.format(process)
+        types = set(properties['types'].lower().split(':'))
+        color = properties.get('color', 0)
+
+        # Project histogram and set style.
+        histogram = ROOT.TH1F(hname, '', n_bins, x_min, x_max)
+
+        if 'data' in types:
+            infile.Get(process).Project(hname, expression, DATA_WEIGHT)
+            histogram.SetMarkerSize(0.8)
+            histogram.SetMarkerStyle(20)
+        else:
+            infile.Get(process).Project(hname, expression, MC_WEIGHT)
+            if 'sig' in types:
+                histogram.SetFillColor(color)
+                histogram.SetMarkerColor(color)
+            elif 'bkg' in types:
+                hist['mc_exp'].Add(histogram)
+                histogram.SetLineColor(ROOT.kBlack)
+                histogram.SetFillColor(color)
+                histogram.SetMarkerColor(color)
+
+        # Book the histogram.
+        hstack.Add(histogram)
+        hist[process] = histogram
+
+    # Set the stacked histogram style.
+    bin_width = (float(x_max) - float(x_min)) / n_bins
+    y_max = max(hist['data_obs'].GetMaximum(), hstack.GetMaximum())
+
+    hstack.SetMaximum(y_max * 1.7) 
+    hstack.GetXaxis().SetLabelSize(0)
+    hstack.GetYaxis().SetTitle('Events / {:3.3f}'.format(bin_wight))
+
+    # Setup canvas and pads.
     canvas = ROOT.TCanvas('canvas', '', 700, 700)
+
     upper_pad = ROOT.TPad('upper_pad', '', 0.0, 0.3, 1.0, 1.0)
     upper_pad.SetBottomMargin(0.0)
     upper_pad.Draw()
+
     lower_pad = ROOT.TPad('lower_pad', '', 0.0, 0.0, 1.0, 0.3)
     lower_pad.SetTopMargin(0.0)
     lower_pad.SetBottomMargin(0.35)
     lower_pad.Draw()
-    upper_pad.cd()
 
-    # Set histogram styles.
-    for h in hist:
+    # Setup statistical uncertainty of the backgrounds.
+    bkg_stat_unc = hist['mc_exp'].Clone('bkg_stat_unc')
 
-        color = {'WJets': 820, 'ZJets': 5,
-                 'TT': 596, 'ST': 840, 'VV': 922, 'QCD': 616}
+    bkg_stat_unc.Sumw2()
+    bkg_stat_unc.SetFillColor(ROOT.kGray+3)
+    bkg_stat_unc.SetMarkerSize(0)
+    bkg_stat_unc.SetFillStyle(3013)
 
-        if (h == 'VH' or h == 'ZnnH125' or h == 'WlnH125'):
-            hist[h].SetFillColor(2)
-            hist[h].SetMarkerColor(2)
-        elif (h == 'ggZH125'):
-            hist[h].SetFillColor(ROOT.kOrange-2)
-            hist[h].SetMarkerColor(ROOT.kOrange-2)
-        elif (h == 'Data_MET'):
-            hist[h].SetMarkerSize(0.8)
-            hist[h].SetMarkerStyle(20)
-        elif (h in color):
-            hist[h].SetLineColor(ROOT.kBlack)
-            hist[h].SetFillColor(color[h])
-            hist[h].SetMarkerColor(color[h])
-        else:
-            continue
-
-    # Statistical uncertainty of all backgrounds.
-    hist['stat_unc'] = hist['mc_exp'].Clone('stat_unc')
-    hist['stat_unc'].Sumw2()
-    hist['stat_unc'].SetFillColor(ROOT.kGray+3)
-    hist['stat_unc'].SetMarkerSize(0)
-    hist['stat_unc'].SetFillStyle(3013)
+    hist['bkg_stat_unc'] = bkg_stat_unc
     
-    # Data to MC ratio.
-    hist['ratio'] = hist['Data_MET'].Clone('ratio')
-    hist['ratio'].Sumw2()
-    hist['ratio'].SetMarkerSize(0.8)
-    hist['ratio'].Divide(hist['Data_MET'], hist['mc_exp'], 1., 1., '')
-    
-    # Statistical uncertainty of data to MC ratio.
-    hist['ratio_stat'] = hist['mc_exp'].Clone('ratio_stat')
-    hist['ratio_stat'].Sumw2()
-    hist['ratio_stat'].SetStats(0)
-    hist['ratio_stat'].GetXaxis().SetTitle(x_title)
-    hist['ratio_stat'].GetYaxis().SetTitle('Data/MC')
-    hist['ratio_stat'].SetMaximum(2.2)
-    hist['ratio_stat'].SetMinimum(0.0)
-    hist['ratio_stat'].SetMarkerSize(0)
-    hist['ratio_stat'].SetFillColor(ROOT.kGray+3)
-    hist['ratio_stat'].SetFillStyle(3013)
-    hist['ratio_stat'].GetXaxis().SetLabelSize(0.12)
-    hist['ratio_stat'].GetXaxis().SetTitleSize(0.14)
-    hist['ratio_stat'].GetXaxis().SetTitleOffset(1.10)
-    hist['ratio_stat'].GetYaxis().SetLabelSize(0.10)
-    hist['ratio_stat'].GetYaxis().SetTitleSize(0.12)
-    hist['ratio_stat'].GetYaxis().SetTitleOffset(0.6)
-    hist['ratio_stat'].GetYaxis().SetNdivisions(505)
+    # Setup the data to MC ratio.
+    ratio = hist['data_obs'].Clone('ratio')
 
-    for i in range(1, n_bins + 1):
-        hist['ratio_stat'].SetBinContent(i, 1.0)
-        if (hist['mc_exp'].GetBinContent(i) > 0):
-            bin_error = hist['mc_exp'].GetBinError(i) / hist['mc_exp'].GetBinContent(i)
-            hist['ratio_stat'].SetBinError(i, bin_error)
-        else:
-            hist['ratio_stat'].SetBinError(i, 0)
+    ratio.Sumw2()
+    ratio.SetMarkerSize(0.8)
+    ratio.Divide(hist['data_obs'], hist['mc_exp'], 1., 1., '')
 
-    # Unity reference line for ratio.
+    hist['ratio'] = ratio
+
+    # Setup the unity reference line for the data to MC ratio.
     ratio_unity = ROOT.TLine(x_min, 1, x_max, 1)
     ratio_unity.SetLineStyle(2)
     
-    # Systematic uncertainty of data to MC ratio.
-    hist['ratio_syst'] = hist['ratio_stat'].Clone('ratio_syst')
-    hist['ratio_syst'].SetMarkerSize(0)
-    hist['ratio_syst'].SetFillColor(ROOT.kYellow-4)
-    hist['ratio_syst'].SetFillStyle(1001)
-    
-    for i in range(1, n_bins + 1):
+    # Setup the statistical uncertainty for the data to MC ratio.
+    ratio_stat_unc = hist['mc_exp'].Clone('ratio_stat')
+
+    ratio_stat_unc.Sumw2()
+    ratio_stat_unc.SetStats(0)
+    ratio_stat_unc.SetMaximum(2.2)
+    ratio_stat_unc.SetMinimum(0.0)
+    ratio_stat_unc.SetMarkerSize(0)
+    ratio_stat_unc.SetFillColor(ROOT.kGray+3)
+    ratio_stat_unc.SetFillStyle(3013)
+
+    rsu_Xaxis = ratio_stat_unc.GetXaxis()
+    rsu_Xaxis.SetTitle(x_title)
+    rsu_Xaxis.SetLabelSize(0.12)
+    rsu_Xaxis.SetTitleSize(0.14)
+    rsu_Xaxis.SetTitleOffset(1.10)
+
+    rsu_Yaxis = ratio_stat_unc.GetYaxis()
+    rsu_Yaxis.SetTitle('Data/MC')
+    rsu_Yaxis.SetLabelSize(0.10)
+    rsu_Yaxis.SetTitleSize(0.12)
+    rsu_Yaxis.SetTitleOffset(0.6)
+    rsu_Yaxis.SetNdivisions(505)
+
+    for i in xrange(1, n_bins + 1):
+        ratio_stat_unc.SetBinContent(i, 1.0)
         if (hist['mc_exp'].GetBinContent(i) > 0):
-	    sq_bin_error = pow(hist['mc_exp'].GetBinError(i), 2)
-	    #sq_bin_error += pow(0.08 * hist['WjLF'].GetBinContent(i), 2)
-	    sq_bin_error += pow(0.20 * hist['WJets'].GetBinContent(i), 2)
-	    #sq_bin_error += pow(0.08 * hist['ZjLF'].GetBinContent(i), 2)
-	    sq_bin_error += pow(0.20 * hist['ZJets'].GetBinContent(i), 2)
-	    sq_bin_error += pow(0.07 * hist['TT'].GetBinContent(i), 2)
-	    sq_bin_error += pow(0.25 * hist['ST'].GetBinContent(i), 2)
-	    sq_bin_error += pow(0.25 * hist['VV'].GetBinContent(i), 2)
-	    sq_bin_error += pow(0.50 * hist['QCD'].GetBinContent(i), 2)
+            bin_error = hist['mc_exp'].GetBinError(i) / hist['mc_exp'].GetBinContent(i)
+            ratio_stat_unc.SetBinError(i, bin_error)
+        else:
+            ratio_stat_unc.SetBinError(i, 0)
 
-            bin_error = math.sqrt(sq_bin_error)
-            hist['ratio_syst'].SetBinError(i, bin_error / hist['mc_exp'].GetBinContent(i))
+    hist['ratio_stat_unc'] = ratio_stat_unc
+    
+    # Setup the systematic uncertainty for the data to MC ratio.
+    ratio_syst_unc = hist['ratio_stat_unc'].Clone('ratio_syst_unc')
+    ratio_syst_unc.SetMarkerSize(0)
+    ratio_syst_unc.SetFillColor(ROOT.kYellow-4)
+    ratio_syst_unc.SetFillStyle(1001)
+    
+    for i in xrange(1, n_bins + 1):
+        if (hist['mc_exp'].GetBinContent(i) > 0): 
+            bin_errors = [
+                1.00 * hist['mc_exp'.GetBinError(i),
+                0.08 * hist['Wj0b'].GetBinError(i),
+                0.08 * hist['Wj1b'].GetBinError(i),
+                0.20 * hist['Wj2b'].GetBinContent(i),
+                0.08 * hist['Zj0b'].GetBinError(i),
+                0.08 * hist['Zj1b'].GetBinError(i),
+                0.20 * hist['Zj2b'].GetBinContent(i),
+                0.07 * hist['TT'].GetBinContent(i),
+                0.25 * hist['s_Top'].GetBinContent(i),
+                0.25 * hist['VVLF'].GetBinContent(i),
+                0.25 * hist['VVHF'].GetBinContent(i),
+                0.50 * hist'QCD'].GetBinContent(i),
+            ]
+            total_bin_error = np.sqrt(np.sum(np.power(bin_errors, 2)))
+            ratio_syst_unc.SetBinError(i, total_bin_error / hist['mc_exp'].GetBinContent(i))
 
-    # Setup legends.
+    hist['ratio_syst_unc'] = ratio_syst_unc
+        
+    # Manually setup drawing of upper pad objects. ----------------------------#
+    upper_pad.cd()
+
     legend_1 = ROOT.TLegend(0.50, 0.68, 0.72, 0.92)
     legend_1.SetFillColor(0)
     legend_1.SetLineColor(0)
@@ -321,13 +282,15 @@ def make_plot(CR = '', plot = '', expression = '', x_title = '', n_bins = None, 
     legend_1.SetTextFont(62)
     legend_1.SetTextSize(0.03)
     legend_1.SetBorderSize(1)
-    legend_1.AddEntry(hist['Data_MET'], 'Data', 'p')
-    legend_1.AddEntry(hist['VH'], 'VH', 'l')
-    legend_1.AddEntry(hist['ggZH125'], 'ggZH', 'l')
+    legend_1.AddEntry(hist['data_obs'], 'Data', 'p')
+    legend_1.AddEntry(hist['ZH'], 'ZH', 'f')
+    legend_1.AddEntry(hist['ggZH'], 'ggZH', 'f')
+    legend_1.AddEntry(hist['WH'], 'WH', 'f')
+    legend_1.AddEntry(hist['VVLF'], 'VV + udscg', 'f')
+    legend_1.AddEntry(hist['VVHF'], 'VV + b, b#bar{b}', 'f')
     legend_1.AddEntry(hist['TT'], 't#bar{t}', 'f')
-    legend_1.AddEntry(hist['ST'], 'Single Top', 'f')
-    legend_1.AddEntry(hist['VV'], 'VV', 'f')
-    
+    legend_1.AddEntry(hist['s_Top'], 'Single Top', 'f')
+
     legend_2 = ROOT.TLegend(0.72, 0.68, 0.94, 0.92)
     legend_2.SetFillColor(0)
     legend_2.SetLineColor(0)
@@ -335,57 +298,21 @@ def make_plot(CR = '', plot = '', expression = '', x_title = '', n_bins = None, 
     legend_2.SetTextFont(62)
     legend_2.SetTextSize(0.03)
     legend_2.SetBorderSize(1)
-    legend_2.AddEntry(hist['WJets'], 'Wj', 'f')
-    #legend_2.AddEntry(hist['WjLF'], 'W+LF', 'f')
-    legend_2.AddEntry(hist['ZJets'], 'Zj', 'f')
-    #legend_2.AddEntry(hist['ZjLF'], 'Z+LF', 'f')
+    legend_2.AddEntry(hist['Wj0b'], 'W + udscg', 'f')
+    legend_2.AddEntry(hist['Wj1b'], 'W + b', 'f')
+    legend_2.AddEntry(hist['Wj2b'], 'W + b#bar{b}', 'f')
+    legend_2.AddEntry(hist['Zj0b'], 'Z + udscg', 'f')
+    legend_2.AddEntry(hist['Zj1b'], 'Z + b', 'f')
+    legend_2.AddEntry(hist['Zj2b'], 'Z + b#bar{b}', 'f')
     legend_2.AddEntry(hist['QCD'], 'QCD', 'f') 
-    legend_2.AddEntry(hist['stat_unc'], 'MC Unc. (Stat)', 'f')
-    
-    ratio_legend_1 = ROOT.TLegend(0.72, 0.88, 0.94, 0.96)
-    ratio_legend_1.SetFillColor(0)
-    ratio_legend_1.SetLineColor(0)
-    ratio_legend_1.SetShadowColor(0)
-    ratio_legend_1.SetTextFont(62)
-    ratio_legend_1.SetTextSize(0.07)
-    ratio_legend_1.SetBorderSize(1)
-    ratio_legend_1.AddEntry(hist['ratio_stat'], 'MC Unc. (Stat)', 'f')
-    
-    ratio_legend_2 = ROOT.TLegend(0.50, 0.88, 0.72, 0.96)
-    ratio_legend_2.SetFillColor(0)
-    ratio_legend_2.SetLineColor(0)
-    ratio_legend_2.SetShadowColor(0)
-    ratio_legend_2.SetTextFont(62)
-    ratio_legend_2.SetTextSize(0.07)
-    ratio_legend_2.SetBorderSize(1)
-    ratio_legend_2.AddEntry(hist['ratio_syst'], 'MC Unc. (Syst)', 'f')
-    
-    # Scale the y-axis for viewing.
-    y_max = max(hist['Data_MET'].GetMaximum(), hstack.GetMaximum())
-    hstack.SetMaximum(y_max * 1.7) 
+    legend_2.AddEntry(hist['bkg_stat_unc'], 'MC Unc. (Stat)', 'f')
 
-    # Draw all the things.
-    hstack.Draw('hist')
-    hstack.GetXaxis().SetLabelSize(0)
-    hstack.GetYaxis().SetTitle('Events / {:3.3f}'.format((float(x_max) - float(x_min)) / float(n_bins)))
-    
-    hist['stat_unc'].Draw('e2 same')
-    
-    hist['VH'].SetLineColor(2)
-    hist['VH'].SetLineWidth(3)
-    hist['VH'].SetFillColor(0)
-    hist['VH'].Draw('hist same')
-
-    hist['ggZH125'].SetLineColor(ROOT.kOrange-2)
-    hist['ggZH125'].SetLineWidth(3)
-    hist['ggZH125'].SetFillColor(0)
-    hist['ggZH125'].Draw('hist same')
-    
-    hist['Data_MET'].Draw('e1 same')
-    
     legend_1.Draw()
     legend_2.Draw()
-   
+    hstack.Draw('hist')    
+    hist['bkg_stat_unc'].Draw('e2 same')
+    hist['data_obs'].Draw('e1 same')
+
     latex = ROOT.TLatex()
     latex.SetNDC()
     latex.SetTextAlign(12)
@@ -394,29 +321,57 @@ def make_plot(CR = '', plot = '', expression = '', x_title = '', n_bins = None, 
     latex.DrawLatex(0.19, 0.89, 'CMS Preliminary 2016')
     latex.DrawLatex(0.19, 0.84, '#sqrt{s} = 13 TeV, L = 2.20 fb^{-1}')
     latex.DrawLatex(0.19, 0.79, 'Z(#nu#bar{#nu})H(b#bar{b})')
-    
+   
+    #hist['ggZH'].SetLineColor(ROOT.kOrange-2)
+    #hist['ggZH'].SetLineWidth(3)
+    #hist['ggZH'].SetFillColor(0)
+    #hist['ggZH'].Draw('hist same')
+    #--------------------------------------------------------------------------#
+       
+    # Manually setup drawing of lower pad objects. ----------------------------#
     lower_pad.cd()
     lower_pad.SetGridy(0)
-    hist['ratio_stat'].Draw('e2')
-    hist['ratio_syst'].Draw('e2 same')
-    hist['ratio_stat'].Draw('e2 same')
+
+    legend_3 = ROOT.TLegend(0.72, 0.88, 0.94, 0.96)
+    legend_3.SetFillColor(0)
+    legend_3.SetLineColor(0)
+    legend_3.SetShadowColor(0)
+    legend_3.SetTextFont(62)
+    legend_3.SetTextSize(0.07)
+    legend_3.SetBorderSize(1)
+    legend_3.AddEntry(hist['ratio_stat_unc'], 'MC Unc. (Stat)', 'f')
     
-    ratio_unity.Draw()
-    hist['ratio'].Draw('e1 same')
-    ratio_legend_1.Draw()
-    ratio_legend_2.Draw()
-    
+    legend_4 = ROOT.TLegend(0.50, 0.88, 0.72, 0.96)
+    legend_4.SetFillColor(0)
+    legend_4.SetLineColor(0)
+    legend_4.SetShadowColor(0)
+    legend_4.SetTextFont(62)
+    legend_4.SetTextSize(0.07)
+    legend_4.SetBorderSize(1)
+    legend_4.AddEntry(hist['ratio_syst_unc'], 'MC Unc. (Syst)', 'f')
+
     pave = ROOT.TPaveText(0.18, 0.86, 0.28, 0.96, 'brNDC')
     pave.SetLineColor(0)
     pave.SetFillColor(0)
     pave.SetShadowColor(0)
     pave.SetBorderSize(1)
-    chi_sq = hist['Data_MET'].Chi2Test(hist['mc_exp'], 'UWCHI2/NDF')
-    text = pave.AddText('#chi_{{#nu}}^{{2}} = {:.3f}'.format(chi_sq))
+
+    chi_square = hist['data_obs'].Chi2Test(hist['mc_exp'], 'UWCHI2/NDF')
+    text = pave.AddText('#chi_{{#nu}}^{{2}} = {:.3f}'.format(chi_square))
     text.SetTextFont(62)
     text.SetTextSize(0.07)
+
+    legend_3.Draw()
+    legend_4.Draw()
+    hist['ratio_stat_unc'].Draw('e2')
+    hist['ratio_syst_unc'].Draw('e2 same')
+    hist['ratio_stat_unc'].Draw('e2 same')
+    ratio_unity.Draw()
+    hist['ratio'].Draw('e1 same')
     pave.Draw()
-    
+    #--------------------------------------------------------------------------#
+  
+    # Refresh the pads and canvas, then save as plots.
     upper_pad.cd()
     upper_pad.RedrawAxis()
     upper_pad.Modified()
@@ -427,34 +382,27 @@ def make_plot(CR = '', plot = '', expression = '', x_title = '', n_bins = None, 
     lower_pad.Update()
     canvas.cd()
     
-    canvas.SaveAs('{}{}/{}.png'.format(PLOT_DIR, CR, plot))
-    canvas.SaveAs('{}{}/{}.pdf'.format(PLOT_DIR, CR, plot))
+    for ftype in ['.png', '.pdf']:
+        canvas.SaveAs(''.join([outdir, name, ftype]))
     
-    canvas.IsA().Destructor(canvas)
-    
+    # Clean up to exit gracefully.
+    canvas.IsA().Destructor(canvas)    
     infile.Close()
+
+#------
+# Main
+#------
  
 if __name__ == '__main__':
-
-    import tdrstyle
 
     # Set ROOT to run in batch mode.
     ROOT.gROOT.SetBatch(1)
 
     # Change ROOT global styles to TDR style.
-    tdrstyle.set_tdrStyle()
+    set_tdrStyle()
 
-    # Create the plot directory if it doesn't exist.
-    if (ROOT.gSystem.AccessPathName(PLOT_DIR)):
-        ROOT.gSystem.mkdir(PLOT_DIR)
-   
-    
-    CR = 'Signal_Loose'
+    for region in sys.argv[1:]:
  
-    # Create the control region subdirectory if it doesn't exist.
-    if (ROOT.gSystem.AccessPathName(PLOT_DIR + CR)):
-        ROOT.gSystem.mkdir(PLOT_DIR + CR)
-
-    for plot, options in PLOTS.iteritems():
-        make_plot(CR, plot, **options)
+        for plot in PLOTS.itervalues():
+            make_plot(region, **plot)
 

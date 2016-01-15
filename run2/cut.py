@@ -151,6 +151,6 @@ qcd = (
 # Target luminosity of the data in inverse picobarns (pb-1).
 target_lumi = 2200
 
-data_weight = Cut('json') * 'HLT_BIT_HLT_PFMET90_PFMHT90_IDTight_v || HLT_BIT_HLT_PFMET170_NoiseCleaned_v'
+DATA_WEIGHT = Cut('json') * 'HLT_BIT_HLT_PFMET90_PFMHT90_IDTight_v || HLT_BIT_HLT_PFMET170_NoiseCleaned_v'
 
-mc_weight = Cut('sign(genWeight)') * target_lumi * '1./sample_lumi' * 'puWeight' * 'HLT_BIT_HLT_PFMET90_PFMHT90_IDLoose_v || HLT_BIT_HLT_PFMET170_NoiseCleaned_v'
+MC_WEIGHT = Cut('sign(genWeight)') * target_lumi * '1./sample_lumi' * 'puWeight' * 'HLT_BIT_HLT_PFMET90_PFMHT90_IDLoose_v || HLT_BIT_HLT_PFMET170_NoiseCleaned_v'

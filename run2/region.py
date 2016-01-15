@@ -8,12 +8,12 @@ import tempfile as tf
 
 import ROOT
 
-from process import Process
-import settings
+from process import Process, PROCESS_DIR
+from settings import WORK_DIR, PROCESSES, REGIONS
 
 
 # Output Directory
-REGION_DIR = settings.WORK_DIR + 'regions/'
+REGION_DIR = WORK_DIR + 'regions/'
 
 class Region(object):
 
@@ -50,7 +50,7 @@ class Region(object):
             for cpu in range(mp.cpu_count())
         ]
 
-        for process in settings.PROCESSES:
+        for process in PROCESSES:
             tasks.put(process)
 
         for p in _processes:
@@ -74,20 +74,20 @@ class Region(object):
 
     def _check_processes(self):
         
-        for process in settings.PROCESSES:
+        for process in PROCESSES:
         
-            if os.path.isfile(settings.PROCESS_DIR + process + '.root'):
+            if os.path.isfile(PROCESS_DIR + process + '.root'):
                 continue
             
             self.logger.info('Getting missing process {}'.format(process))
-            Process(process, **settings.PROCESSES[process]).make()
+            Process(process, **PROCESSES[process]).make()
 
     
     def _cut_process(self, tasks = None, results = None):
 
         for process in iter(tasks.get, None):
 
-            infile = ROOT.TFile(settings.PROCESS_DIR + process + '.root', 'read')
+            infile = ROOT.TFile(PROCESS_DIR + process + '.root', 'read')
             outfile = ROOT.TFile(self.tmpdir + process + '.root', 'recreate')
 
             intree = infile.Get('tree')
@@ -123,5 +123,5 @@ if __name__ == '__main__':
         logging.basicConfig(level = logging.INFO,
                             format = '%(name)s(%(levelname)s) - %(message)s')
 
-        Region(name, **settings.REGIONS[name]).make()
+        Region(name, **REGIONS[name]).make()
 
