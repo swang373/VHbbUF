@@ -36,6 +36,52 @@ class Cut(str):
             return Cut()
         return Cut(str(other))
 
+    # Comparison Operators
+
+    @op
+    def __eq__(self, other):
+        """
+        Equal to. Ex: a == b
+        """
+        return Cut('({0!s})==({1!s})'.format(self, other))
+
+    @op
+    def __ne__(self, other):
+        """
+        Not equal to. Ex: a != b
+        """
+        return Cut('({0!s})!=({1!s})'.format(self, other))
+
+    @op
+    def __lt__(self, other):
+        """
+        Less than. Ex: a < b
+        """
+        return Cut('({0!s})<({1!s})'.format(self, other))
+
+    @op
+    def __le__(self, other):
+        """
+        Less than or equal to. Ex: a <= b
+        """
+        return Cut('({0!s})<=({1!s})'.format(self, other))
+    
+    @op
+    def __gt__(self, other):
+        """
+        Greater than. Ex: a > b
+        """
+        return Cut('({0!s})>({1!s})'.format(self, other))
+
+    @op
+    def __ge__(self, other):
+        """
+        Greater than or equal to. Ex: a >= b
+        """
+        return Cut('({0!s})>=({1!s})'.format(self, other))
+
+    # Logical Operators
+
     def __neg__(self):
         """
         Logical negation. Ex: -a
@@ -65,6 +111,19 @@ class Cut(str):
     @op
     def __ror__(self, other):
         return other | self
+
+    # Arithmetic Operators
+
+    @op
+    def __add__(self, other):
+        """
+        Addition. Ex: a + b
+        """
+        return Cut('({0!s})+({1!s})'.format(self, other))
+
+    @op
+    def __radd__(self, other):
+        return other + self
 
     @op
     def __mul__(self, other):
@@ -131,16 +190,18 @@ Vudsg = -(Vbb | Vb | Vcc)
 ##################################
 
 # Silvio's Cuts
-FlagsMET = Cut('Flag_hbheFilterNew') & 'Flag_eeBadScFilter' & 'Flag_CSCTightHaloFilter' & 'Flag_hbheIsoFilter' & 'Flag_goodVertices'
+FlagsMET = Cut('Flag_hbheFilterNew && Flag_eeBadScFilter && Flag_CSCTightHaloFilter && Flag_hbheIsoFilter && Flag_goodVertices')
 
-NoQCD = (
-    FlagsMET & 
-    'HCSV_pt>150' & 
-    'MinIf$(abs(TVector2::Phi_mpi_pi(Jet_phi-met_phi)), Jet_pt>20 && Jet_puId && abs(Jet_eta)<5.2)>0.5' &
-    'Jet_chHEF[0]>0.1' &
-    'MinIf$(abs(TVector2::Phi_mpi_pi(DiscardedJet_phi-met_phi))-3.1415, DiscardedJet_pt>20 && DiscardedJet_puId && abs(DiscardedJet_eta)<5.2)>(0.5-3.1415)'
-)
+NoQCD1 = 'MinIf$(abs(TVector2::Phi_mpi_pi(Jet_phi-met_phi)), Jet_pt>20 && Jet_puId && abs(Jet_eta)<5.2)>0.5'
 
+NoQCD2 = 'Jet_chHEF[0]>0.1'
+
+NoQCD3 = 'MinIf$(abs(TVector2::Phi_mpi_pi(DiscardedJet_phi-met_phi))-3.1415, DiscardedJet_pt>20 && DiscardedJet_puId && abs(DiscardedJet_eta)<5.2)>(0.5-3.1415)'
+
+
+VetoMuon = Cut('(Sum$(aLeptons_looseIdPOG>0 && aLeptons_pfRelIso04<0.50 && abs(aLeptons_pdgId)==13 && aLeptons_pt>5) + Sum$(vLeptons_looseIdPOG>0 && vLeptons_pfRelIso04<0.50 && abs(vLeptons_pdgId)==13 && vLeptons_pt>5))')
+
+VetoElectron = Cut('(Sum$(aLeptons_eleCutIdSpring15_25ns_v1>0 && aLeptons_pfRelIso04<0.50 && abs(aLeptons_pdgId)==11 && aLeptons_pt>5) + Sum$(vLeptons_eleCutIdSpring15_25ns_v1>0 && vLeptons_pfRelIso04<0.50 && abs(vLeptons_pdgId)==11 && vLeptons_pt>5))')
 
 
 
@@ -198,11 +259,8 @@ qcd = (
 # Target luminosity of the data in inverse picobarns (pb-1).
 TARGET_LUMI = 2190
 
-#DATA_WEIGHT = Cut('json') * 'HLT_BIT_HLT_PFMET90_PFMHT90_IDTight_v || HLT_BIT_HLT_PFMET170_NoiseCleaned_v'
+# 'puWeight' is currently broken in the Heppy ntuples. Use the custom reweighting below.
+DATA_WEIGHT = '1'
 
-#MC_WEIGHT = Cut('sign(genWeight)') * TARGET_LUMI * '1./sample_lumi' * 'puWeight' * 'HLT_BIT_HLT_PFMET90_PFMHT90_IDLoose_v || HLT_BIT_HLT_PFMET170_NoiseCleaned_v'
-
-# puWeight is currently broken in the Heppy ntuples. Use the custom reweighting below.
-DATA_WEIGHT = Cut('json') * 'HLT_BIT_HLT_PFMET90_PFMHT90_IDTight_v || HLT_BIT_HLT_PFMET170_NoiseCleaned_v'
-
-MC_WEIGHT = Cut('sign(genWeight)') * TARGET_LUMI * '1./sample_lumi' * 'weight2(nTrueInt)' * 'HLT_BIT_HLT_PFMET90_PFMHT90_IDLoose_v || HLT_BIT_HLT_PFMET170_NoiseCleaned_v'
+MC_WEIGHT = Cut('sign(genWeight)') * TARGET_LUMI * '1./sample_lumi' * 'weight2(nTrueInt)'
+ 
