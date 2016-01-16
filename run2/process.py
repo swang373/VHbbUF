@@ -80,11 +80,12 @@ class Process(object):
         
         if (len(inputfiles) == 1) and (SAMPLE_DIR in inputfiles[0]):
             # Make symbolic link instead to save memory.
-            sp.check_call(['ln', '-s', inputfiles[0], outputfile])
+            sp.check_call(['ln', '-sf', inputfiles[0], outputfile])
         else:
             sp.check_call(['hadd', '-f', outputfile] + inputfiles)
 
-        sp.check_call(['rm', '-r', self.tmpdir])
+        if hasattr(self, 'tmpdir'):
+            sp.check_call(['rm', '-r', self.tmpdir])
          
     def _check_samples(self):
     

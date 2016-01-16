@@ -260,24 +260,21 @@ PROCESSES = {
     },
 
     'Wj0b': {
-        'samples': ['WJetsIncl', 'WJetsHT100', 'WJetsHT200', 'WJetsHT400', 'WJetsHT600'],
-        'sample_cuts': ['lheHT<100'],
+        'samples': ['WJetsHT100', 'WJetsHT200', 'WJetsHT400', 'WJetsHT600'],
         'process_cut': Vudsg | Vcc,
         'types': 'MC:bkg',
         'color': 820 - 6,
     },
 
     'Wj1b': {
-        'samples': ['WJetsIncl', 'WJetsHT100', 'WJetsHT200', 'WJetsHT400', 'WJetsHT600'],
-        'sample_cuts': ['lheHT<100'],
+        'samples': ['WJetsHT100', 'WJetsHT200', 'WJetsHT400', 'WJetsHT600'],
         'process_cut': Vb,
         'types': 'MC:bkg',
         'color': 820 - 1,
     },
 
     'Wj2b': {
-        'samples': ['WJetsIncl', 'WJetsHT100', 'WJetsHT200', 'WJetsHT400', 'WJetsHT600'],
-        'sample_cuts': ['lheHT<100'],
+        'samples': ['WJetsHT100', 'WJetsHT200', 'WJetsHT400', 'WJetsHT600'],
         'process_cut': Vbb,
         'types': 'MC:bkg',
         'color': 820,
