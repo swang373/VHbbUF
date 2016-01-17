@@ -13,7 +13,7 @@ __all__ = [
     # referenced directly in the central configuration module.
     'Vbb', 'Vb', 'Vcc', 'Vudsg', 
     'CSV_Loose', 'CSV_Medium', 'CSV_Tight', 
-    'VetoLeptons', 'addCenJet30', 'NoQCD',
+    'VetoLeptons', 'addCenJet30', 'FlagsMET', 'NoQCD',
 ]
 
 
@@ -231,7 +231,7 @@ NoQCD = (
 #######################
 
 # Target luminosity of the data in inverse picobarns (pb-1).
-TARGET_LUMI = 2190
+TARGET_LUMI = 2200
 
 # 'puWeight' is currently broken in the Heppy ntuples. Use the custom reweighting below.
 DATA_WEIGHT = ''

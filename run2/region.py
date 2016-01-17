@@ -123,5 +123,5 @@ if __name__ == '__main__':
         logging.basicConfig(level = logging.INFO,
                             format = '%(name)s(%(levelname)s) - %(message)s')
 
-        Region(name, **REGIONS[name]).make()
+        Region(name, REGIONS[name]).make()
 

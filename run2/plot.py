@@ -340,7 +340,7 @@ def make_plot(region = '',
     lower_pad.cd()
     lower_pad.SetGridy(0)
 
-    legend_3 = ROOT.TLegend(0.78, 0.88, 0.95, 0.95)
+    legend_3 = ROOT.TLegend(0.78, 0.88, 0.94, 0.95)
     legend_3.SetFillColor(0)
     legend_3.SetLineColor(0)
     legend_3.SetShadowColor(0)
@@ -357,8 +357,8 @@ def make_plot(region = '',
     pave.SetShadowColor(0)
     pave.SetBorderSize(1)
 
-    chi_square = hist['data_obs'].Chi2Test(hist['sum_mc'], 'UWCHI2/NDF')
-    text = pave.AddText('#chi_{{#nu}}^{{2}} = {:.3f}'.format(chi_square))
+    chi_score = hist['data_obs'].Chi2Test(hist['sum_mc'], 'UWCHI2/NDF')
+    text = pave.AddText('#chi_{{#nu}}^{{2}} = {:.3f}'.format(chi_score))
     text.SetTextFont(62)
     text.SetTextSize(0.07)
 

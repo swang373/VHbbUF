@@ -330,49 +330,51 @@ PROCESSES = {
 """
 Properties
 ----------
-cuts : list of str or Cut
-       The cuts defining the signal or control region. PyROOT bugs out when
-       passed a long/complicated cut string. The fix is to split such cuts into
-       smaller subcuts. The cuts are applied sequentially using the order given.
+list of str or Cut
+The cuts defining the signal or control region. PyROOT bugs out when
+passed a long/complicated cut string. The fix is to split such cuts into
+smaller subcuts. The cuts are applied sequentially using the order given.
 """
 
 
 REGIONS = {
     
-    'TT': {
-        'cuts': [
-            NoQCD,
-            VetoLeptons >= 1,
-            (addCenJet30 >= 1) & (Cut('Jet_btagCSV[hJCidx[0]]') > CSV_Medium),
-        ],
-    },
+    'TT': [
+        NoQCD,
+        VetoLeptons >= 1,
+        (addCenJet30 >= 1) & (Cut('Jet_btagCSV[hJCidx[0]]') > CSV_Medium),
+    ],
 
-    'ZLight': {
-        'cuts': [
-            
-        ],
-    },
+    'ZLight': [
+        NoQCD,
+        VetoLeptons == 0,
+        (addCenJet30 == 0) & (Cut('Jet_btagCSV[hJCidx[0]]') < CSV_Medium),
+    ],
+
+    'Zbb': [
+        NoQCD,
+        VetoLeptons == 0,
+        (addCenJet30 == 0) & (Cut('Jet_btagCSV[hJCidx[0]]') > CSV_Medium) & 'HCSV_reg_mass<110 || HCSV_reg_mass>140',
+    ],
+
+    'WLight': [
+        NoQCD,
+        VetoLeptons == 1,
+        (addCenJet30 == 0) & (Cut('Jet_btagCSV[hJCidx[0]]') < CSV_Medium),
+    ],
+
+    'Wbb': [
+        NoQCD,
+        VetoLeptons == 1,
+        (addCenJet30 == 0) & (Cut('Jet_btagCSV[hJCidx[0]]') > CSV_Medium),
+        Cut('HCSV_reg_pt>170') & 'MinIf$(abs(TVector2::Phi_mpi_pi(Jet_phi-met_phi)),Jet_pt>20 && Jet_eta<5.2)>2',
+    ],
 
 
-    #'Z_light': {
-    #    'cuts': [minimal, antiQCD, z_light],
-    #},
-
-    #'Z_bb': {
-    #    'cuts': [minimal, antiQCD, z_bb],
-    #},
-
-    #'W_light': {
-    #    'cuts': [minimal, antiQCD, w_light],
-    #},
-
-    #'W_bb': {
-    #    'cuts': [minimal, antiQCD, w_bb],
-    #},
-
-    #'QCD': {
-    #    'cuts': [NoQCD],
-    #},
+    'QCD': [
+        FlagsMET & 'HCSV_pt>150',
+        'MinIf$(abs(TVector2::Phi_mpi_pi(Jet_phi-met_phi)),Jet_pt>25 && Jet_eta<5.2)<0.5',
+    ],
  
 }
 
@@ -734,16 +736,7 @@ PLOTS = {
         'x_min': 0,
         'x_max': 5,
     },
-
-    'maxleptonPt': {
-        'name': 'maxleptonPt',
-        'expression': 'max(Alt$(vLeptons_pt[0],0),Alt$(aLeptons_pt[0],0))',
-        'x_title': 'Max Lepton p_{T} [GeV]',
-        'n_bins': 20,
-        'x_min': 0,
-        'x_max': 5,
-    },
-
+ 
     'nTightLeptons': {
         'name': 'nTightLeptons',
         'expression': '(Sum$(aLeptons_eleCutIdSpring15_25ns_v1>3 && aLeptons_pfRelIso04<0.15 && abs(aLeptons_pdgId)==11 && aLeptons_pt>20) + Sum$(vLeptons_eleCutIdSpring15_25ns_v1>3 && vLeptons_pfRelIso04<0.15 && abs(vLeptons_pdgId)==11 && vLeptons_pt>20))+(Sum$(aLeptons_tightId>0 && aLeptons_pfRelIso04<0.15 && abs(aLeptons_pdgId)==13 && aLeptons_pt>20) + Sum$(vLeptons_tightId>0 && vLeptons_pfRelIso04<0.15 && abs(vLeptons_pdgId)==13 && vLeptons_pt>20))',
