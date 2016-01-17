@@ -92,10 +92,10 @@ class Region(object):
 
             intree = infile.Get('tree')
             intree.SetName(process)
-
+            
             for i, cut in enumerate(self.cuts):
-               intree.Draw('>>{}_elist_{}'.format(process,i), cut)
-               eventlist = ROOT.gDirectory.Get('{}_elist_{}'.format(process,i))
+               intree.Draw('>>{0!s}_elist_{1!s}'.format(process,i), cut)
+               eventlist = ROOT.gDirectory.Get('{0!s}_elist_{1!s}'.format(process,i))
                intree.SetEventList(eventlist)
 
             outtree = intree.CopyTree('')
@@ -103,7 +103,7 @@ class Region(object):
             result = (outtree.GetEntriesFast(), intree.GetEntriesFast(), process)
 
             outtree.Write()
-
+            
             outfile.Close()
             infile.Close()
 

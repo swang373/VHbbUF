@@ -331,48 +331,50 @@ PROCESSES = {
 Properties
 ----------
 cuts : list of str or Cut
-       The list of cuts defining the signal or control region. Please keep 
-       the individual cuts small in length, as the design choice to apply cuts
-       sequentially was made because PyROOT crashes when using one large string.
+       The cuts defining the signal or control region. PyROOT bugs out when
+       passed a long/complicated cut string. The fix is to split such cuts into
+       smaller subcuts. The cuts are applied sequentially using the order given.
 """
 
-"""
+
 REGIONS = {
-
-    'Signal_Loose': {
-        'cuts': [minimal, antiQCD, signal_loose],
-    },
-
-    'Signal_Tight': {
-        'cuts': [minimal, antiQCD, signal_tight],
-    },
     
     'TT': {
-        'cuts': [minimal, antiQCD, tt],
+        'cuts': [
+            NoQCD,
+            VetoLeptons >= 1,
+            (addCenJet30 >= 1) & (Cut('Jet_btagCSV[hJCidx[0]]') > CSV_Medium),
+        ],
     },
 
-    'Z_light': {
-        'cuts': [minimal, antiQCD, z_light],
+    'ZLight': {
+        'cuts': [
+            
+        ],
     },
 
-    'Z_bb': {
-        'cuts': [minimal, antiQCD, z_bb],
-    },
 
-    'W_light': {
-        'cuts': [minimal, antiQCD, w_light],
-    },
+    #'Z_light': {
+    #    'cuts': [minimal, antiQCD, z_light],
+    #},
 
-    'W_bb': {
-        'cuts': [minimal, antiQCD, w_bb],
-    },
+    #'Z_bb': {
+    #    'cuts': [minimal, antiQCD, z_bb],
+    #},
 
-    'QCD': {
-        'cuts': [NoQCD],
-    },
+    #'W_light': {
+    #    'cuts': [minimal, antiQCD, w_light],
+    #},
+
+    #'W_bb': {
+    #    'cuts': [minimal, antiQCD, w_bb],
+    #},
+
+    #'QCD': {
+    #    'cuts': [NoQCD],
+    #},
  
 }
-"""
 
 #############
 #-- Plots --#
@@ -381,130 +383,473 @@ REGIONS = {
 # The plots to draw and their properties.
 PLOTS = {
 
-    'The mass of the Higgs.': {
-        'name': 'H_mass',
-        'expression': 'HCSV_mass',
-        'x_title': 'm_{H} [GeV]',
-        'n_bins': 30,
+    'nPVs': {
+        'name': 'nPVs',
+        'expression': 'nPVs',
+        'x_title': '# of Primary Vertices',
+        'n_bins': 60,
         'x_min': 0,
-        'x_max': 300,
+        'x_max': 60,
     },
 
-    'The Pt of the Higgs.': {
-        'name': 'HCSV_pt',
-        'expression': 'HCSV_pt',
-        'x_title': 'H p_{T} [GeV]',
+    'DeltaPhiJetMet15': {
+        'name': 'DeltaPhiJetMet15',
+        'expression': 'MinIf$(abs(TVector2::Phi_mpi_pi(Jet_phi-met_phi)),Jet_pt>15 && Jet_eta<5.2)',
+        'x_title': '#Delta#Phi(Jet,MET)',
+        'n_bins': 18,
+        'x_min': -0.3,
+        'x_max': 3.3,
+    },
+
+    'DeltaPhiJetMet20': {
+        'name': 'DeltaPhiJetMet20',
+        'expression': 'MinIf$(abs(TVector2::Phi_mpi_pi(Jet_phi-met_phi)),Jet_pt>20 && Jet_eta<5.2)',
+        'x_title': '#Delta#Phi(Jet,MET)',
+        'n_bins': 18,
+        'x_min': -0.3,
+        'x_max': 3.3,
+    },
+
+    'DeltaPhiJetMet25': {
+        'name': 'DeltaPhiJetMet25',
+        'expression': 'MinIf$(abs(TVector2::Phi_mpi_pi(Jet_phi-met_phi)),Jet_pt>25 && Jet_eta<5.2)',
+        'x_title': '#Delta#Phi(Jet,MET)',
+        'n_bins': 18,
+        'x_min': -0.3,
+        'x_max': 3.3,
+    },
+
+    'softActivityVH_HT': {
+        'name': 'softActivityVH_HT',
+        'expression': 'softActivityVH_HT',
+        'x_title': 'softActivity HT [GeV]',
+        'n_bins': 50,
+        'x_min': 0,
+        'x_max': 250,
+    },
+
+    'softActivityVH_njets2': {
+        'name': 'softActivityVH_njets2',
+        'expression': 'softActivityVH_njets2',
+        'x_title': 'softActivity, # Jets {p_{T} > 2 GeV}',
+        'n_bins': 40,
+        'x_min': 0,
+        'x_max': 40,
+    },
+
+    'softActivityVH_njets5': {
+        'name': 'softActivityVH_njets5',
+        'expression': 'softActivityVH_njets5',
+        'x_title': 'softActivity, # Jets {p_{T} > 5 GeV}',
         'n_bins': 20,
-        'x_min': 150,
-        'x_max': 450, 
-    },
-
-    'The number of additional jets within a selection.': {
-        'name': 'nAddJets',
-        'expression': 'Sum$(Jet_pt>30 && Jet_puId &&  abs(Jet_eta)<4.5)',
-        'x_title': '# Add. Jets',
-        'n_bins': 8,                                                          
         'x_min': 0,
-        'x_max': 8,
+        'x_max': 20,
     },
 
-    'The minimum delta phi between MET and the Higgs jets.': {
-        'name': 'min_dPhi_MET_hJ',
-        'expression': 'min(abs(TVector2::Phi_mpi_pi(met_phi - Jet_phi[hJCidx[0]])), abs(TVector2::Phi_mpi_pi(met_phi - Jet_phi[hJCidx[1]])))',
-        'x_title': 'Min #||{#Delta#phi(#slash{E}_{T}, H Jet)}',
-        'n_bins': 32, 
+    'softActivityVH_njets10': {
+        'name': 'softActivityVH_njets10',
+        'expression': 'softActivityVH_njets10',
+        'x_title': 'softActivity, # Jets {p_{T} > 10 GeV}',
+        'n_bins': 10,
         'x_min': 0,
-        'x_max': 3.2,
+        'x_max': 10,
     },
 
-    'The minimum delta phi between MET and any jet within a selection.': {
-        'name': 'min_dPhi_MET_J',
-        'expression': 'MinIf$(abs(TVector2::Phi_mpi_pi(met_phi - Jet_phi)), Jet_pt>30 && Jet_puId && abs(Jet_eta)<4.5)',
-        'x_title': 'Min #||{#Delta#phi(#slash{E}_{T}, Jet)}',
-        'n_bins': 32,
+    'Vtype': {
+        'name': 'Vtype',
+        'expression': 'Vtype',
+        'x_title': 'Vtype',
+        'n_bins': 6,
         'x_min': 0,
-        'x_max': 3.2,
+        'x_max': 6,
     },
 
-    'The HT for jets with Pt > 30.': {
-        'name': 'ht30',
-        'expression': 'htJet30',
-        'x_title': 'HT [GeV]',
+    'lheHT': {
+        'name': 'lheHT',
+        'expression': 'Alt$(lheHT,Sum$(Jet_pt))',
+        'x_title': 'lheHT',
         'n_bins': 50,
         'x_min': 0,
         'x_max': 1000,
+        'logy': True,
     },
 
-    'The larger Higgs jet Pt.': {
-        'name': 'hj_maxpt',
-        'expression': 'max(Jet_pt[hJCidx[0]], Jet_pt[hJCidx[1]])',
-        'x_title': 'Max H Jet p_{T} [GeV]',
-        'n_bins': 15,
-        'x_min': 0,
-        'x_max': 300,
-    },
-
-    'The smaller Higgs jet Pt.': {
-        'name': 'hj_minpt',
-        'expression': 'min(Jet_pt[hJCidx[0]], Jet_pt[hJCidx[1]])',
-        'x_title': 'Min H Jet p_{T} [GeV]',
-        'n_bins': 15,
-        'x_min': 0,
-        'x_max': 300,
-    },
-
-    'The CSV of the first Higgs jet.': {
-        'name': 'CSV1',
-        'expression': 'Jet_btagCSV[hJCidx[0]]',
-        'x_title': 'H Jet 1 CSV',
+    'CSVidx1': {
+        'name': 'CSVidx1',
+        'expression': 'min(hJCidx[0],hJCidx[1])',
+        'x_title': 'Jet1 HCSV Index',
         'n_bins': 20,
         'x_min': 0,
-        'x_max': 1,
+        'x_max': 20,
     },
 
-    'The CSV of the second Higgs jet.': {
-        'name': 'CSV2',
-        'expression': 'Jet_btagCSV[hJCidx[1]]',
-        'x_title': 'H Jet 2 CSV',
+    'CSVidx2': {
+        'name': 'CSVidx2',
+        'expression': 'max(hJCidx[0],hJCidx[1])',
+        'x_title': 'Jet2 HCSV Index',
         'n_bins': 20,
         'x_min': 0,
-        'x_max': 1,
+        'x_max': 20,
     },
 
-    'The Pt of MET.': {
-        'name': 'MET_pt',
+    'MET': {
+        'name': 'MET',
         'expression': 'met_pt',
         'x_title': '#slash{E}_{T} [GeV]',
-        'n_bins': 30,
-        'x_min': 150,
-        'x_max': 450,
-    },
-    
-    'The number of primary vertices.': {
-        'name': 'nPV',
-        'expression': 'nPVs',
-        'x_title': '# Primary Vertices',
-        'n_bins': 30,
+        'n_bins': 50,
         'x_min': 0,
-        'x_max': 30,
+        'x_max': 500,
     },
 
-    'The Pt of tracker MET.': {
-        'name': 'tkMet',
+    'minMETMHT': {
+        'name': 'minMETMHT',
+        'expression': 'min(met_pt,mhtJet30)',
+        'x_title': 'Min(MET,MHT) [GeV]',
+        'n_bins': 50,
+        'x_min': 0,
+        'x_max': 500,
+    },
+
+    'addCenJet30': {
+        'name': 'addCenJet30',
+        'expression': 'Sum$(Jet_pt>30 && abs(Jet_eta)<5.2)-2',
+        'x_title': '# Add. Central Jets',
+        'n_bins': 10,
+        'x_min': 0,
+        'x_max': 10,
+    },
+
+    'addCenJet30': {
+        'name': 'addCenJet30',
+        'expression': 'Sum$(Jet_pt>30 && abs(Jet_eta)<5.2)-2',
+        'x_title': '# Add. Central Jets',
+        'n_bins': 10,
+        'x_min': 0,
+        'x_max': 10,
+    },
+
+    'METpuppi': {
+        'name': 'METpuppi',
+        'expression': 'metPuppi_pt',
+        'x_title': 'MET PUPPI [GeV]',
+        'n_bins': 50,
+        'x_min': 0,
+        'x_max': 500,
+    },
+
+    'maxCSV': {
+        'name': 'maxCSV',
+        'expression': 'TMath::Max(Jet_btagCSV[hJCidx[0]],Jet_btagCSV[hJCidx[1]])',
+        'x_title': 'Max CSV',
+        'n_bins': 40,
+        'x_min': 0,
+        'x_max': 1,
+    },
+
+    'minCSV': {
+        'name': 'minCSV',
+        'expression': 'TMath::Min(Jet_btagCSV[hJCidx[0]],Jet_btagCSV[hJCidx[1]])',
+        'x_title': 'Min CSV',
+        'n_bins': 40,
+        'x_min': 0,
+        'x_max': 1,
+    },
+
+    'sumEt': {
+        'name': 'sumEt',
+        'expression': 'met_sumEt',
+        'x_title': 'sumEt [GeV]',
+        'n_bins': 50,
+        'x_min': 0,
+        'x_max': 2500,
+    },
+
+    'MET_sumEt': {
+        'name': 'MET_sumEt',
+        'expression': 'met_pt/(met_sumEt)',
+        'x_title': 'MET/sumEt',
+        'n_bins': 50,
+        'x_min': 0,
+        'x_max': 0.5,
+    },
+
+    'MET_sign': {
+        'name': 'MET_sign',
+        'expression': 'met_pt/sqrt(met_sumEt)',
+        'x_title': 'MET/#sqrt{sumEt}',
+        'n_bins': 50,
+        'x_min': 0,
+        'x_max': 20,
+    },
+
+    'DeltaPhiJet1Jet2': {
+        'name': 'DeltaPhiJet1Jet2',
+        'expression': 'abs(TVector2::Phi_mpi_pi(Jet_phi[0]-Jet_phi[1]))',
+        'x_title': '#Delta#Phi(Jet1,Jet2)',
+        'n_bins': 18,
+        'x_min': -0.3,
+        'x_max': 3.3,
+    },
+
+    'Hmass': {
+        'name': 'Hmass',
+        'expression': 'HCSV_reg_mass',
+        'x_title': 'm(jj) after Regression [GeV]',
+        'n_bins': 40,
+        'x_min': 0,
+        'x_max': 400,
+    },
+
+    'Hmass_NoReg': {
+        'name': 'Hmass_NoReg',
+        'expression': 'HCSV_mass',
+        'x_title': 'm(jj) before Regression [GeV]',
+        'n_bins': 40,
+        'x_min': 0,
+        'x_max': 400,
+    },
+
+    'Hpt': {
+        'name': 'Hpt',
+        'expression': 'HCSV_reg_pt',
+        'x_title': 'p_{T}(jj) after Regression [GeV]',
+        'n_bins': 20,
+        'x_min': 0,
+        'x_max': 400,
+    },
+
+    'Hpt_NoReg': {
+        'name': 'Hpt_NoReg',
+        'expression': 'HCSV_pt',
+        'x_title': 'm(jj) before Regression [GeV]',
+        'n_bins': 20,
+        'x_min': 0,
+        'x_max': 400,
+    },
+
+    'HT': {
+        'name': 'HT',
+        'expression': 'Sum$(Jet_pt * (Jet_pt>30))',
+        'x_title': 'HT[GeV]',
+        'n_bins': 50,
+        'x_min': 0,
+        'x_max': 1500,
+    },
+
+    'MHT': {
+        'name': 'MHT',
+        'expression': 'mhtJet30',
+        'x_title': 'MHT [GeV]',
+        'n_bins': 50,
+        'x_min': 0,
+        'x_max': 500,
+    },
+
+    'tkMET': {
+        'name': 'tkMET',
         'expression': 'tkMet_pt',
-        'x_title': 'Tracker #slash{E}_{T} [GeV]',
-        'n_bins': 30,
+        'x_title': 'Track MET [GeV]',
+        'n_bins': 50,
         'x_min': 0,
         'x_max': 300,
     },
 
-    'The delta phi between the MET and tracker MET.': {
-        'name': 'dPhi_MET_tkMET',
-        'expression': 'abs(TVector2::Phi_mpi_pi(met_phi - tkMet_phi))',
-        'x_title': '#||{#Delta#phi(#slash{E}_{T}, Tracker #slash{E}_{T})}',
-        'n_bins': 32,
+    'tkMetPVch': {
+        'name': 'tkMetPVch',
+        'expression': 'tkMetPVchs_pt',
+        'x_title': 'Track MET CHS [GeV]',
+        'n_bins': 50,
         'x_min': 0,
-        'x_max': 3.2,
+        'x_max': 300,
+    },
+
+    'METType1p2': {
+        'name': 'METType1p2',
+        'expression': 'metType1p2_pt',
+        'x_title': 'MET1.2 [GeV]',
+        'n_bins': 50,
+        'x_min': 0,
+        'x_max': 500,
+    },
+
+    'DeltaPhiHCSVMET': {
+        'name': 'DeltaPhiHCSVMET',
+        'expression': 'abs(TVector2::Phi_mpi_pi(HCSV_phi-met_phi))',
+        'x_title': '#Delta#Phi(HCSV,MET)',
+        'n_bins': 18,
+        'x_min': -0.3,
+        'x_max': 3.3,
+    },
+
+    'addJet': {
+        'name': 'addJet',
+        'expression': 'Sum$(Jet_pt>30 && abs(Jet_eta)<5.2)-2',
+        'x_title': '# Add. Jets',
+        'n_bins': 10,
+        'x_min': 0,
+        'x_max': 10,
+    },
+
+    'maxhjPt': {
+        'name': 'maxhjPt',
+        'expression': 'max(Jet_pt_reg[hJCidx[0]],Jet_pt_reg[hJCidx[1]])',
+        'x_title': 'Max H Jet p_{T} after Regression [GeV]',
+        'n_bins': 50,
+        'x_min': 0,
+        'x_max': 400,
+    },
+
+    'minhjPt': {
+        'name': 'minhjPt',
+        'expression': 'min(Jet_pt_reg[hJCidx[0]],Jet_pt_reg[hJCidx[1]])',
+        'x_title': 'Min H Jet p_{T} after Regression [GeV]',
+        'n_bins': 50,
+        'x_min': 0,
+        'x_max': 400,
+    },
+
+    'maxhjPtOld': {
+        'name': 'maxhjPtOld',
+        'expression': 'max(Jet_pt[hJCidx[0]],Jet_pt[hJCidx[1]])',
+        'x_title': 'Max H Jet p_{T} before Regression [GeV]',
+        'n_bins': 50,
+        'x_min': 0,
+        'x_max': 400,
+    },
+
+    'minhjPtOld': {
+        'name': 'minhjPtOld',
+        'expression': 'min(Jet_pt[hJCidx[0]],Jet_pt[hJCidx[1]])',
+        'x_title': 'Min H Jet p_{T} before Regression [GeV]',
+        'n_bins': 50, 
+        'x_min': 0,
+        'x_max': 400,
+    },
+
+    'naddGoodLeptons5': {
+        'name': 'naddGoodLeptons5',
+        'expression': 'Sum$(aLeptons_pt>5 && (aLeptons_jetBTagCSV<0.25 || aLeptons_relIso03<0.4 || aLeptons_looseIdSusy!=0 ||  aLeptons_jetDR>0.3 ))+Sum$(vLeptons_pt>5 && (vLeptons_jetBTagCSV<0.25 || vLeptons_relIso03<0.4 || vLeptons_looseIdSusy!=0 ||  vLeptons_jetDR>0.3 ))',
+        'x_title': 'naddGoodLeptons5',
+        'n_bins': 5,
+        'x_min': 0,
+        'x_max': 5,
+    },
+
+    'maxleptonPt': {
+        'name': 'maxleptonPt',
+        'expression': 'max(Alt$(vLeptons_pt[0],0),Alt$(aLeptons_pt[0],0))',
+        'x_title': 'Max Lepton p_{T} [GeV]',
+        'n_bins': 20,
+        'x_min': 0,
+        'x_max': 5,
+    },
+
+    'nTightLeptons': {
+        'name': 'nTightLeptons',
+        'expression': '(Sum$(aLeptons_eleCutIdSpring15_25ns_v1>3 && aLeptons_pfRelIso04<0.15 && abs(aLeptons_pdgId)==11 && aLeptons_pt>20) + Sum$(vLeptons_eleCutIdSpring15_25ns_v1>3 && vLeptons_pfRelIso04<0.15 && abs(vLeptons_pdgId)==11 && vLeptons_pt>20))+(Sum$(aLeptons_tightId>0 && aLeptons_pfRelIso04<0.15 && abs(aLeptons_pdgId)==13 && aLeptons_pt>20) + Sum$(vLeptons_tightId>0 && vLeptons_pfRelIso04<0.15 && abs(vLeptons_pdgId)==13 && vLeptons_pt>20))',
+        'x_title': '# Tight Leptons',
+        'n_bins': 5,
+        'x_min': 0,
+        'x_max': 5,
+    },
+
+    'nVetoLeptons': {
+        'name': 'nVetoLeptons',
+        'expression': 'Sum$(aLeptons_eleCutIdSpring15_25ns_v1>0 && aLeptons_pfRelIso04<0.50 && abs(aLeptons_pdgId)==11 && aLeptons_pt>5) + Sum$(vLeptons_eleCutIdSpring15_25ns_v1>0 && vLeptons_pfRelIso04<0.50 && abs(vLeptons_pdgId)==11 && vLeptons_pt>5)+(Sum$(aLeptons_looseIdPOG>0 && aLeptons_pfRelIso04<0.50 && abs(aLeptons_pdgId)==13 && aLeptons_pt>5) + Sum$(vLeptons_looseIdPOG>0 && vLeptons_pfRelIso04<0.50 && abs(vLeptons_pdgId)==13 && vLeptons_pt>5))',
+        'x_title': '# Veto Leptons',
+        'n_bins': 5,
+        'x_min': 0,
+        'x_max': 5,
+    },
+
+    'JetPtCloseToMet03': {
+        'name': 'JetPtCloseToMet03',
+        'expression': 'MaxIf$(Jet_pt,abs(TVector2::Phi_mpi_pi(Jet_phi-met_phi))<0.3)',
+        'x_title': 'Jet p_{T} {#Delta#Phi(Jet,MET)<0.3} [GeV]',
+        'n_bins': 18,
+        'x_min': 0,
+        'x_max': 60,
+    },
+
+    'JetPtCloseToMet05': {
+        'name': 'JetPtCloseToMet05',
+        'expression': 'MaxIf$(Jet_pt,abs(TVector2::Phi_mpi_pi(Jet_phi-met_phi))<0.5)',
+        'x_title': 'Jet p_{T} {#Delta#Phi(Jet,MET)<0.5} [GeV]',
+        'n_bins': 18,
+        'x_min': 0,
+        'x_max': 60,
+    },
+
+    'JetPtCloseToMet07': {
+        'name': 'JetPtCloseToMet07',
+        'expression': 'MaxIf$(Jet_pt,abs(TVector2::Phi_mpi_pi(Jet_phi-met_phi))<0.7)',
+        'x_title': 'Jet p_{T} {#Delta#Phi(Jet,MET)<0.7} [GeV]',
+        'n_bins': 18,
+        'x_min': 0,
+        'x_max': 60,
+    },
+
+    'JetPtCloseToMet10': {
+        'name': 'JetPtCloseToMet10',
+        'expression': 'MaxIf$(Jet_pt,abs(TVector2::Phi_mpi_pi(Jet_phi-met_phi))<1.0)',
+        'x_title': 'Jet p_{T} {#Delta#Phi(Jet,MET)<1.0} [GeV]',
+        'n_bins': 18,
+        'x_min': 0,
+        'x_max': 60,
+    },
+
+    'CSV3': {
+        'name': 'CSV3',
+        'expression': 'Max$(Jet_btagCSV[aJCidx])',
+        'x_title': 'CSV3',
+        'n_bins': 40,
+        'x_min': 0,
+        'x_max': 1,
+    },
+
+    'HmassFSR_NoReg': {
+        'name': 'HmassFSR_NoReg',
+        'expression': 'HaddJetsdR08_mass',
+        'x_title': 'm(jj) including FSR before Regression [GeV]',
+        'n_bins': 40,
+        'x_min': 0,
+        'x_max': 400,
+    },
+
+    'DeltaPhiMETMHT': {
+        'name': 'DeltaPhiMETMHT',
+        'expression': 'abs(TVector2::Phi_mpi_pi(mhtPhiJet30-met_phi))',
+        'x_title': '#Delta#Phi(MHT,MET)',
+        'n_bins': 40,
+        'x_min': 0,
+        'x_max': 2,
+    },
+
+    'DeltaPhiMETtkMETPVchs': {
+        'name': 'DeltaPhiMETtkMETPVchs',
+        'expression': 'abs(TVector2::Phi_mpi_pi(tkMetPVchs_phi-met_phi))',
+        'x_title': '#Delta#Phi(tkMetPVchs,MET)',
+        'n_bins': 40,
+        'x_min': 0,
+        'x_max': 2,
+    },
+
+    'DeltaPhiMETpuppiMET': {
+        'name': 'DeltaPhiMETpuppiMET',
+        'expression': 'abs(TVector2::Phi_mpi_pi(metPuppi_phi-met_phi))',
+        'x_title': '#Delta#Phi(PUPPI MET,MET)',
+        'n_bins': 40,
+        'x_min': 0,
+        'x_max': 2,
+    },
+
+    'DeltaPhiMETtkMET': {
+        'name': 'DeltaPhiMETtkMET',
+        'expression': 'abs(TVector2::Phi_mpi_pi(tkMet_phi-met_phi))',
+        'x_title': '#Delta#Phi(tkMet,MET)',
+        'n_bins': 40,
+        'x_min': 0,
+        'x_max': 2,
     },
 
 }

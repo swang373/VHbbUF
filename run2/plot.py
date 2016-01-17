@@ -3,8 +3,9 @@ import sys
 
 import ROOT
 
+from cut import TARGET_LUMI, DATA_WEIGHT, MC_WEIGHT
 from region import REGION_DIR
-from settings import WORK_DIR, PROCESSES, PLOTS, TARGET_LUMI, DATA_WEIGHT, MC_WEIGHT
+from settings import WORK_DIR, PROCESSES, PLOTS
 
 
 # Output Directory
@@ -114,7 +115,10 @@ def set_tdrStyle():
     
     tdrStyle.cd()
 
-def make_plot(region = '', name = '', expression = '', x_title = '', n_bins = None, x_min = None, x_max = None, **kwargs):
+def make_plot(region = '', 
+              name = '', expression = '', x_title = '', 
+              n_bins = None, x_min = None, x_max = None, 
+              logy = False, **kwargs):
 
     # Load the custom pileup reweighting function.
     ROOT.gSystem.Load('PU_C')
@@ -172,13 +176,17 @@ def make_plot(region = '', name = '', expression = '', x_title = '', n_bins = No
 
     # Rescale the stacked histogram for viewing.
     y_max = max(hist['data_obs'].GetMaximum(), hstack.GetMaximum())
-    hstack.SetMaximum(y_max * 1.7)
+    if logy:
+        hstack.SetMaximum(y_max * 17)
+    else:
+        hstack.SetMaximum(y_max * 1.7)
 
     # Setup canvas and pads.
     canvas = ROOT.TCanvas('canvas', '', 700, 700)
 
     upper_pad = ROOT.TPad('upper_pad', '', 0.0, 0.3, 1.0, 1.0)
     upper_pad.SetBottomMargin(0.0)
+    upper_pad.SetLogy(logy)
     upper_pad.Draw()
 
     lower_pad = ROOT.TPad('lower_pad', '', 0.0, 0.0, 1.0, 0.3)
