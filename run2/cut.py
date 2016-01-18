@@ -14,6 +14,7 @@ __all__ = [
     'Vbb', 'Vb', 'Vcc', 'Vudsg', 
     'CSV_Loose', 'CSV_Medium', 'CSV_Tight', 
     'VetoLeptons', 'addCenJet30', 'FlagsMET', 'NoQCD',
+    'Preselection', 'JSON_Triggers',
 ]
 
 
@@ -175,8 +176,6 @@ JSON_Triggers = (
     'json'
 )
 
-SKIM = Preselection & JSON_Triggers
-
 #################################################
 #-- Generator Level Higgs Jets Classification --#
 #################################################
@@ -220,21 +219,9 @@ FlagsMET = Cut('Flag_hbheFilterNew && Flag_eeBadScFilter && Flag_CSCTightHaloFil
 # QCD Reduction 
 NoQCD = (
     FlagsMET &
-    Cut('HCSV_pt>150') &
+    Cut('HCSV_reg_pt>150') &
     'MinIf$(abs(TVector2::Phi_mpi_pi(Jet_phi-met_phi)), Jet_pt>20 && abs(Jet_eta)<5.2)>0.5' &
     'Jet_chHEF[0]>0.1' &
     'MinIf$(abs(TVector2::Phi_mpi_pi(DiscardedJet_phi-met_phi))-3.1415, DiscardedJet_pt>20 && abs(DiscardedJet_eta)<5.2)>(0.5-3.1415)'
 )
 
-#######################
-#-- Event Weighting --#
-#######################
-
-# Target luminosity of the data in inverse picobarns (pb-1).
-TARGET_LUMI = 2200
-
-# 'puWeight' is currently broken in the Heppy ntuples. Use the custom reweighting below.
-DATA_WEIGHT = ''
-
-MC_WEIGHT = Cut('sign(genWeight)') * TARGET_LUMI * '1./sample_lumi' * 'weight2(nTrueInt)'
- 

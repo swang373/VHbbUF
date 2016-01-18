@@ -8,10 +8,9 @@ import tempfile as tf
 
 import ROOT
 
-from cut import TARGET_LUMI, DATA_WEIGHT, MC_WEIGHT
-from tdrstyle import set_tdrStyle
 from process import Process, PROCESS_DIR
-from settings import WORK_DIR, PROCESSES, REGIONS, PLOTS
+from settings import WORK_DIR, PROCESSES, REGIONS, PLOTS, TARGET_LUMI, DATA_WEIGHT, MC_WEIGHT
+from tdrstyle import set_tdrStyle
 
 
 # Output Directories

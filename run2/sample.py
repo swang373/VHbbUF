@@ -9,8 +9,7 @@ import tempfile as tf
 import numpy as np
 import ROOT
 
-from cut import SKIM
-from settings import WORK_DIR, SAMPLES
+from settings import WORK_DIR, SKIM, SAMPLES
 
 
 # EOS Command Alias on LXPLUS

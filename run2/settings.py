@@ -17,16 +17,19 @@ WORK_DIR = '/afs/cern.ch/work/s/swang373/private/V14/'
 ###############
 
 """
-Properties
-----------
+SKIM    : str or Cut
+          A cut used to reduce the size of the Step1 ntuples/samples.
+
+SAMPLES : dict of 'Sample Name': {Sample Properties}
+
+Sample Properties
+-----------------
 path : str
        The path to the Step1 ntuple on EOS. The directory tree from the path
        to the sample's files must contain a single subdirectory at each level,
        as multiple subdirectories may lead to different versions of the sample.
 xsec : float, optional
-       The cross-section for the MC sample, reported in picobarns (pb).
-
-BEFORE RUNNING sample.py: MAKE SURE SKIM IN cut.py IS CORRECT!
+       The MC sample cross-section reported in picobarns (pb).
 
 The cross-sections and k-factors were obtained from the following CERN TWiki's:
 twiki.cern.ch/twiki/bin/viewauth/CMS/SummaryTable1G25ns
@@ -35,6 +38,8 @@ twiki.cern.ch/twiki/bin/view/LHCPhysics/SingleTopRefXsec
 
 The branching ratios were obtained from the PDG refernce tables.
 """
+
+SKIM = Preselection & JSON_Triggers
 
 SAMPLES = { 
 
@@ -210,8 +215,10 @@ SAMPLES = {
 #################
 
 """
-Properties
-----------
+PROCESSES : dict of 'Process Name': {Process Properties}
+
+Process Properties
+------------------
 samples     : list of str
               The list of samples to be combined into a decay process. 
               Sample names must be valid keys of the SAMPLES dictionary.
@@ -219,14 +226,22 @@ sample_cuts : list of str or Cut, optional
               A list of sample-specific cuts applied before combination. 
               Their ordering must match that of the samples property.
 process_cut : str or Cut, optional
-              A process-specific cut applied to all samples before combination. 
+              A process-specific cut applied to all samples before combination.
+types       : str
+              A string of the following process descriptors, delimited by ':'.
+              Data - Contains only data events.
+              MC   - Contains only MC events.
+              sig  - A signal process.
+              bkg  - A background process.
+color       : int
+              The ROOT color wheel code with which the process will be plotted.
 """
 
 PROCESSES = {
 
     'data_obs': {
         'samples': ['Data_MET_C', 'Data_MET_D', 'Data_MET_DP'],
-        'types': 'data',
+        'types': 'Data',
     },
 
     'ZH': {
@@ -323,19 +338,126 @@ PROCESSES = {
 
 }
 
+##########################
+#-- Classification BDT --#
+##########################
+
+BDT_SKIM = ''
+
+VARIABLES = {
+    
+    'M(jj)': {
+        'expression': 'HCSV_reg_mass',
+        'title': 'H mass',
+        'unit': 'GeV',
+        'type': 'F',
+    },
+    
+    'p_T(jj)': {
+        'expression': 'HCSV_reg_pt',
+        'title': 'H p_{T}',
+        'unit': 'GeV',
+        'type': 'F',
+    },
+
+    'p_T(j1)': {
+        'expression': 'max(Jet_pt_reg[hJCidx[0]], Jet_pt_reg[hJCidx[1]])',
+        'title': 'H j1 p_{T}',
+        'unit': 'GeV',
+        'type': 'F',
+    },
+
+    'p_T(j2)': {
+        'expression': 'min(Jet_pt_reg[hJCidx[0]], Jet_pt_reg[hJCidx[1]])',
+        'title': 'H j2 p_{T}',
+        'unit': 'GeV',
+        'type': 'F',
+    },
+    
+    'p_T(V) (Same as MET for Znn)': {
+        'expression': 'met_pt',
+        'title': 'Type1 Corr. PF #slash{E}_{T}',
+        'unit': 'GeV',
+        'type': 'F',
+    },
+
+    'H Jet Max CSV': {
+        'expression': 'maxCSV := max(0, max(Jet_btagCSV[hJCidx[0]], Jet_btagCSV[hJCidx[1]]))',
+        'title': 'CSV_{max}(j1,j2)',
+        'unit': '',
+        'type': 'F',
+    },
+
+    'H Jet Min CSV': {
+        'expression': 'minCSV := max(0, min(Jet_btagCSV[hJCidx[0]], Jet_btagCSV[hJCidx[1]]))',
+        'title': 'CSV_{min}(j1,j2)',
+        'unit': '',
+        'type': 'F',
+    },
+
+    'dPhi(H,V)': {
+        'expression': 'abs(HVdPhi)',
+        'title': '#||{#Delta #varphi(H,PF #slash{E}_{T}}',
+        'unit': '',
+        'type': 'F',
+    },
+
+    'dEta(jj)': {
+        'expression': 'dEta_jj := abs(Jet_eta[hJCidx[0]] - Jet_eta[hJCidx[1]])',
+        'title': '#||{#Delta #eta(j1,j2)}',
+        'unit': '',
+        'type': 'F',
+    },
+
+    'dR(jj)': {
+        'expression': 'deltaR_jj',
+        'title': '#Delta R(j1,j2)',
+        'unit': '',
+        'type': 'F',
+    },
+
+    'N_aj': {
+        'expression': 'naJets_Znn := max(0, Sum$(Jet_pt>25 && abs(Jet_eta)<4.5 && Jet_puId==1)-2)',
+        'title': '# Add. Jets {p_{T}>25}',
+        'unit': '',
+        'type': 'I',
+    },
+
+
+    #deltaPhi(pfMET,J) ADD SUPPORT
+    #mindPhiMETJet_dPhi :=  MinIf$(abs(deltaPhi(met_phi,Jet_phi)), Jet_pt>25 && abs(Jet_eta)<4.5 && Jet_puId==1)
+    #min #||{#Delta #varphi(pfMET,j25)}
+    #''
+    #F
+
+    'Add. Jet Max CSV': {
+        'expression': 'maxAddCSV := MaxIf$(max(Jet_btagCSV[aJCidx],0), Jet_pt[aJCidx]>20 && abs(Jet_eta[aJCidx])<2.5 && Jet_puId[aJCidx]==1)',
+        'title': 'CSV_{max}(Add. CJ 20)',
+        'unit': '',
+        'type': 'F',
+    },
+
+    #mindeltaR(H,aj) ADD SUPPORT
+    #mindRAddJetH := Min$(deltaR(Jet_eta[hJCidx], Jet_phi[hJCidx], Jet_eta[aJCidx], Jet_phi[aJCidx]))
+    #min #DeltaR(H, add. j25)
+    #''
+    #F
+
+}
+
 ###############
 #-- Regions --#
 ###############
 
 """
-Properties
-----------
-list of str or Cut
+REGION : dict of 'Region Name': list of str or Cut
+
+Region Properties
+-----------------
 The cuts defining the signal or control region. PyROOT bugs out when
 passed a long/complicated cut string. The fix is to split such cuts into
 smaller subcuts. The cuts are applied sequentially using the order given.
 """
-
 
 REGIONS = {
     
@@ -382,7 +504,43 @@ REGIONS = {
 #-- Plots --#
 #############
 
-# The plots to draw and their properties.
+"""
+TARGET_LUMI : int or float
+              The target luminosity of the data in inverse picobarns (pb-1).
+
+DATA_WEIGHT : str or Cut
+              The plotting weight for data events.
+
+MC_WEIGHT   : str or Cut
+              The plotting weight for MC events.
+
+PLOTS       : dict of 'Plot Description': {Plot Properties}
+
+Plot Properties
+---------------
+name       : str
+             The file name for the plot.
+expression : str or Cut
+             A TTree.Draw expression which will be passed to TTree.Project.
+x_title    : str
+             The x-axis title for the plot. Supports TLatex syntax.
+n_bins     : int
+             The number of bins along the x-axis.
+x_min      : int or float
+             The lower bound of the x-axis.
+x_max      : int or float
+             The upper bound of the x-axis.
+logy       : bool, optional
+             Use a logarithmic scale for the y-axis. Default is False.
+"""
+
+TARGET_LUMI = 2200
+
+DATA_WEIGHT = ''
+
+# 'puWeight' is currently broken in the Heppy ntuples. Use custom reweighting.
+MC_WEIGHT = Cut('sign(genWeight)') * TARGET_LUMI * '1./sample_lumi' * 'weight2(nTrueInt)'
+
 PLOTS = {
 
     'nPVs': {
