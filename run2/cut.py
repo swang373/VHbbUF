@@ -4,19 +4,6 @@ VHbb Analysis Cuts
 See also settings.py
 """
 
-__all__ = [
-    # The Cut string subclass. Do not remove.
-    'Cut',
-
-    # This module is * imported into settings.py. Any number of cut strings may
-    # be defined within this module, but only those cuts listed below can be 
-    # referenced directly in the central configuration module.
-    'Vbb', 'Vb', 'Vcc', 'Vudsg', 
-    'CSV_Loose', 'CSV_Medium', 'CSV_Tight', 
-    'VetoLeptons', 'addCenJet30', 'FlagsMET', 'NoQCD',
-    'Preselection', 'JSON_Triggers',
-]
-
 
 def op(func):
     def check_args(self, other):

@@ -235,6 +235,9 @@ types       : str
               bkg  - A background process.
 color       : int
               The ROOT color wheel code with which the process will be plotted.
+pid         : int, optional
+              The unique process id number used by the datacard. Use a positive
+              number for background and zero or a negative number for signal.
 """
 
 PROCESSES = {
@@ -248,30 +251,35 @@ PROCESSES = {
         'samples': ['ZnnH125'],
         'types': 'MC:sig',
         'color': 632,
+        'pid': -2,
     },
 
     'ggZH': {
         'samples': ['ggZH125'],
         'types': 'MC:sig',
         'color': 632 - 7,
+        'pid': -1,
     },
 
     'WH': {
         'samples': ['WlnH125'],
         'types': 'MC:sig',
         'color': 632 + 2,
+        'pid': 0,
     },
     
     's_Top': {
         'samples': ['T_s_comb_lep', 'T_t_lep', 'Tbar_t_lep', 'T_tW', 'Tbar_tW'],
         'types': 'MC:bkg',
         'color': 840,
+        'pid': 1,
     },
 
     'TT': {
         'samples': ['TTPow'],
         'types': 'MC:bkg',
         'color': 600,
+        'pid': 2,
     },
 
     'Wj0b': {
@@ -279,6 +287,7 @@ PROCESSES = {
         'process_cut': Vudsg | Vcc,
         'types': 'MC:bkg',
         'color': 820 - 6,
+        'pid': 3,
     },
 
     'Wj1b': {
@@ -286,6 +295,7 @@ PROCESSES = {
         'process_cut': Vb,
         'types': 'MC:bkg',
         'color': 820 - 1,
+        'pid': 4,
     },
 
     'Wj2b': {
@@ -293,6 +303,7 @@ PROCESSES = {
         'process_cut': Vbb,
         'types': 'MC:bkg',
         'color': 820,
+        'pid': 5,
     },
 
     'Zj0b': {
@@ -300,6 +311,7 @@ PROCESSES = {
         'process_cut': Vudsg | Vcc,
         'types': 'MC:bkg',
         'color': 400 + 2,
+        'pid': 6,
     },
 
     'Zj1b': {
@@ -307,6 +319,7 @@ PROCESSES = {
         'process_cut': Vb,
         'types': 'MC:bkg',
         'color': 400 - 7,
+        'pid': 7,
     },
 
     'Zj2b': {
@@ -314,12 +327,14 @@ PROCESSES = {
         'process_cut': Vbb,
         'types': 'MC:bkg',
         'color': 400,
+        'pid': 8,
     },
 
     'QCD': {
         'samples': ['QCDHT100', 'QCDHT200', 'QCDHT300', 'QCDHT500', 'QCDHT700', 'QCDHT1000', 'QCDHT1500', 'QCDHT2000'],
         'types': 'MC:bkg',
         'color': 613,
+        'pid': 9,
     },
 
     'VVLF': {
@@ -327,6 +342,7 @@ PROCESSES = {
         'process_cut': Vudsg | Vcc,
         'types': 'MC:bkg',
         'color': 920,
+        'pid': 10,
     },
 
     'VVHF': {
@@ -334,6 +350,7 @@ PROCESSES = {
         'process_cut': Vb | Vbb,
         'types': 'MC:bkg',
         'color': 920 + 1,
+        'pid': 11,
     },
 
 }
@@ -342,9 +359,9 @@ PROCESSES = {
 #-- Classification BDT --#
 ##########################
 
-BDT_SKIM = ''
+CLASSIFICATION_SKIM = ''
 
-VARIABLES = {
+CLASSIFICATION_VARS = {
     
     'M(jj)': {
         'expression': 'HCSV_reg_mass',
@@ -514,7 +531,7 @@ DATA_WEIGHT : str or Cut
 MC_WEIGHT   : str or Cut
               The plotting weight for MC events.
 
-PLOTS       : dict of 'Plot Description': {Plot Properties}
+PLOTS       : dict of 'Plot description.': {Plot Properties}
 
 Plot Properties
 ---------------
