@@ -16,7 +16,7 @@ Currently this code is being developed and run on lxplus. The dream is to eventu
   In `settings.py`, set the working directory to your desired path.
   
   ```python
-  WORK_DIR = /path/to/your/work/dir
+  WORK_DIR = '/path/to/your/work/dir/'
   ```
   
   The main configuration file is `settings.py`, which itself imports `cut.py`. The former is concerned with general workflow and most analysis-wide constants, whereas the latter defines the Cut class (a subclass of str with operators overloaded in the style of ROOT's TCut) and all cuts used in the analysis. The relevant configuration settings will be referenced as we move through the steps, but feel free to peruse those files for a sense of their use.
