@@ -1,18 +1,28 @@
 ##ZnnHbb Analysis
 
-Currently this code is being developed and run on lxplus. The hope is to eventually port it within an IPython notebook in some sort of packaged distribution so that the code is stable and the results easily reproducible.
+Currently this code is being developed and run on lxplus. The dream is to eventually port it within an IPython notebook in some sort of packaged distribution so that the code is stable and the results easily reproducible.
 
 1. **Installation**
 
   ```bash
   export SCRAM_ARCH=slc6_amd64_gcc481
   cmsrel CMSSW_7_2_2
-  # eventually forward port to newer CMSSW releases
+  # eventually follow Heppy to newer CMSSW releases
   cd CMSSW_7_2_2/src; cmsenv
   git clone <http or ssh link to this remote>
   ```
-2. **Make the Step2 Ntuples** 
+2. **Initial Setup**
 
+  In `settings.py`, set the working directory to your desired path.
+  
+  ```python
+  WORK_DIR = /path/to/your/work/dir
+  ```
+  
+  The main configuration file is `settings.py`, which itself imports `cut.py`. The former is concerned with general workflow and most analysis-wide constants, whereas the latter defines the Cut class (a subclass of str with operators overloaded in the style of ROOT's TCut) and all cuts used in the analysis. The relevant configuration settings will be referenced as we move through the steps, but feel free to peruse those files for a sense of their use.
+  
+3. **Getting the Samples**
+  
    Step1 ntuples are generated from MiniAOD files (MC or data) using the VHbb Heppy code. They are then stored at a variety of locations. I prefer to access them from the CERN T3 storage area of the Hbb group.
    
    ```bash
