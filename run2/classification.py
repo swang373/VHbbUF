@@ -1,63 +1,128 @@
+import glob
 import logging
+import multiprocessing as mp
 import os
+import subprocess as sp
+import tempfile as tf
 
 import numpy as np
 import ROOT
 
 from process import PROCESS_DIR
-import settings
+from settings import WORK_DIR, PROCESSES, CLASSIFICATION_SKIM
 
-DATASET_DIR = settings.WORK_DIR + 'classification/datasets/'
 
-WEIGHT_DIR = settings.WORK_DIR + 'classification/weights/'
+# Output Directories
+DATASET_DIR = WORK_DIR + 'classification/datasets/'
+WEIGHT_DIR = WORK_DIR + 'classification/weights/'
 
-def make_dataset(process = '', rnd_seed = 0):
+class Classification(object):
 
-    try:
-        os.makedirs(DATASET_DIR)
-    except OSError:
-        if not os.path.isdir(DATASET_DIR):
-            raise
+    def __init__(self):
+        self.logger = logging.getLogger('Classification')
 
-    infile = ROOT.TFile(PROCESS_DIR + process + '.root', 'read')
-    intree = infile.Get('tree')
+    def _make_dataset(self, rnd_seed = 0):
 
-    # Figure out how to split the entries.
-    # For uneven splits, the training set gets the remaining entries.
-    n_entries = intree.GetEntriesFast()
-    n_test = n_entries / 2
-    n_train = n_test if (n_entries % 2 == 0) else n_test + 1
+        self.logger.info('Generating dataset...')
+
+        # Output Directory
+        try:
+            os.makedirs(DATASET_DIR)
+        except OSError:
+            if not os.path.isdir(DATASET_DIR):
+                raise
+
+        # Temporary Work Directory
+        tmpdir = tf.mkdtemp(dir = DATASET_DIR)
+        self.tmpdir = tmpdir + '/'
+
+        # Parallel Split
+        n_tasks = 0
+        tasks = mp.Queue()
+
+        processes = []
+
+        for process, properties in PROCESSES.iteritems():
+            types = set(properties['types'].lower().split(':'))
+            if 'data' in types:
+                continue
+            if 'sig' in types:
+                tasks.put((process, 'sig'))
+            elif 'bkg' in types:
+                tasks.put((process, 'bkg'))
+            n_tasks += 1
+
+        _processes = [
+            mp.Process(target = self._split_process, args = (tasks,))
+            for i in xrange(min(n_tasks, mp.cpu_count()))
+        ]
+
+        for p in _processes:
+            tasks.put(None)
+            p.start()
+
+        for p in _processes:
+            p.join()
+
+        # hadd Files
+        inputfiles = glob.glob(self.tmpdir + '*.root')
+        outputfile = DATASET_DIR + 'dataset.root'
+
+        sp.check_call(['hadd', '-f', outputfile] + inputfiles)
+        sp.check_call(['rm', '-r', self.tmpdir])
+         
+    def _split_process(self, tasks = None, rnd_seed = 0):
     
-    # Randomly shuffle the entries.
-    # Seeding for now to make sure code works.
-    # The entry numbers must be fed into the eventlist
-    # in ASCENDING order, because of its binary search structure.
-    np.random.seed(rnd_seed)
-    permute_entries = np.random.permutation(n_entries)
+        for process, types in iter(tasks.get, None):
 
-    train_elist = ROOT.TEventList('train', '', n_train)
-    for i in np.sort(permute_entries[:n_train]): 
-        train_elist.Enter(i)
+            infile = ROOT.TFile(PROCESS_DIR + process + '.root', 'read')
+            outfile = ROOT.TFile(self.tmpdir + process + '.root', 'recreate')
 
-    test_elist  = ROOT.TEventList('test', '', n_test)
-    for i in np.sort(permute_entries[n_train:]):
-        test_elist.Enter(i)
+            intree = infile.Get('tree')
+            intree.SetName(process)
 
-    # Start filling the new file.
-    outfile = ROOT.TFile(DATASET_DIR + process + '.root', 'recreate')
+            # Apply preselection cut and shuffle the entries which pass.
+            n_entries = intree.Draw('>>{!s}_skim'.format(process), CLASSIFICATION_SKIM)
+            skim_elist = ROOT.gDirectory.Get('{!s}_skim'.format(process))
 
-    intree.SetName('train')
-    intree.SetEventList(train_elist)
-    train_tree = intree.CopyTree('')
-    train_tree.Write()
+            entries = np.zeros(n_entries, dtype = np.int64)
+            for i in xrange(n_entries):
+                entries[i] = skim_elist.GetEntry(i)
 
-    intree.SetName('test')
-    intree.SetEventList(test_elist)
-    test_tree = intree.CopyTree('')
-    test_tree.Write()
+            np.random.seed(rnd_seed)
+            np.random.shuffle(entries)
+ 
+            # Split the entries into a training and test set.
+            n_test = n_entries / 2
+            n_train = n_test if (n_entries % 2 == 0) else n_test + 1
 
-    outfile.Close()
-    infile.Close()
+            train_elist = ROOT.TEventList(process + '_train', '', n_train)
+            for entry in np.sort(entries[:n_train]):
+                train_elist.Enter(entry)
+
+            test_elist = ROOT.TEventList(process + '_test', '', n_test)
+            for entry in np.sort(entries[n_train:]):
+                test_elist.Enter(entry)
+
+            # Create the training and test set trees.
+            intree.SetEventList(train_elist)
+            train_tree = intree.CopyTree('')
+            train_tree.SetName('{}_{}_train'.format(process, types))
+            train_tree.Write()
+
+            intree.SetEventList(test_elist)
+            test_tree = intree.CopyTree('')
+            test_tree.SetName('{}_{}_test'.format(process, types))
+            test_tree.Write()
+
+            # Remove any autosaved trees.
+            #for key in outfile.GetListOfKeys():
+            #    if key.GetName() == process:
+            #        obj = key.ReadObj()
+            #        obj.Delete('all')
+
+            outfile.Close()
+            infile.Close()
 
 
 def run_classification():
@@ -111,7 +176,14 @@ def run_classification():
 
 if __name__ == '__main__':
 
-    run_classification()
+    # Set ROOT to batch mode.
+    ROOT.gROOT.SetBatch(1)
+
+    logging.basicConfig(level = logging.INFO,
+                        format = '%(name)s(%(levelname)s) - %(message)s')
+
+    classifier = Classification()
+    classifier._make_dataset()
 
 
 

@@ -359,6 +359,7 @@ PROCESSES = {
 #-- Classification BDT --#
 ##########################
 
+# AllBDT = <!Cuts|NoQCD3!> && Vtype==4&& VetoLeptons<=1 
 CLASSIFICATION_SKIM = ''
 
 CLASSIFICATION_VARS = {
