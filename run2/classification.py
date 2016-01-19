@@ -115,15 +115,14 @@ class Classification(object):
             test_tree.SetName('{}_{}_test'.format(process, types))
             test_tree.Write()
 
-            # Remove any autosaved trees.
-            #for key in outfile.GetListOfKeys():
-            #    if key.GetName() == process:
-            #        obj = key.ReadObj()
-            #        obj.Delete('all')
-
             outfile.Close()
             infile.Close()
-
+            
+            # Remove the autosaved tree.
+            outfile = ROOT.TFile(self.tmpdir + process + '.root', 'update')
+            outfile.Delete(process + ';*')
+            outfile.Close()
+ 
 
 def run_classification():
 
