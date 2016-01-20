@@ -81,13 +81,15 @@ class Classification(object):
             intree = infile.Get('tree')
             intree.SetName(process)
 
-            # Apply preselection cut and shuffle the entries which pass.
-            n_entries = intree.Draw('>>{!s}_skim'.format(process), CLASSIFICATION_SKIM)
-            skim_elist = ROOT.gDirectory.Get('{!s}_skim'.format(process))
+            # Apply preselection cuts and shuffle the entries which pass.
+            for i, cut in enumerate(CLASSIFICATION_SKIM):
+                n_entries = intree.Draw('>>{0!s}_skim_{1!s}'.format(process, i), cut)
+                eventlist = ROOT.gDirectory.Get('{0!s}_skim_{1!s}'.format(process, i))
+                intree.SetEventList(eventlist)
 
             entries = np.zeros(n_entries, dtype = np.int64)
             for i in xrange(n_entries):
-                entries[i] = skim_elist.GetEntry(i)
+                entries[i] = eventlist.GetEntry(i)
 
             np.random.seed(rnd_seed)
             np.random.shuffle(entries)
@@ -115,14 +117,12 @@ class Classification(object):
             test_tree.SetName('{}_{}_test'.format(process, types))
             test_tree.Write()
 
+            # Remove any autosaved TTrees.
+            outfile.Delete(process + ';*')
+
             outfile.Close()
             infile.Close()
-            
-            # Remove the autosaved tree.
-            outfile = ROOT.TFile(self.tmpdir + process + '.root', 'update')
-            outfile.Delete(process + ';*')
-            outfile.Close()
- 
+  
 
 def run_classification():
 
