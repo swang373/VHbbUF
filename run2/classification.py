@@ -9,21 +9,57 @@ import numpy as np
 import ROOT
 
 from process import PROCESS_DIR
-from settings import WORK_DIR, PROCESSES, CLASSIFICATION_SKIM
+from settings import WORK_DIR, PROCESSES, CLASSIFICATION, VARIABLES
 
 
 # Output Directories
 DATASET_DIR = WORK_DIR + 'classification/datasets/'
+MONITOR_DIR = WORK_DIR + 'classification/monitoring/'
 WEIGHT_DIR = WORK_DIR + 'classification/weights/'
 
 class Classification(object):
 
-    def __init__(self):
+    def __init__(self, 
+                 job_name = 'TMVAClassification',
+                 dataset = 'test',
+                 preselection = '',
+                 factory = 'Silent:Transformations=I:AnalysisType=Classification',
+                 model_name = 'BDT',
+                 hyperparams = None,
+                 **kwargs):
+
         self.logger = logging.getLogger('Classification')
+        self.logger.info('Initialized for {}'.format(job_name))
 
-    def _make_dataset(self, rnd_seed = 0):
+        self.job_name = job_name
+        self.dataset = dataset
+        self.preselection = preselection
+        self.factory = factory
+        self.model_name = model_name
+        if hyperparams is None:
+            self.hyperparams = {
+                'NTrees': 400,
+                'MaxDepth': 3,
+                'MinNodeSize': 0.05,
+                'nCuts': 35,
+                'BoostType': 'AdaBoost',
+                'AdaBoostBeta': 0.5,
+                'SeparationType': 'GiniIndex',
+            }
+        else:
+            self.hyperparams = hyperparams
 
-        self.logger.info('Generating dataset...')
+    def run(self):
+
+        if not os.path.isfile(DATASET_DIR + self.dataset + '.root'):
+            self._make_dataset()
+
+        self._train_classifier()
+    
+
+    def _make_dataset(self):
+
+        self.logger.info('Generating dataset "{}"'.format(self.dataset))
 
         # Output Directory
         try:
@@ -39,6 +75,7 @@ class Classification(object):
         # Parallel Split
         n_tasks = 0
         tasks = mp.Queue()
+        results = mp.Queue()
 
         processes = []
 
@@ -53,7 +90,7 @@ class Classification(object):
             n_tasks += 1
 
         _processes = [
-            mp.Process(target = self._split_process, args = (tasks,))
+            mp.Process(target = self._split_process, args = (tasks, results))
             for i in xrange(min(n_tasks, mp.cpu_count()))
         ]
 
@@ -64,14 +101,19 @@ class Classification(object):
         for p in _processes:
             p.join()
 
+        results.put(None)
+
+        for r in iter(results.get, None):
+            self.logger.info('{!s} entries in {!s} passed preselection and were split into {!s}({!s}) for training(testing).'.format(*r))
+
         # hadd Files
         inputfiles = glob.glob(self.tmpdir + '*.root')
-        outputfile = DATASET_DIR + 'dataset.root'
+        outputfile = DATASET_DIR + self.dataset + '.root'
 
         sp.check_call(['hadd', '-f', outputfile] + inputfiles)
         sp.check_call(['rm', '-r', self.tmpdir])
          
-    def _split_process(self, tasks = None, rnd_seed = 0):
+    def _split_process(self, tasks = None, results = None, rnd_seed = 0):
     
         for process, types in iter(tasks.get, None):
 
@@ -82,7 +124,7 @@ class Classification(object):
             intree.SetName(process)
 
             # Apply preselection cuts and shuffle the entries which pass.
-            for i, cut in enumerate(CLASSIFICATION_SKIM):
+            for i, cut in enumerate(self.preselection):
                 n_entries = intree.Draw('>>{0!s}_skim_{1!s}'.format(process, i), cut)
                 eventlist = ROOT.gDirectory.Get('{0!s}_skim_{1!s}'.format(process, i))
                 intree.SetEventList(eventlist)
@@ -120,58 +162,77 @@ class Classification(object):
             # Remove any autosaved TTrees.
             outfile.Delete(process + ';*')
 
+            result = (n_entries, process, train_tree.GetEntriesFast(), test_tree.GetEntriesFast())
+
             outfile.Close()
             infile.Close()
-  
 
-def run_classification():
+            results.put(result)
 
-    # Book Trees
-    signal = ROOT.TFile.Open(DATASET_DIR + 'ZH.root', 'read')
-    #sig_train_tree = signal.Get('train')
-    #sig_test_tree = signal.Get('test')
-    background = ROOT.TFile.Open(DATASET_DIR + 'QCD.root', 'read')
-    #bkg_train_tree = background.Get('train')
-    #bkg_test_tree = background.Get('test')
+    def _get_hyperparams(self):
 
-    # Start TMVA
-    ROOT.TMVA.Tools.Instance()
+        hyperparams = {}
 
-    # Change the weight directory.
-    ioNames = ROOT.TMVA.gConfig().GetIONames()
-    ioNames.fWeightFileDir = WEIGHT_DIR
-    ioNames.fWeightFileExtension = 'ZnnHbb'
+        for name, value in self.hyperparams.iteritems():
+            if hasattr(value, 'rvs'):
+                hyperparams[name] = value.rvs()
+            elif isinstance(value, list):
+                hyperparams[name] = np.random.choice(value)
+            else:
+                hyperparams[name] = value
 
-    outfile = ROOT.TFile('TMVA_BDT.root', 'recreate')
+        return hyperparams
 
-    factory = ROOT.TMVA.Factory('TMVAClassification',
-                                outfile,
-                                #'!V:!Silent:Color:!DrawProgressBar:Transformations=I:AnalysisType=Classification'
-                                '!Silent:Transformations=I:AnalysisType=Classification')
+    def _train_classifier(self):
 
-    for var in VARIABLES.itervalues():
-        factory.AddVariable(var['expression'], var['title'], var['unit'], var['type']) 
+        self.logger.info('Training classifier...')
 
-    factory.AddSignalTree(signal.Get('train'), 2.0, 'train')
-    factory.AddSignalTree(signal.Get('test'), 2.0, 'test')
+        ROOT.TMVA.Tools.Instance()
 
-    factory.AddBackgroundTree(background.Get('train'), 2.0, 'train')
-    factory.AddBackgroundTree(background.Get('test'), 2.0, 'test')
+        # Change the weight directory path.
+        ioNames = ROOT.TMVA.gConfig().GetIONames()
+        ioNames.fWeightFileDir = WEIGHT_DIR
+        #ioNames.fWeightFileExtension = 'foo' # e.g. TMVA_BDT.foo.xml
 
-    factory.SetSignalWeightExpression('sample_lumi')
-    factory.SetBackgroundWeightExpression('sample_lumi')
+        # from datetime import datetime, include timestamp in file name.
+        #timestamp = datetime.now().strftime('%d%b%Y_%H%M%S')
+        outfile = ROOT.TFile(MONITOR_DIR + self.job_name + '.root', 'recreate')
 
-    sigCut = ROOT.TCut('')
-    bkgCut = ROOT.TCut('')
+        factory = ROOT.TMVA.Factory(self.job_name, outfile, self.factory)
 
-    factory.PrepareTrainingAndTestTree(sigCut, bkgCut, 'nTrain_Signal=0:nTrain_Background=0:SplitMode=Random:NormMode=None')
+        # Register the classification variables.
+        for var in VARIABLES.itervalues():
+            factory.AddVariable(var['expression'], var['title'], var['unit'], var['type'])
 
-    bdt_options = '!H:V:NTrees=400:MinNodeSize=0.05:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:SeparationType=GiniIndex:nCuts=35:PruneMethod=NoPruning:!CreateMVAPdfs:!DoBoostMonitor'
-    factory.BookMethod(ROOT.TMVA.Types.kBDT, 'BDT', bdt_options) 
+        # Load the dataset and add the training and validation samples.
+        infile = ROOT.TFile(DATASET_DIR + self.dataset + '.root', 'read')
 
-    factory.TrainAllMethods()
-    factory.TestAllMethods()
-    factory.EvaluateAllMethods()
+        for key in infile.GetListOfKeys():
+            name = key.GetName()
+            tree_class, tree_type = name.split('_')[-2:]
+            if tree_class == 'sig':
+                factory.AddSignalTree(key.ReadObj(), 1.0, tree_type)
+            elif tree_class == 'bkg':
+                factory.AddBackgroundTree(key.ReadObj(), 1.0, tree_type)
+                    
+        factory.SetSignalWeightExpression('sample_lumi')
+        sigCut = ROOT.TCut('')
+
+        factory.SetBackgroundWeightExpression('sample_lumi')
+        bkgCut = ROOT.TCut('')
+
+        factory.PrepareTrainingAndTestTree(sigCut, bkgCut, 'NormMode=None')
+
+        hyperparams = ':'.join('{!s}={!s}'.format(*x) for x in _get_hyperparams.iteritems())
+        factory.BookMethod(ROOT.TMVA.Types.kBDT, self.model_name, '!H:!V' + hyperparams)
+
+        factory.TrainAllMethods()
+        factory.TestAllMethods()
+        factory.EvaluateAllMethods()
+
+#------
+# Main
+#------
 
 if __name__ == '__main__':
 
@@ -181,59 +242,9 @@ if __name__ == '__main__':
     logging.basicConfig(level = logging.INFO,
                         format = '%(name)s(%(levelname)s) - %(message)s')
 
-    classifier = Classification()
-    classifier._make_dataset()
+    classification = Classification(**CLASSIFICATION)
+    print classification._get_hyperparams()
+    print classification._get_hyperparams()
+    print classification._get_hyperparams()
+    classification.run()
 
-
-
-
-
-
-"""
-BEGIN CODE FOR RANDOM SEARCH HYPERPARAM OPTIMIZATION
-
-import random
-
-import numpy as np
-from scipy import stats
-
-
-# Dictionary of hyperparameters and their distributions.
-# http://tmva.sourceforge.net/optionRef.html#MVA::BDT
-# Either a list or sensible distribution should be provided.
-hyperparameters = {
-    'NTrees': stats.randint(200, 1001),
-    'MaxDepth': stats.randint(3, 11),
-    'nCuts': stats.randint(10, 31),
-    'SeparationType': ['CrossEntropy', 'GiniIndex', 'GiniIndexWithLaplace', 'MisClassificationError'],
-    'Shrinkage': stats.expon(loc = 0.001, scale = 0.1),
-}
-
-def rand_hyperparam():
-
-    configuration = {}
-
-    for option, value in hyperparameters.iteritems():
-        if hasattr(value, 'rvs'):
-            configuration[option] = value.rvs()
-        else:
-            configuration[option] = random.choice(value)
-
-    return configuration
-
-if __name__ == '__main__':
-
-    # Seed the rng for repoducibility.
-    np.random.seed(0)
-
-    trials = mp.Queue()
-    n_trials = 30
-
-    for i in range(n_trials):
-        trials.put(rand_hyperparam())
-
-    trials.put(None)
-
-    for trial in iter(trials.get, None):
-        print ':'.join('{}={}'.format(*optval) for optval in trial.iteritems())
-"""

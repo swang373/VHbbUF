@@ -1,3 +1,5 @@
+from scipy import stats
+
 from cut import *
 
 """
@@ -359,13 +361,62 @@ PROCESSES = {
 #-- Classification BDT --#
 ##########################
 
-CLASSIFICATION_SKIM = [
-    NoQCD,
-    VetoLeptons <= 1,
-    'Vtype==4',
-]
+"""
+CLASSIFICATION : dict of Classfication Properties
 
-CLASSIFICATION_VARS = {
+Classification Properties
+-------------------------
+job_name     : str
+               The prefix given to all TMVA output files.
+dataset      : str
+               The name of the dataset to use/create.
+preselection : list of str or Cut
+               A list of preselection cuts for events in the dataset.
+factory      : str
+               A string of TMVA Factory configuration options delimited by ':'.
+               See also tmva.sourceforge.net/optionRef.html#Factory
+model_name   : str
+               The naming prefix for the trained classifiers.
+hyperparams  : dict
+               A dictionary of hyperparameter values keyed by their names.
+               The parameter is fixed if passed a single value or sampled
+               from a scipy.stats distribution or uniformly from a list.
+               See also tmva.sourceforge.net/optionRef.html#MVA::BDT
+"""
+
+CLASSIFICATION = {
+
+    'job_name': 'test',
+
+    'dataset': 'test',
+
+    'preselection': [NoQCD, VetoLeptons <= 1, 'Vtype==4'],
+
+    'factory': '!Silent:Transformations=I:AnalysisType=Classification', 
+
+    'model_name': 'BDT',
+
+    'hyperparams': {
+        'NTrees': 400,
+        'MaxDepth': 3,
+        'MinNodeSize': 0.05,
+        'nCuts': 35,
+        'BoostType': 'AdaBoost',
+        'AdaBoostBeta': 0.5,
+        'SeparationType': 'GiniIndex',
+    },
+
+    #hyperparameters = {
+    #    'NTrees': stats.randint(200, 1001),
+    #    'MaxDepth': stats.randint(3, 11),
+    #    'nCuts': stats.randint(10, 31),
+    #    'SeparationType': ['CrossEntropy', 'GiniIndex', 'GiniIndexWithLaplace', 'MisClassificationError'],
+    #    'Shrinkage': stats.expon(loc = 0.001, scale = 0.1),
+    #}
+
+}
+
+VARIABLES = {
     
     'M(jj)': {
         'expression': 'HCSV_reg_mass',
