@@ -26,6 +26,7 @@ class Classification(object):
                  factory = 'Silent:Transformations=I:AnalysisType=Classification',
                  model_name = 'BDT',
                  hyperparams = None,
+                 n_trials = None,
                  **kwargs):
 
         self.logger = logging.getLogger('Classification')
@@ -48,15 +49,41 @@ class Classification(object):
             }
         else:
             self.hyperparams = hyperparams
-
+        self.n_trials = n_trials
+        
     def run(self):
 
         if not os.path.isfile(DATASET_DIR + self.dataset + '.root'):
             self._make_dataset()
 
-        self._train_classifier()
-    
+        # Parallel Train
+        tasks = mp.Queue()
+        results = mp.Queue()
 
+        if self.n_trials is None:
+            self.n_trials = 1
+            tasks.put(('', self._sample_hyperparams()))
+        else:
+            for i in xrange(self.n_trials):
+                tasks.put((i, self._sample_hyperparams()))
+
+        _processes = [
+            mp.Process(target = self._train_classifier, args = (tasks, results))
+            for cpu in xrange(min(self.n_trials, mp.cpu_count()))
+        ]
+
+        for p in _processes:
+            tasks.put(None)
+            p.start()
+
+        for p in _processes:
+            p.join()
+
+        results.put(None)
+
+        for r in iter(results.get, None):
+            self.logger.info('Model {!s} trained using options "{!s}".'.format(*r)) 
+    
     def _make_dataset(self):
 
         self.logger.info('Generating dataset "{}"'.format(self.dataset))
@@ -113,7 +140,7 @@ class Classification(object):
         sp.check_call(['hadd', '-f', outputfile] + inputfiles)
         sp.check_call(['rm', '-r', self.tmpdir])
          
-    def _split_process(self, tasks = None, results = None, rnd_seed = 0):
+    def _split_process(self, tasks = None, results = None):
     
         for process, types in iter(tasks.get, None):
 
@@ -133,7 +160,7 @@ class Classification(object):
             for i in xrange(n_entries):
                 entries[i] = eventlist.GetEntry(i)
 
-            np.random.seed(rnd_seed)
+            #np.random.seed(0)
             np.random.shuffle(entries)
  
             # Split the entries into a training and test set.
@@ -169,66 +196,79 @@ class Classification(object):
 
             results.put(result)
 
-    def _get_hyperparams(self):
+    def _sample_hyperparams(self):
 
-        hyperparams = {}
+        sampled_params = {}
 
         for name, value in self.hyperparams.iteritems():
             if hasattr(value, 'rvs'):
-                hyperparams[name] = value.rvs()
+                sampled_params[name] = value.rvs()
             elif isinstance(value, list):
-                hyperparams[name] = np.random.choice(value)
+                sampled_params[name] = value[np.random.randint(len(value))]
             else:
-                hyperparams[name] = value
+                sampled_params[name] = value
 
-        return hyperparams
+        return sampled_params
 
-    def _train_classifier(self):
+    def _train_classifier(self, tasks = None, results = None):
 
-        self.logger.info('Training classifier...')
+        for trial_id, hyperparams in iter(tasks.get, None):
 
-        ROOT.TMVA.Tools.Instance()
+            model_name = self.model_name + '_trial{!s}'.format(trial_id)
 
-        # Change the weight directory path.
-        ioNames = ROOT.TMVA.gConfig().GetIONames()
-        ioNames.fWeightFileDir = WEIGHT_DIR
-        #ioNames.fWeightFileExtension = 'foo' # e.g. TMVA_BDT.foo.xml
+            ROOT.TMVA.Tools.Instance()
 
-        # from datetime import datetime, include timestamp in file name.
-        #timestamp = datetime.now().strftime('%d%b%Y_%H%M%S')
-        outfile = ROOT.TFile(MONITOR_DIR + self.job_name + '.root', 'recreate')
+	    # Change the weight directory path.
+	    ioNames = ROOT.TMVA.gConfig().GetIONames()
+	    ioNames.fWeightFileDir = WEIGHT_DIR
+	    #ioNames.fWeightFileExtension = 'foo' # job_name_model_name_*.foo.xml
+	    
+	    # Output Directory
+	    try:
+                os.makedirs(MONITOR_DIR)
+            except OSError:
+                if not os.path.isdir(MONITOR_DIR):
+                    raise
 
-        factory = ROOT.TMVA.Factory(self.job_name, outfile, self.factory)
+            # from datetime import datetime, include timestamp in file name.
+            #timestamp = datetime.now().strftime('%d%b%Y_%H%M%S')
+            outname = MONITOR_DIR + '{!s}_{!s}.root'.format(self.job_name, model_name)
+            outfile = ROOT.TFile(outname, 'recreate')
 
-        # Register the classification variables.
-        for var in VARIABLES.itervalues():
-            factory.AddVariable(var['expression'], var['title'], var['unit'], var['type'])
+            factory = ROOT.TMVA.Factory(self.job_name, outfile, self.factory)
 
-        # Load the dataset and add the training and validation samples.
-        infile = ROOT.TFile(DATASET_DIR + self.dataset + '.root', 'read')
+            # Register the classification variables.
+            for var in VARIABLES.itervalues():
+                factory.AddVariable(var['expression'], var['title'], var['unit'], var['type'])
 
-        for key in infile.GetListOfKeys():
-            name = key.GetName()
-            tree_class, tree_type = name.split('_')[-2:]
-            if tree_class == 'sig':
-                factory.AddSignalTree(key.ReadObj(), 1.0, tree_type)
-            elif tree_class == 'bkg':
-                factory.AddBackgroundTree(key.ReadObj(), 1.0, tree_type)
+            # Load the dataset and add the training and validation samples.
+            infile = ROOT.TFile(DATASET_DIR + self.dataset + '.root', 'read')
+
+            for key in infile.GetListOfKeys():
+                name = key.GetName()
+                tree_class, tree_type = name.split('_')[-2:]
+                if tree_class == 'sig':
+                    factory.AddSignalTree(key.ReadObj(), 1.0, tree_type)
+                elif tree_class == 'bkg':
+                    factory.AddBackgroundTree(key.ReadObj(), 1.0, tree_type)
                     
-        factory.SetSignalWeightExpression('sample_lumi')
-        sigCut = ROOT.TCut('')
+            factory.SetSignalWeightExpression('sample_lumi')
+            sigCut = ROOT.TCut('')
 
-        factory.SetBackgroundWeightExpression('sample_lumi')
-        bkgCut = ROOT.TCut('')
+            factory.SetBackgroundWeightExpression('sample_lumi')
+            bkgCut = ROOT.TCut('')
 
-        factory.PrepareTrainingAndTestTree(sigCut, bkgCut, 'NormMode=None')
+            factory.PrepareTrainingAndTestTree(sigCut, bkgCut, 'NormMode=None')
 
-        hyperparams = ':'.join('{!s}={!s}'.format(*x) for x in _get_hyperparams.iteritems())
-        factory.BookMethod(ROOT.TMVA.Types.kBDT, self.model_name, '!H:!V' + hyperparams)
+            model_options = ':'.join('{!s}={!s}'.format(*x) for x in hyperparams.iteritems())
+            factory.BookMethod(ROOT.TMVA.Types.kBDT, model_name, '!H:!V:' + model_options)
 
-        factory.TrainAllMethods()
-        factory.TestAllMethods()
-        factory.EvaluateAllMethods()
+            factory.TrainAllMethods()
+            factory.TestAllMethods()
+            factory.EvaluateAllMethods()
+
+            result = (model_name, model_options)
+            results.put(result)
 
 #------
 # Main
@@ -243,8 +283,5 @@ if __name__ == '__main__':
                         format = '%(name)s(%(levelname)s) - %(message)s')
 
     classification = Classification(**CLASSIFICATION)
-    print classification._get_hyperparams()
-    print classification._get_hyperparams()
-    print classification._get_hyperparams()
     classification.run()
 

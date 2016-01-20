@@ -382,17 +382,19 @@ hyperparams  : dict
                The parameter is fixed if passed a single value or sampled
                from a scipy.stats distribution or uniformly from a list.
                See also tmva.sourceforge.net/optionRef.html#MVA::BDT
+n_trials     : int
+               The number of random search trials to be performed.
 """
 
 CLASSIFICATION = {
 
-    'job_name': 'test',
+    'job_name': 'Znn',
 
-    'dataset': 'test',
+    'dataset': '20Jan2016',
 
     'preselection': [NoQCD, VetoLeptons <= 1, 'Vtype==4'],
 
-    'factory': '!Silent:Transformations=I:AnalysisType=Classification', 
+    'factory': 'Silent:!DrawProgressBar:Transformations=I:AnalysisType=Classification', 
 
     'model_name': 'BDT',
 
@@ -406,13 +408,17 @@ CLASSIFICATION = {
         'SeparationType': 'GiniIndex',
     },
 
-    #hyperparameters = {
+    #'n_trials': 5,
+    #'hyperparams': {
     #    'NTrees': stats.randint(200, 1001),
     #    'MaxDepth': stats.randint(3, 11),
-    #    'nCuts': stats.randint(10, 31),
+    #    'MinNodeSize': 0.05,
+    #    'nCuts': stats.randint(10, 51),
+    #    'BoostType': 'AdaBoost',
+    #    'AdaBoostBeta': 0.5,
     #    'SeparationType': ['CrossEntropy', 'GiniIndex', 'GiniIndexWithLaplace', 'MisClassificationError'],
     #    'Shrinkage': stats.expon(loc = 0.001, scale = 0.1),
-    #}
+    #},
 
 }
 
