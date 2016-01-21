@@ -1,19 +1,15 @@
-import glob
 import logging
 import multiprocessing as mp
 import os
-import subprocess as sp
-import tempfile as tf
 
 import numpy as np
 import ROOT
 
-from process import PROCESS_DIR
-from settings import WORK_DIR, PROCESSES, CLASSIFICATION, VARIABLES
+from dataset import DATASET_DIR, Dataset
+from settings import WORK_DIR, CLASSIFICATION, VARIABLES
 
 
 # Output Directories
-DATASET_DIR = WORK_DIR + 'classification/datasets/'
 MONITOR_DIR = WORK_DIR + 'classification/monitoring/'
 WEIGHT_DIR = WORK_DIR + 'classification/weights/'
 
@@ -26,18 +22,23 @@ class Classification(object):
                  factory = 'Silent:Transformations=I:AnalysisType=Classification',
                  model_name = 'BDT',
                  hyperparams = None,
-                 n_trials = None,
+                 n_trials = 1,
                  **kwargs):
 
         self.logger = logging.getLogger('Classification')
         self.logger.info('Initialized for {}'.format(job_name))
 
         self.job_name = job_name
+
         self.dataset = dataset
         self.preselection = preselection
+
         self.factory = factory
+
         self.model_name = model_name
+
         if hyperparams is None:
+            self.logger.info('Using default hyperparameter set.')
             self.hyperparams = {
                 'NTrees': 400,
                 'MaxDepth': 3,
@@ -49,23 +50,25 @@ class Classification(object):
             }
         else:
             self.hyperparams = hyperparams
+
         self.n_trials = n_trials
+        if n_trials > 1:
+            self.logger.info('{!s} random search trials will be conducted.'.format(n_trials))
         
     def run(self):
 
         if not os.path.isfile(DATASET_DIR + self.dataset + '.root'):
-            self._make_dataset()
+            Dataset(self.dataset).make()
 
-        # Parallel Train
+        # Parallel Train 
         tasks = mp.Queue()
         results = mp.Queue()
 
-        if self.n_trials is None:
-            self.n_trials = 1
+        if self.n_trials == 1:
             tasks.put(('', self._sample_hyperparams()))
-        else:
-            for i in xrange(self.n_trials):
-                tasks.put((i, self._sample_hyperparams()))
+        elif self.n_trials > 1:
+            for trial_id in ('_trial{!s}'.format(i) for i in xrange(self.n_trials)):
+                tasks.put((trial_id, self._sample_hyperparams()))
 
         _processes = [
             mp.Process(target = self._train_classifier, args = (tasks, results))
@@ -82,124 +85,19 @@ class Classification(object):
         results.put(None)
 
         for r in iter(results.get, None):
-            self.logger.info('Model {!s} trained using options "{!s}".'.format(*r)) 
+            self.logger.info('Model {!s} trained using options "{!s}".'.format(*r))
+
+    def apply(self, model_name = ''):
     
-    def _make_dataset(self):
+        pass
+        #reader = ROOT.TMVA.Reader()
 
-        self.logger.info('Generating dataset "{}"'.format(self.dataset))
+        #variables = {}
 
-        # Output Directory
-        try:
-            os.makedirs(DATASET_DIR)
-        except OSError:
-            if not os.path.isdir(DATASET_DIR):
-                raise
-
-        # Temporary Work Directory
-        tmpdir = tf.mkdtemp(dir = DATASET_DIR)
-        self.tmpdir = tmpdir + '/'
-
-        # Parallel Split
-        n_tasks = 0
-        tasks = mp.Queue()
-        results = mp.Queue()
-
-        processes = []
-
-        for process, properties in PROCESSES.iteritems():
-            types = set(properties['types'].lower().split(':'))
-            if 'data' in types:
-                continue
-            if 'sig' in types:
-                tasks.put((process, 'sig'))
-            elif 'bkg' in types:
-                tasks.put((process, 'bkg'))
-            n_tasks += 1
-
-        _processes = [
-            mp.Process(target = self._split_process, args = (tasks, results))
-            for i in xrange(min(n_tasks, mp.cpu_count()))
-        ]
-
-        for p in _processes:
-            tasks.put(None)
-            p.start()
-
-        for p in _processes:
-            p.join()
-
-        results.put(None)
-
-        for r in iter(results.get, None):
-            self.logger.info('{!s} entries in {!s} passed preselection and were split into {!s}({!s}) for training(testing).'.format(*r))
-
-        # hadd Files
-        inputfiles = glob.glob(self.tmpdir + '*.root')
-        outputfile = DATASET_DIR + self.dataset + '.root'
-
-        sp.check_call(['hadd', '-f', outputfile] + inputfiles)
-        sp.check_call(['rm', '-r', self.tmpdir])
-         
-    def _split_process(self, tasks = None, results = None):
-    
-        for process, types in iter(tasks.get, None):
-
-            infile = ROOT.TFile(PROCESS_DIR + process + '.root', 'read')
-            outfile = ROOT.TFile(self.tmpdir + process + '.root', 'recreate')
-
-            intree = infile.Get('tree')
-            intree.SetName(process)
-
-            # Apply preselection cuts and shuffle the entries which pass.
-            for i, cut in enumerate(self.preselection):
-                n_entries = intree.Draw('>>{0!s}_skim_{1!s}'.format(process, i), cut)
-                eventlist = ROOT.gDirectory.Get('{0!s}_skim_{1!s}'.format(process, i))
-                intree.SetEventList(eventlist)
-
-            entries = np.zeros(n_entries, dtype = np.int64)
-            for i in xrange(n_entries):
-                entries[i] = eventlist.GetEntry(i)
-
-            #np.random.seed(0)
-            np.random.shuffle(entries)
- 
-            # Split the entries into a training and test set.
-            n_test = n_entries / 2
-            n_train = n_test if (n_entries % 2 == 0) else n_test + 1
-
-            train_elist = ROOT.TEventList(process + '_train', '', n_train)
-            for entry in np.sort(entries[:n_train]):
-                train_elist.Enter(entry)
-
-            test_elist = ROOT.TEventList(process + '_test', '', n_test)
-            for entry in np.sort(entries[n_train:]):
-                test_elist.Enter(entry)
-
-            # Create the training and test set trees.
-            intree.SetEventList(train_elist)
-            train_tree = intree.CopyTree('')
-            train_tree.SetName('{}_{}_train'.format(process, types))
-            train_tree.Write()
-
-            intree.SetEventList(test_elist)
-            test_tree = intree.CopyTree('')
-            test_tree.SetName('{}_{}_test'.format(process, types))
-            test_tree.Write()
-
-            # Remove any autosaved TTrees.
-            outfile.Delete(process + ';*')
-
-            result = (n_entries, process, train_tree.GetEntriesFast(), test_tree.GetEntriesFast())
-
-            outfile.Close()
-            infile.Close()
-
-            results.put(result)
+        #for var in VARIABLES.itervalues():
 
     def _sample_hyperparams(self):
-
         sampled_params = {}
-
         for name, value in self.hyperparams.iteritems():
             if hasattr(value, 'rvs'):
                 sampled_params[name] = value.rvs()
@@ -207,18 +105,17 @@ class Classification(object):
                 sampled_params[name] = value[np.random.randint(len(value))]
             else:
                 sampled_params[name] = value
-
         return sampled_params
 
     def _train_classifier(self, tasks = None, results = None):
 
         for trial_id, hyperparams in iter(tasks.get, None):
 
-            model_name = self.model_name + '_trial{!s}'.format(trial_id)
-
             ROOT.TMVA.Tools.Instance()
 
-	    # Change the weight directory path.
+            model_name = self.model_name + trial_id
+
+	    # Change the weight directory path. TMVA makes this directory.
 	    ioNames = ROOT.TMVA.gConfig().GetIONames()
 	    ioNames.fWeightFileDir = WEIGHT_DIR
 	    #ioNames.fWeightFileExtension = 'foo' # job_name_model_name_*.foo.xml

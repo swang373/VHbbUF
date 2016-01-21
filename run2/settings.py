@@ -376,7 +376,7 @@ factory      : str
                A string of TMVA Factory configuration options delimited by ':'.
                See also tmva.sourceforge.net/optionRef.html#Factory
 model_name   : str
-               The naming prefix for the trained classifiers.
+               The name prefix for the trained classifiers, not the model type.
 hyperparams  : dict
                A dictionary of hyperparameter values keyed by their names.
                The parameter is fixed if passed a single value or sampled
@@ -388,25 +388,15 @@ n_trials     : int
 
 CLASSIFICATION = {
 
-    'job_name': 'Znn',
+    'job_name': 'test',
 
-    'dataset': '20Jan2016',
+    'dataset': 'test',
 
     'preselection': [NoQCD, VetoLeptons <= 1, 'Vtype==4'],
 
     'factory': 'Silent:!DrawProgressBar:Transformations=I:AnalysisType=Classification', 
 
     'model_name': 'BDT',
-
-    'hyperparams': {
-        'NTrees': 400,
-        'MaxDepth': 3,
-        'MinNodeSize': 0.05,
-        'nCuts': 35,
-        'BoostType': 'AdaBoost',
-        'AdaBoostBeta': 0.5,
-        'SeparationType': 'GiniIndex',
-    },
 
     #'n_trials': 5,
     #'hyperparams': {
