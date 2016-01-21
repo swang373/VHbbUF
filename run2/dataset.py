@@ -9,7 +9,7 @@ import numpy as np
 import ROOT
 
 from process import PROCESS_DIR
-from settings import WORK_DIR, PROCESSES, CLASSIFICATION
+from settings import WORK_DIR, PROCESSES, PRESELECTION
 
 
 # Output Directory
@@ -22,7 +22,6 @@ class Dataset(object):
         self.logger = logging.getLogger('Dataset')
 
         self.name = name
-        self.preselection = CLASSIFICATION.get('preselection', [''])
 
     def make(self):
 
@@ -89,7 +88,7 @@ class Dataset(object):
             intree.SetName(process)
 
             # Apply preselection cuts and shuffle the entries which pass.
-            for i, cut in enumerate(self.preselection):
+            for i, cut in enumerate(PRESELECTION):
                 n_entries = intree.Draw('>>{0!s}_skim_{1!s}'.format(process, i), cut)
                 eventlist = ROOT.gDirectory.Get('{0!s}_skim_{1!s}'.format(process, i))
                 intree.SetEventList(eventlist)

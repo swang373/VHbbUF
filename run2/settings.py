@@ -1,5 +1,3 @@
-from scipy import stats
-
 from cut import *
 
 """
@@ -362,55 +360,34 @@ PROCESSES = {
 ##########################
 
 """
-CLASSIFICATION : dict of Classfication Properties
+PRESELECTION : list of str or Cut
+               A list of preselection cuts for events in the dataset.
 
-Classification Properties
+TRAINING     : dict of Training Properties
+
+Training Properties
 -------------------------
 job_name     : str
                The prefix given to all TMVA output files.
 dataset      : str
                The name of the dataset to use/create.
-preselection : list of str or Cut
-               A list of preselection cuts for events in the dataset.
-factory      : str
+factory      : str, optional
                A string of TMVA Factory configuration options delimited by ':'.
                See also tmva.sourceforge.net/optionRef.html#Factory
-model_name   : str
+model_name   : str, optional
                The name prefix for the trained classifiers, not the model type.
-hyperparams  : dict
+n_trials     : int, optional
+               The number of random search trials to be performed.
+hyperparams  : dict, optional
                A dictionary of hyperparameter values keyed by their names.
                The parameter is fixed if passed a single value or sampled
                from a scipy.stats distribution or uniformly from a list.
                See also tmva.sourceforge.net/optionRef.html#MVA::BDT
-n_trials     : int
-               The number of random search trials to be performed.
 """
 
-CLASSIFICATION = {
-
-    'job_name': 'test',
-
-    'dataset': 'test',
-
-    'preselection': [NoQCD, VetoLeptons <= 1, 'Vtype==4'],
-
-    'factory': 'Silent:!DrawProgressBar:Transformations=I:AnalysisType=Classification', 
-
-    'model_name': 'BDT',
-
-    #'n_trials': 5,
-    #'hyperparams': {
-    #    'NTrees': stats.randint(200, 1001),
-    #    'MaxDepth': stats.randint(3, 11),
-    #    'MinNodeSize': 0.05,
-    #    'nCuts': stats.randint(10, 51),
-    #    'BoostType': 'AdaBoost',
-    #    'AdaBoostBeta': 0.5,
-    #    'SeparationType': ['CrossEntropy', 'GiniIndex', 'GiniIndexWithLaplace', 'MisClassificationError'],
-    #    'Shrinkage': stats.expon(loc = 0.001, scale = 0.1),
-    #},
-
-}
+PRESELECTION = [
+    NoQCD, VetoLeptons <= 1, 'Vtype==4'
+]
 
 VARIABLES = {
     
