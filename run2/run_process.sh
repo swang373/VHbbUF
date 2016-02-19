@@ -1,0 +1,15 @@
+python process.py data_obs >> process.log 2>&1
+python process.py ZH       >> process.log 2>&1
+python process.py ggZH     >> process.log 2>&1
+python process.py WH       >> process.log 2>&1
+python process.py s_Top    >> process.log 2>&1
+python process.py TT       >> process.log 2>&1
+python process.py Wj0b     >> process.log 2>&1
+python process.py Wj1b     >> process.log 2>&1
+python process.py Wj2b     >> process.log 2>&1
+python process.py Zj0b     >> process.log 2>&1
+python process.py Zj1b     >> process.log 2>&1
+python process.py Zj2b     >> process.log 2>&1
+python process.py VVLF     >> process.log 2>&1
+python process.py VVHF     >> process.log 2>&1
+python process.py QCD      >> process.log 2>&1
