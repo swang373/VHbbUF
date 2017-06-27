@@ -6,12 +6,12 @@ shapes * * znnhbb_HighPt_13TeV.root $PROCESS $PROCESS_$SYSTEMATIC
 -----------------------------------
 bin         ZnnHighPt_8TeV
 observation 0.000
-#prediction 6531.713
+#prediction 6761.436
 -----------------------------------
 bin         ZnnHighPt_8TeV   ZnnHighPt_8TeV   ZnnHighPt_8TeV   ZnnHighPt_8TeV   ZnnHighPt_8TeV   ZnnHighPt_8TeV   ZnnHighPt_8TeV   ZnnHighPt_8TeV   ZnnHighPt_8TeV   
 process     ZH         WH         WjLF       WjHF       ZjLF       ZjHF       TT         ST         VV         
 process     -1         0          1          2          3          4          5          6          7          
-rate            40.221      8.514    947.600    786.326   1264.856   1870.643   1395.561    266.727      0.000
+rate            39.696      8.652   1088.839    820.582   1236.159   1761.418   1547.017    307.421      0.000
 -----------------------------------
 
 # This datacard is for demonstration purposes only!

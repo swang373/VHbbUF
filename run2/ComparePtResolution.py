@@ -1,11 +1,11 @@
 #!usr/bin/python
 import ROOT
 from ROOT import TFile, TH1, TCanvas, TProfile, TEfficiency, TGraphAsymmErrors, TF1, TPaveText, TPaveStats, TLegend, TLine, gROOT, gPad, gStyle
-from setTDRStyle import setTDRStyle
+from tdrstyle import tdrStyle
 from array import array
 
 gROOT.Reset()
-setTDRStyle()
+tdrStyle()
 gROOT.SetStyle('tdrStyle')
 gROOT.ForceStyle()
 

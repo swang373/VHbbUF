@@ -94,7 +94,7 @@ class Reader:
             "BDT Regression Variable",
             "BDT Regression FJ Variable",
             "Systematics",
-            ]
+        ]
 
     def is_not_a_list(self, value):
         if not value.count(" , ") == 0:
@@ -599,6 +599,6 @@ if __name__ == "__main__":
     reader.read(ini)
 
     # Write codes
-    #reader.write_HelperNtuples()
-    reader.write_HelperTMVA()
+    reader.write_HelperNtuples()
+    #reader.write_HelperTMVA()
 

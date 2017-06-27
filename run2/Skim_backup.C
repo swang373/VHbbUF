@@ -12,8 +12,6 @@
 #include "TFileCollection.h"
 
 #include "HelperNtuples.h"
-
-
 //#include "HelperFunctions.h"
 
 //#define XROOTD
@@ -40,7 +38,8 @@ void Skim(TString process="ZnnH125")
     TString dirMC   = "root://xrootd.ba.infn.it//store/user/arizzi/" + tagMC + "/";
     TString dirData = "root://xrootd.ba.infn.it//store/user/arizzi/" + tagData + "/";
 #endif
-    TString outdir  = " /afs/cern.ch/work/d/degrutto/public/MiniAOD/ZnnHbb_Phys14_PU20bx25/skimV11/";
+    //TString outdir  = " /afs/cern.ch/work/d/degrutto/public/MiniAOD/ZnnHbb_Phys14_PU20bx25/skimV11/"; swang373, 06.07.2015
+    TString outdir  = " /afs/cern.ch/work/s/swang373/private/MiniAOD/ZnnHbb_Phys14_PU20bx25/skimV11/test/";
     TString prefix  = "skim_";
     TString suffix  = "tree*.root";
     

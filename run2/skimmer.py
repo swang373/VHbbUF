@@ -384,8 +384,10 @@ class Skimmer:
 if __name__ == "__main__":
     import sys
     
-    indir = "/afs/cern.ch/work/d/degrutto/public/MiniAOD/ZnnHbb_Phys14_PU20bx25/skim/"
-    outdir = "skim/"
+    #indir = "/afs/cern.ch/work/d/degrutto/public/MiniAOD/ZnnHbb_Phys14_PU20bx25/skim/"
+    indir = "/afs/cern.ch/work/s/swang373/private/MiniAOD/ZnnHbb_Phys14_PU20bx25/skimV11/" # swang373, 08.07.2015
+    #outdir = "skim/" 
+    outdir = "skimV11test/" # swang373, 08.07.2015 
     prefix = "skim_"
 
 

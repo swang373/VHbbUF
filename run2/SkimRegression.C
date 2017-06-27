@@ -24,13 +24,10 @@ void SkimRegression(TString process="ZnnH125", Long64_t skimentries=1000000000)
     TString fname   = "";
     TString dijet   = "";
 
-
-    TString dirMC  = "/afs/cern.ch/work/d/degrutto/public/MiniAOD/ZnnHbb_Phys14_PU20bx25/skimV11/";
+    TString dirMC  = "/afs/cern.ch/work/s/swang373/private/MiniAOD/ZnnHbb_Phys14_PU20bx25/skimV11/";
     TString prefix  = "skim_";
     TString suffix  = ".root";
     TString outdir  = "skim_regression/";                                                                                                                                                       
-
-
     /*#ifndef XROOTD
     //TString dirMC   = "dcache:/pnfs/cms/WAX/resilient/jiafu/ZnunuHbb/" + tagMC + "/";
     //TString dirData = "dcache:/pnfs/cms/WAX/resilient/jiafu/ZnunuHbb/" + tagData + "/";
@@ -42,9 +39,7 @@ void SkimRegression(TString process="ZnnH125", Long64_t skimentries=1000000000)
 #endif
     TString outdir  = "skim_ZnnH_regression/";
     TString prefix  = "skim_";
-    TString suffix  = ".root";
-
-    */
+    TString suffix  = ".root";*/
 
     // ZbbHinv
     if (process == "ZbbHinv105") {
@@ -107,7 +102,8 @@ void SkimRegression(TString process="ZnnH125", Long64_t skimentries=1000000000)
         fname = dirMC + dijet + "WH_WToLNu_HToBB_M-120_8TeV-powheg-herwigpp" + suffix;
         chain->Add(fname);
     } else if (process == "WlnH125") {
-        fname = dirMC + dijet + "WH_WToLNu_HToBB_M-125_8TeV-powheg-herwigpp" + suffix;
+        //fname = dirMC + dijet + "WH_WToLNu_HToBB_M-125_8TeV-powheg-herwigpp" + suffix; // swang373, 07.07.2015
+        fname = dirMC + dijet + prefix + process + suffix;
         chain->Add(fname);
     } else if (process == "WlnH130") {
         fname = dirMC + dijet + "WH_WToLNu_HToBB_M-130_8TeV-powheg-herwigpp" + suffix;
@@ -154,13 +150,12 @@ void SkimRegression(TString process="ZnnH125", Long64_t skimentries=1000000000)
         fname = dirMC + dijet + "ZH_ZToLL_HToBB_M-150_8TeV-powheg-herwigpp" + suffix;
         chain->Add(fname);
 
-	//TTBar
-
+    //TTBar
     } else if (process == "TT") {
         fname = dirMC + dijet + prefix + "TTPythia8" + suffix;
         chain->Add(fname);
-      fname = dirMC + dijet + prefix + "TTMadv2" + suffix;
-        chain->Add(fname);
+      //fname = dirMC + dijet + prefix + "TTMadv2" + suffix; // swang373, 07.07.2015
+        //chain->Add(fname);
 
 
     } else {
@@ -200,4 +195,3 @@ void SkimRegression(TString process="ZnnH125", Long64_t skimentries=1000000000)
 
 // To run:
 //root -l -b -q SkimRegression.C+\(\"ZnnH125\"\)
-
